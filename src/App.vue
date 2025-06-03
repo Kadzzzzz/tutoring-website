@@ -158,7 +158,7 @@
                 <i class="fas fa-envelope"></i>
                 <div>
                   <h3>{{ t('contact.email') }}</h3>
-                  <p><a href="mailto:jeremy.luccioni@gmail.com">jeremy.luccioni@gmail.com</a></p>
+                  <p><a href="mailto:jeremy.luccioni@etu.ec-lyon.fr">jeremy.luccioni@etu.ec-lyon.fr</a></p>
                 </div>
               </div>
               <div class="contact-item">
@@ -167,6 +167,25 @@
                   <h3>{{ t('contact.levels') }}</h3>
                   <p>{{ t('contact.levelsDescription') }}</p>
                 </div>
+              </div>
+            </div>
+
+            <!-- Nouveaux liens sociaux -->
+            <div class="social-links">
+              <h3>{{ t('contact.followMe') }}</h3>
+              <div class="social-icons">
+                <a href="https://www.linkedin.com/in/jeremy-luccioni-695365bb/" target="_blank" rel="noopener noreferrer" class="social-link linkedin">
+                  <i class="fab fa-linkedin-in"></i>
+                  <span>LinkedIn</span>
+                </a>
+                <a href="https://www.youtube.com/@TheKadzzzzz" target="_blank" rel="noopener noreferrer" class="social-link youtube">
+                  <i class="fab fa-youtube"></i>
+                  <span>YouTube</span>
+                </a>
+                <a href="https://github.com/Kadzzzzz" target="_blank" rel="noopener noreferrer" class="social-link github">
+                  <i class="fab fa-github"></i>
+                  <span>GitHub</span>
+                </a>
               </div>
             </div>
           </div>
@@ -225,17 +244,17 @@ const translations = {
     hero: {
       subtitle: "Étudiant Ingénieur & Professeur Particulier",
       title: "Réussissez vos études scientifiques",
-      description: "Cours particuliers en Mathématiques, Physique et Chimie pour lycéens et préparationnaires. Pédagogie personnalisée par un étudiant de Centrale Lyon.",
+      description: "Cours particuliers en Mathématiques, Physique et Chimie pour lycéens et préparationnaires.",
       scrollDown: "Découvrir"
     },
     about: {
       title: "Mon Parcours",
       paragraph1: "Actuellement étudiant en première année à l'École Centrale de Lyon et en parallèle en L3 de Physique à l'Université Claude Bernard Lyon 1, je mets ma passion pour les sciences au service de la réussite de mes élèves.",
-      paragraph2: "Fort de mon expérience en classes préparatoires (PC/SI puis PC à l'ENCPB, et PC* au lycée Louis-le-Grand), je comprends parfaitement les défis que rencontrent les étudiants dans ces filières exigeantes.",
+      paragraph2: "Fort de mon expérience en classes préparatoires (PCSI puis PC à l'ENCPB, et PC* au lycée Louis-le-Grand), je comprends parfaitement les défis que rencontrent les étudiants dans ces filières exigeantes.",
       paragraph3: "J'aime beaucoup transmettre mon savoir et ma passion pour les sciences. C'est pourquoi je donne régulièrement des cours particuliers à des élèves allant de la seconde à la première année de prépa, et je gère également des salles de travail à Centrale.",
       academicPath: "Parcours Académique",
       timeline: {
-        prepa: "Prépa PC/SI puis PC - ENCPB Paris",
+        prepa: "Prépa PCSI puis PC - ENCPB Paris",
         prepastar: "Prépa PC* - Lycée Louis-le-Grand",
         centrale: "École Centrale de Lyon",
         physics: "L3 Physique - Université Claude Bernard Lyon 1"
@@ -312,14 +331,15 @@ const translations = {
       },
       item3: {
         title: "Approche Bienveillante",
-        description: "En tant que jeune diplômé de prépa, je comprends les défis que vivent mes élèves. J'offre un encadrement bienveillant qui permet de prendre confiance et de se projeter dans la réussite."
+        description: "En tant que jeune étudiant tout juste sorti de prépa, je comprends les défis que vivent mes élèves. J'offre un encadrement bienveillant qui permet de prendre confiance et de se projeter dans la réussite."
       }
     },
     contact: {
       title: "Me Contacter",
       email: "Email",
       levels: "Niveaux enseignés",
-      levelsDescription: "De la Seconde à la Prépa (1A et 2A)"
+      levelsDescription: "De la Seconde à la Prépa (1A et 2A)",
+      followMe: "Me suivre" // NOUVEAU
     },
     footer: {
       rights: "Tous droits réservés"
@@ -335,17 +355,17 @@ const translations = {
     hero: {
       subtitle: "Engineering Student & Private Tutor",
       title: "Excel in Scientific Studies",
-      description: "Private lessons in Mathematics, Physics and Chemistry for high school and preparatory students. Personalized teaching by a Centrale Lyon student.",
+      description: "Private lessons in Mathematics, Physics and Chemistry for high school and preparatory students.",
       scrollDown: "Discover"
     },
     about: {
       title: "My Background",
       paragraph1: "Currently a first-year student at École Centrale de Lyon and simultaneously pursuing a L3 in Physics at Claude Bernard Lyon 1 University, I put my passion for science at the service of my students' success.",
-      paragraph2: "With my experience in preparatory classes (PC/SI then PC at ENCPB, and PC* at Louis-le-Grand high school), I perfectly understand the challenges that students face in these demanding programs.",
+      paragraph2: "With my experience in preparatory classes (PCSI then PC at ENCPB, and PC* at Louis-le-Grand high school), I perfectly understand the challenges that students face in these demanding programs.",
       paragraph3: "I love sharing my knowledge and passion for science. That's why I regularly give private lessons to students from sophomore year to first year of prep school, and I also manage study rooms at Centrale.",
       academicPath: "Academic Path",
       timeline: {
-        prepa: "Prep PC/SI then PC - ENCPB Paris",
+        prepa: "Prep PCSI then PC - ENCPB Paris",
         prepastar: "Prep PC* - Louis-le-Grand High School",
         centrale: "École Centrale de Lyon",
         physics: "L3 Physics - Claude Bernard Lyon 1 University"
@@ -422,14 +442,15 @@ const translations = {
       },
       item3: {
         title: "Caring Approach",
-        description: "As a young prep school graduate, I understand the challenges my students face. I offer caring guidance that builds confidence and helps project success."
+        description: "As a young student fresh out of prep school, I understand the challenges my students face. I offer caring guidance that builds confidence and helps project success."
       }
     },
     contact: {
       title: "Contact Me",
       email: "Email",
       levels: "Teaching Levels",
-      levelsDescription: "From Sophomore to Prep School (1st & 2nd year)"
+      levelsDescription: "From Sophomore to Prep School (1st & 2nd year)",
+      followMe: "Follow Me" // NOUVEAU
     },
     footer: {
       rights: "All rights reserved"
@@ -534,6 +555,7 @@ const toggleLanguage = () => {
 const handleScroll = () => {
   scrolled.value = window.scrollY > 100
 }
+
 
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value
@@ -767,7 +789,7 @@ button {
               url('https://images.unsplash.com/photo-1509228468518-180dd4864904?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
   background-size: cover;
   background-position: center;
-  background-attachment: fixed;
+  background-attachment: scroll;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -865,17 +887,20 @@ button {
   content: '';
   position: absolute;
   left: 20px;
-  top: 0;
+  top: 60px; /* Décalé pour éviter de traverser le titre */
   bottom: 0;
   width: 2px;
   background-color: var(--accent-color);
 }
+
+/* Timeline items normaux */
 .timeline-item {
   position: relative;
   padding: 20px 0 20px 60px;
   margin-bottom: 20px;
 }
-.timeline-item::before {
+
+.timeline-item:not(.double)::before {
   content: '';
   position: absolute;
   left: 10px;
@@ -886,15 +911,60 @@ button {
   background-color: var(--accent-color);
   border: 4px solid var(--secondary-color);
 }
+
+/* Timeline items doubles */
+.timeline-item.double {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.timeline-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-content.double {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  align-items: start;
+  margin-top: 10px;
+}
+
+.timeline-entry {
+  position: relative;
+}
+
+/* Points pour les entrées doubles */
+.timeline-entry::before {
+  content: '';
+  position: absolute;
+  left: -50px;
+  top: 8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--accent-color);
+  border: 4px solid var(--secondary-color);
+}
+
+/* Cacher le point principal pour les items doubles */
+.timeline-item.double::before {
+  display: none;
+}
+
 .timeline-year {
   color: var(--accent-color);
   font-weight: 600;
   font-size: 0.9rem;
   margin-bottom: 5px;
 }
+
 .timeline-title {
   font-weight: 600;
   color: var(--primary-color);
+  line-height: 1.4;
 }
 
 /* --- Section Resources --- */
@@ -1079,6 +1149,73 @@ button {
   font-weight: 500;
 }
 
+/* --- Liens sociaux --- */
+.social-links {
+  margin-top: 50px;
+  text-align: center;
+}
+
+.social-links h3 {
+  margin-bottom: 25px;
+  color: var(--primary-color);
+  font-size: 1.3rem;
+}
+
+.social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.social-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  border-radius: 12px;
+  transition: all var(--transition-speed);
+  text-decoration: none;
+  min-width: 100px;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.social-link:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.social-link i {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  transition: color var(--transition-speed);
+}
+
+.social-link span {
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: color var(--transition-speed);
+}
+
+.social-link.linkedin i { color: #0077B5; }
+.social-link.linkedin span { color: #0077B5; }
+.social-link.linkedin:hover { background-color: #0077B5; }
+.social-link.linkedin:hover i,
+.social-link.linkedin:hover span { color: white; }
+
+.social-link.youtube i { color: #FF0000; }
+.social-link.youtube span { color: #FF0000; }
+.social-link.youtube:hover { background-color: #FF0000; }
+.social-link.youtube:hover i,
+.social-link.youtube:hover span { color: white; }
+
+.social-link.github i { color: #333; }
+.social-link.github span { color: #333; }
+.social-link.github:hover { background-color: #333; }
+.social-link.github:hover i,
+.social-link.github:hover span { color: white; }
+
 /* --- Footer --- */
 .footer {
   background-color: #1a1a1a;
@@ -1125,10 +1262,44 @@ button {
   .layout-split { grid-template-columns: 1fr 1fr; }
 }
 
-@media (max-width: 992px) {
-  .nav-links { display: none; }
-  .mobile-menu-btn { display: flex; }
-  .layout-split { grid-template-columns: 1fr; }
+.timeline-content.double {
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+.timeline-entry::before {
+  left: -45px;
+}
+
+.timeline-title {
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+@media (max-width: 814px) {
+  /* Cacher les liens de navigation sauf la langue */
+  .nav-links ul li:not(.language-selector) {
+    display: none;
+  }
+
+  /* Garder le bouton de langue visible */
+  .language-selector {
+    margin-left: 0;
+  }
+
+  /* Cacher complètement le menu hamburger */
+  .mobile-menu-btn {
+    display: none !important;
+  }
+
+  /* Cacher le menu mobile */
+  .mobile-menu {
+    display: none !important;
+  }
+
+  .layout-split {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1153,6 +1324,25 @@ button {
   .footer-nav {
     flex-wrap: wrap;
     justify-content: center;
+  }
+
+    .social-icons {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .social-link {
+    flex-direction: row;
+    width: 200px;
+    justify-content: flex-start;
+    padding: 15px 20px;
+  }
+
+  .social-link i {
+    font-size: 1.8rem;
+    margin-bottom: 0;
+    margin-right: 15px;
   }
 }
 
