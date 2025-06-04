@@ -26,11 +26,23 @@
 
       <!-- Boutons de téléchargement -->
       <div class="modal-downloads">
-        <a href="#" class="download-btn statement" @click.prevent="downloadFile('statement')">
+        <a
+          v-if="resource.pdfStatement"
+          :href="resource.pdfStatement"
+          target="_blank"
+          class="download-btn statement"
+          :download="getFileName('statement')"
+        >
           <i class="fas fa-file-text"></i>
           {{ getTranslation('resources.downloadTypes.statement') }}
         </a>
-        <a href="#" class="download-btn solution" @click.prevent="downloadFile('solution')">
+        <a
+          v-if="resource.pdfSolution"
+          :href="resource.pdfSolution"
+          target="_blank"
+          class="download-btn solution"
+          :download="getFileName('solution')"
+        >
           <i class="fas fa-check-circle"></i>
           {{ getTranslation('resources.downloadTypes.solution') }}
         </a>
@@ -220,13 +232,19 @@ const getTranslation = (key) => {
   return value || key
 }
 
-const downloadFile = (type) => {
-  // Simulation du téléchargement
-  console.log(`Téléchargement du ${type} pour ${props.resource.id}`)
-  const typeText = type === 'statement' ? 
-    (props.currentLang === 'fr' ? 'sujet' : 'statement') : 
+const getFileName = (type) => {
+  const subject = getTranslation(`resources.subjects.${props.resource.subject}`).toLowerCase()
+  const title = getTranslation(`resources.exercises.${props.resource.subject}.${props.resource.id}.title`)
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+
+  const typeText = type === 'statement' ?
+    (props.currentLang === 'fr' ? 'enonce' : 'statement') :
     (props.currentLang === 'fr' ? 'correction' : 'solution')
-  alert(`${props.currentLang === 'fr' ? 'Téléchargement du' : 'Downloading'} ${typeText} ${props.currentLang === 'fr' ? 'en cours...' : 'in progress...'}`)
+
+  return `${subject}-${title}-${typeText}.pdf`
 }
 </script>
 

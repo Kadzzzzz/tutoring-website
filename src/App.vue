@@ -474,7 +474,9 @@ const resources = [
     typeKey: 'exercise',
     duration: '45 min',
     hasVideo: true,
-    videoUrl: 'dQw4w9WgXcQ'
+    videoUrl: 'dQw4w9WgXcQ',
+    pdfStatement: '/documents/exercices/maths/test-enonce.pdf',
+    pdfSolution: '/documents/exercices/maths/test-correction.pdf'
   },
   {
     id: 'integrals',
