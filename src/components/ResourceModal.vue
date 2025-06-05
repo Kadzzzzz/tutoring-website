@@ -4,18 +4,18 @@
       <button @click="$emit('close')" class="modal-close" aria-label="Fermer">×</button>
       
       <div class="modal-header">
-        <h2 class="modal-title">{{ getTranslation(`resources.exercises.${resource.subject}.${resource.id}.title`) }}</h2>
+        <h2 class="modal-title">{{ t(`resources.exercises.${resource.subject}.${resource.id}.title`) }}</h2>
         <div class="modal-tags">
-          <span class="tag level">{{ getTranslation(`resources.subjects.${resource.subject}`) }}</span>
-          <span class="tag level">{{ getTranslation(`resources.levels.${resource.levelKey}`) }}</span>
-          <span class="tag type">{{ getTranslation(`resources.types.${resource.typeKey}`) }}</span>
+          <span class="tag level">{{ t(`resources.subjects.${resource.subject}`) }}</span>
+          <span class="tag level">{{ t(`resources.levels.${resource.levelKey}`) }}</span>
+          <span class="tag type">{{ t(`resources.types.${resource.typeKey}`) }}</span>
         </div>
-        <p class="modal-description">{{ getTranslation(`resources.exercises.${resource.subject}.${resource.id}.fullDescription`) || getTranslation(`resources.exercises.${resource.subject}.${resource.id}.description`) }}</p>
+        <p class="modal-description">{{ t(`resources.exercises.${resource.subject}.${resource.id}.fullDescription`) || t(`resources.exercises.${resource.subject}.${resource.id}.description`) }}</p>
       </div>
 
       <!-- Vidéo si disponible -->
       <div v-if="resource.hasVideo && resource.videoUrl" class="modal-video">
-        <iframe 
+        <iframe
           :src="`https://www.youtube.com/embed/${resource.videoUrl}`"
           title="Vidéo explicative"
           frameborder="0"
@@ -24,8 +24,8 @@
         ></iframe>
       </div>
 
-      <!-- Boutons de téléchargement -->
-      <div class="modal-downloads">
+      <!-- Boutons de téléchargement PDF -->
+      <div v-if="resource.pdfStatement || resource.pdfSolution" class="modal-downloads">
         <a
           v-if="resource.pdfStatement"
           :href="resource.pdfStatement"
@@ -34,7 +34,7 @@
           :download="getFileName('statement')"
         >
           <i class="fas fa-file-text"></i>
-          {{ getTranslation('resources.downloadTypes.statement') }}
+          {{ t('resources.downloadTypes.statement') }}
         </a>
         <a
           v-if="resource.pdfSolution"
@@ -44,208 +44,66 @@
           :download="getFileName('solution')"
         >
           <i class="fas fa-check-circle"></i>
-          {{ getTranslation('resources.downloadTypes.solution') }}
+          {{ t('resources.downloadTypes.solution') }}
         </a>
       </div>
 
+      <!-- Message si pas de PDF disponible -->
+      <div v-else class="modal-downloads">
+        <div class="no-pdf-message">
+          <i class="fas fa-info-circle"></i>
+          {{ t('resources.noPdfAvailable') }}
+        </div>
+      </div>
+
       <!-- Notes et conseils -->
-      <div v-if="getTranslation(`resources.exercises.${resource.subject}.${resource.id}.notes`)" class="modal-notes">
-        <h4>{{ getTranslation('resources.notes') }}</h4>
-        <p>{{ getTranslation(`resources.exercises.${resource.subject}.${resource.id}.notes`) }}</p>
+      <div v-if="t(`resources.exercises.${resource.subject}.${resource.id}.notes`)" class="modal-notes">
+        <h4>{{ t('resources.notes') }}</h4>
+        <p>{{ t(`resources.exercises.${resource.subject}.${resource.id}.notes`) }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+// 🎣 IMPORT DU COMPOSABLE (au lieu de duplication)
+import {useTranslations} from '@/composables/useTranslations.js'
+
 const props = defineProps({
   resource: {
     type: Object,
     required: true
-  },
-  currentLang: {
-    type: String,
-    default: 'fr'
   }
+  // ✅ PLUS DE PROP currentLang !
 })
 
 const emit = defineEmits(['close'])
 
-// Traductions pour le modal
-const translations = {
-  fr: {
-    resources: {
-      downloadTypes: {
-        statement: "Énoncé", 
-        solution: "Correction"
-      },
-      notes: "Notes et conseils"
-    }
-  },
-  en: {
-    resources: {
-      downloadTypes: {
-        statement: "Statement",
-        solution: "Solution"
-      },
-      notes: "Notes and tips"
-    }
-  }
-}
+// 🎯 UTILISATION DU COMPOSABLE (remplace tout l'ancien système)
+const {t, currentLang} = useTranslations()
 
-// Traductions complètes (même structure que dans App.vue)
-const fullTranslations = {
-  fr: {
-    resources: {
-      subjects: {
-        maths: "Mathématiques",
-        physics: "Physique", 
-        chemistry: "Chimie"
-      },
-      types: {
-        exercise: "Exercice",
-        course: "Cours",
-        method: "Méthode"
-      },
-      levels: {
-        terminale: "Terminale",
-        prepa1: "Prépa 1A",
-        prepa2: "Prépa 2A"
-      },
-      downloadTypes: {
-        statement: "Énoncé", 
-        solution: "Correction"
-      },
-      notes: "Notes et conseils",
-      exercises: {
-        maths: {
-          derivatives: {
-            title: "Dérivées et primitives",
-            description: "Exercices corrigés sur les dérivées et primitives usuelles",
-            fullDescription: "Une série d'exercices progressifs pour maîtriser les dérivées et primitives. Commençant par les formules de base jusqu'aux fonctions composées.",
-            notes: "Ces exercices sont essentiels pour la préparation au bac et aux concours. Pensez à bien maîtriser les formules de base avant de passer aux exercices complexes."
-          },
-          integrals: {
-            title: "Intégrales généralisées",
-            description: "Convergence et calculs d'intégrales impropres",
-            fullDescription: "Méthodes complètes pour étudier la convergence des intégrales généralisées et techniques de calcul avancées."
-          }
-        },
-        physics: {
-          mechanics: {
-            title: "Mécanique du point",
-            description: "Cours et exercices sur la cinématique et la dynamique",
-            fullDescription: "Étude complète de la mécanique du point : référentiels, vitesse, accélération, forces et théorèmes de Newton."
-          },
-          electromagnetism: {
-            title: "Électromagnétisme",
-            description: "Équations de Maxwell et applications",
-            fullDescription: "Étude des champs électriques et magnétiques, équations de Maxwell et applications en électrostatique et magnétostatique."
-          }
-        },
-        chemistry: {
-          equilibrium: {
-            title: "Équilibres chimiques",
-            description: "Constantes d'équilibre et déplacements",
-            fullDescription: "Étude des équilibres chimiques, calcul des constantes d'équilibre et loi de Le Chatelier."
-          },
-          kinetics: {
-            title: "Cinétique chimique",
-            description: "Vitesse de réaction et mécanismes",
-            fullDescription: "Étude de la vitesse des réactions chimiques, ordres de réaction et mécanismes réactionnels."
-          }
-        }
-      }
-    }
-  },
-  en: {
-    resources: {
-      subjects: {
-        maths: "Mathematics",
-        physics: "Physics",
-        chemistry: "Chemistry"
-      },
-      types: {
-        exercise: "Exercise",
-        course: "Course",
-        method: "Method"
-      },
-      levels: {
-        terminale: "Senior Year",
-        prepa1: "Prep 1st Year",
-        prepa2: "Prep 2nd Year"
-      },
-      downloadTypes: {
-        statement: "Statement",
-        solution: "Solution"
-      },
-      notes: "Notes and tips",
-      exercises: {
-        maths: {
-          derivatives: {
-            title: "Derivatives and primitives",
-            description: "Corrected exercises on usual derivatives and primitives",
-            fullDescription: "A series of progressive exercises to master derivatives and primitives. Starting from basic formulas to composite functions.",
-            notes: "These exercises are essential for preparing for the baccalaureate and competitive exams. Make sure to master the basic formulas before moving on to complex exercises."
-          },
-          integrals: {
-            title: "Generalized integrals",
-            description: "Convergence and calculations of improper integrals",
-            fullDescription: "Complete methods for studying the convergence of generalized integrals and advanced calculation techniques."
-          }
-        },
-        physics: {
-          mechanics: {
-            title: "Point mechanics",
-            description: "Course and exercises on kinematics and dynamics",
-            fullDescription: "Complete study of point mechanics: reference frames, velocity, acceleration, forces and Newton's theorems."
-          },
-          electromagnetism: {
-            title: "Electromagnetism",
-            description: "Maxwell's equations and applications",
-            fullDescription: "Study of electric and magnetic fields, Maxwell's equations and applications in electrostatics and magnetostatics."
-          }
-        },
-        chemistry: {
-          equilibrium: {
-            title: "Chemical equilibria",
-            description: "Equilibrium constants and shifts",
-            fullDescription: "Study of chemical equilibria, calculation of equilibrium constants and Le Chatelier's law."
-          },
-          kinetics: {
-            title: "Chemical kinetics",
-            description: "Reaction rate and mechanisms",
-            fullDescription: "Study of the rate of chemical reactions, reaction orders and reaction mechanisms."
-          }
-        }
-      }
-    }
-  }
-}
+// ✅ SUPPRIMÉ : const translations = { ... }
+// ✅ SUPPRIMÉ : const fullTranslations = { ... }
+// ✅ SUPPRIMÉ : const getTranslation = (key) => { ... }
 
-const getTranslation = (key) => {
-  const keys = key.split('.')
-  let value = fullTranslations[props.currentLang]
-  for (const k of keys) {
-    value = value?.[k]
-  }
-  return value || key
-}
-
+// 🏷️ Génération du nom de fichier pour le téléchargement
 const getFileName = (type) => {
-  const subject = getTranslation(`resources.subjects.${props.resource.subject}`).toLowerCase()
-  const title = getTranslation(`resources.exercises.${props.resource.subject}.${props.resource.id}.title`)
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
+  const subject = t(`resources.subjects.${props.resource.subject}`).toLowerCase()
+  const title = t(`resources.exercises.${props.resource.subject}.${props.resource.id}.title`)
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
 
   const typeText = type === 'statement' ?
-    (props.currentLang === 'fr' ? 'enonce' : 'statement') :
-    (props.currentLang === 'fr' ? 'correction' : 'solution')
+      (currentLang.value === 'fr' ? 'enonce' : 'statement') :
+      (currentLang.value === 'fr' ? 'correction' : 'solution')
 
   return `${subject}-${title}-${typeText}.pdf`
 }
+
+// ✅ FINI ! Plus de duplication de traductions !
+// ✅ Le composable gère tout automatiquement
 </script>
 
 <style scoped>
@@ -380,7 +238,7 @@ const getFileName = (type) => {
 
 .download-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .download-btn.statement:hover {
@@ -389,6 +247,19 @@ const getFileName = (type) => {
 
 .download-btn.solution:hover {
   background-color: #c8e6c9;
+}
+
+.no-pdf-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 20px;
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  color: #856404;
+  font-style: italic;
+  width: 100%;
 }
 
 .modal-notes {
@@ -412,8 +283,12 @@ const getFileName = (type) => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
@@ -433,24 +308,24 @@ const getFileName = (type) => {
     width: 95%;
     margin: 20px;
   }
-  
+
   .modal-header {
     padding: 20px;
   }
-  
+
   .modal-video {
     padding: 0 20px;
   }
-  
+
   .modal-downloads {
     flex-direction: column;
     padding: 0 20px;
   }
-  
+
   .download-btn {
     justify-content: center;
   }
-  
+
   .modal-notes {
     margin: 20px;
   }

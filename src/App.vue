@@ -211,12 +211,11 @@
       </div>
     </footer>
 
-    <!-- Resource Modal -->
-    <ResourceModal 
-      v-if="selectedResource" 
-      :resource="selectedResource" 
-      :current-lang="currentLang"
-      @close="closeResourceModal" 
+    <!-- Resource Modal - ✅ PLUS DE PROP current-lang ! -->
+    <ResourceModal
+      v-if="selectedResource"
+      :resource="selectedResource"
+      @close="closeResourceModal"
     />
   </div>
 </template>
@@ -224,241 +223,19 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import ResourceModal from './components/ResourceModal.vue'
+// 🎣 IMPORT DU COMPOSABLE
+import { useTranslations } from '@/composables/useTranslations.js'
 
-// --- State ---
+// 🎯 UTILISATION DU COMPOSABLE (remplace tout l'ancien système)
+const { t, currentLang, toggleLanguage, loadSavedLanguage } = useTranslations()
+
+// --- State (sans les traductions et currentLang maintenant !) ---
 const scrolled = ref(false)
 const mobileMenuOpen = ref(false)
 const activeSubject = ref('maths')
 const selectedResource = ref(null)
-const currentLang = ref('fr')
 
-// --- Translations ---
-const translations = {
-  fr: {
-    nav: {
-      about: "À propos",
-      resources: "Ressources", 
-      methodology: "Méthode",
-      contact: "Contact"
-    },
-    hero: {
-      subtitle: "Étudiant Ingénieur & Professeur Particulier",
-      title: "Réussissez vos études scientifiques",
-      description: "Cours particuliers en Mathématiques, Physique et Chimie pour lycéens et préparationnaires.",
-      scrollDown: "Découvrir"
-    },
-    about: {
-      title: "Mon Parcours",
-      paragraph1: "Actuellement étudiant en première année à l'École Centrale de Lyon et en parallèle en L3 de Physique à l'Université Claude Bernard Lyon 1, je mets ma passion pour les sciences au service de la réussite de mes élèves.",
-      paragraph2: "Fort de mon expérience en classes préparatoires (PCSI puis PC à l'ENCPB, et PC* au lycée Louis-le-Grand), je comprends parfaitement les défis que rencontrent les étudiants dans ces filières exigeantes.",
-      paragraph3: "J'aime beaucoup transmettre mon savoir et ma passion pour les sciences. C'est pourquoi je donne régulièrement des cours particuliers à des élèves allant de la seconde à la première année de prépa, et je gère également des salles de travail à Centrale.",
-      academicPath: "Parcours Académique",
-      timeline: {
-        prepa: "Prépa PCSI puis PC - ENCPB Paris",
-        prepastar: "Prépa PC* - Lycée Louis-le-Grand",
-        centrale: "École Centrale de Lyon",
-        physics: "L3 Physique - Université Claude Bernard Lyon 1"
-      }
-    },
-    resources: {
-      title: "Ressources Pédagogiques",
-      description: "Découvrez mes exercices corrigés, cours et méthodes classés par matière et niveau. Chaque ressource est accompagnée de corrections détaillées et parfois de vidéos explicatives.",
-      subjects: {
-        maths: "Mathématiques",
-        physics: "Physique", 
-        chemistry: "Chimie"
-      },
-      types: {
-        exercise: "Exercice",
-        course: "Cours",
-        method: "Méthode"
-      },
-      levels: {
-        terminale: "Terminale",
-        prepa1: "Prépa 1A",
-        prepa2: "Prépa 2A"
-      },
-      hasVideo: "Vidéo",
-      exercises: {
-        maths: {
-          derivatives: {
-            title: "Dérivées et primitives",
-            description: "Exercices corrigés sur les dérivées et primitives usuelles",
-            fullDescription: "Une série d'exercices progressifs pour maîtriser les dérivées et primitives. Commençant par les formules de base jusqu'aux fonctions composées.",
-            notes: "Ces exercices sont essentiels pour la préparation au bac et aux concours. Pensez à bien maîtriser les formules de base avant de passer aux exercices complexes."
-          },
-          integrals: {
-            title: "Intégrales généralisées",
-            description: "Convergence et calculs d'intégrales impropres",
-            fullDescription: "Méthodes complètes pour étudier la convergence des intégrales généralisées et techniques de calcul avancées."
-          }
-        },
-        physics: {
-          mechanics: {
-            title: "Mécanique du point",
-            description: "Cours et exercices sur la cinématique et la dynamique",
-            fullDescription: "Étude complète de la mécanique du point : référentiels, vitesse, accélération, forces et théorèmes de Newton."
-          },
-          electromagnetism: {
-            title: "Électromagnétisme",
-            description: "Équations de Maxwell et applications",
-            fullDescription: "Étude des champs électriques et magnétiques, équations de Maxwell et applications en électrostatique et magnétostatique."
-          }
-        },
-        chemistry: {
-          equilibrium: {
-            title: "Équilibres chimiques",
-            description: "Constantes d'équilibre et déplacements",
-            fullDescription: "Étude des équilibres chimiques, calcul des constantes d'équilibre et loi de Le Chatelier."
-          },
-          kinetics: {
-            title: "Cinétique chimique",
-            description: "Vitesse de réaction et mécanismes",
-            fullDescription: "Étude de la vitesse des réactions chimiques, ordres de réaction et mécanismes réactionnels."
-          }
-        }
-      }
-    },
-    methodology: {
-      title: "Ma Méthode Pédagogique",
-      item1: {
-        title: "Transmission de la Passion",
-        description: "Je crois fermement qu'exceller dans une discipline est beaucoup plus simple quand on l'aime. C'est pourquoi je m'attache à transmettre ma passion pour les sciences autant que mes connaissances."
-      },
-      item2: {
-        title: "Écoute et Personnalisation", 
-        description: "Chaque élève est unique. Je suis très à l'écoute de mes élèves pour adapter ma pédagogie à leur profil, leurs difficultés et leurs objectifs personnels."
-      },
-      item3: {
-        title: "Approche Bienveillante",
-        description: "En tant que jeune étudiant tout juste sorti de prépa, je comprends les défis que vivent mes élèves. J'offre un encadrement bienveillant qui permet de prendre confiance et de se projeter dans la réussite."
-      }
-    },
-    contact: {
-      title: "Me Contacter",
-      email: "Email",
-      levels: "Niveaux enseignés",
-      levelsDescription: "De la Seconde à la Prépa (1A et 2A)",
-      followMe: "Me suivre" // NOUVEAU
-    },
-    footer: {
-      rights: "Tous droits réservés"
-    }
-  },
-  en: {
-    nav: {
-      about: "About",
-      resources: "Resources",
-      methodology: "Method", 
-      contact: "Contact"
-    },
-    hero: {
-      subtitle: "Engineering Student & Private Tutor",
-      title: "Excel in Scientific Studies",
-      description: "Private lessons in Mathematics, Physics and Chemistry for high school and preparatory students.",
-      scrollDown: "Discover"
-    },
-    about: {
-      title: "My Background",
-      paragraph1: "Currently a first-year student at École Centrale de Lyon and simultaneously pursuing a L3 in Physics at Claude Bernard Lyon 1 University, I put my passion for science at the service of my students' success.",
-      paragraph2: "With my experience in preparatory classes (PCSI then PC at ENCPB, and PC* at Louis-le-Grand high school), I perfectly understand the challenges that students face in these demanding programs.",
-      paragraph3: "I love sharing my knowledge and passion for science. That's why I regularly give private lessons to students from sophomore year to first year of prep school, and I also manage study rooms at Centrale.",
-      academicPath: "Academic Path",
-      timeline: {
-        prepa: "Prep PCSI then PC - ENCPB Paris",
-        prepastar: "Prep PC* - Louis-le-Grand High School",
-        centrale: "École Centrale de Lyon",
-        physics: "L3 Physics - Claude Bernard Lyon 1 University"
-      }
-    },
-    resources: {
-      title: "Educational Resources",
-      description: "Discover my corrected exercises, courses and methods classified by subject and level. Each resource comes with detailed corrections and sometimes explanatory videos.",
-      subjects: {
-        maths: "Mathematics",
-        physics: "Physics",
-        chemistry: "Chemistry"
-      },
-      types: {
-        exercise: "Exercise",
-        course: "Course",
-        method: "Method"
-      },
-      levels: {
-        terminale: "Senior Year",
-        prepa1: "Prep 1st Year",
-        prepa2: "Prep 2nd Year"
-      },
-      hasVideo: "Video",
-      exercises: {
-        maths: {
-          derivatives: {
-            title: "Derivatives and primitives",
-            description: "Corrected exercises on usual derivatives and primitives",
-            fullDescription: "A series of progressive exercises to master derivatives and primitives. Starting from basic formulas to composite functions.",
-            notes: "These exercises are essential for preparing for the baccalaureate and competitive exams. Make sure to master the basic formulas before moving on to complex exercises."
-          },
-          integrals: {
-            title: "Generalized integrals",
-            description: "Convergence and calculations of improper integrals",
-            fullDescription: "Complete methods for studying the convergence of generalized integrals and advanced calculation techniques."
-          }
-        },
-        physics: {
-          mechanics: {
-            title: "Point mechanics",
-            description: "Course and exercises on kinematics and dynamics",
-            fullDescription: "Complete study of point mechanics: reference frames, velocity, acceleration, forces and Newton's theorems."
-          },
-          electromagnetism: {
-            title: "Electromagnetism",
-            description: "Maxwell's equations and applications",
-            fullDescription: "Study of electric and magnetic fields, Maxwell's equations and applications in electrostatics and magnetostatics."
-          }
-        },
-        chemistry: {
-          equilibrium: {
-            title: "Chemical equilibria",
-            description: "Equilibrium constants and shifts",
-            fullDescription: "Study of chemical equilibria, calculation of equilibrium constants and Le Chatelier's law."
-          },
-          kinetics: {
-            title: "Chemical kinetics",
-            description: "Reaction rate and mechanisms",
-            fullDescription: "Study of the rate of chemical reactions, reaction orders and reaction mechanisms."
-          }
-        }
-      }
-    },
-    methodology: {
-      title: "My Teaching Method",
-      item1: {
-        title: "Sharing Passion",
-        description: "I firmly believe that excelling in a discipline is much easier when you love it. That's why I focus on transmitting my passion for science as much as my knowledge."
-      },
-      item2: {
-        title: "Listening & Personalization",
-        description: "Every student is unique. I listen carefully to my students to adapt my teaching to their profile, their difficulties and their personal goals."
-      },
-      item3: {
-        title: "Caring Approach",
-        description: "As a young student fresh out of prep school, I understand the challenges my students face. I offer caring guidance that builds confidence and helps project success."
-      }
-    },
-    contact: {
-      title: "Contact Me",
-      email: "Email",
-      levels: "Teaching Levels",
-      levelsDescription: "From Sophomore to Prep School (1st & 2nd year)",
-      followMe: "Follow Me" // NOUVEAU
-    },
-    footer: {
-      rights: "All rights reserved"
-    }
-  }
-}
 
-// --- Data ---
 const subjects = [
   { key: 'maths', name: 'Mathématiques', icon: 'fas fa-calculator' },
   { key: 'physics', name: 'Physique', icon: 'fas fa-atom' },
@@ -468,16 +245,17 @@ const subjects = [
 const resources = [
   // Mathématiques
   {
-    id: 'derivatives',
+    id: 'interro0LLG',
     subject: 'maths',
-    levelKey: 'terminale',
-    typeKey: 'exercise',
-    duration: '45 min',
-    hasVideo: true,
-    videoUrl: 'dQw4w9WgXcQ',
-    pdfStatement: '/documents/exercices/maths/test-enonce.pdf',
-    pdfSolution: '/documents/exercices/maths/test-correction.pdf'
+    levelKey: 'prepa2',
+    typeKey: 'interro',
+    duration: '2h',
+    hasVideo: false,
+    videoUrl: '',
+    pdfStatement: '/documents/exercices/maths/Interrogation_0_sujet.pdf',
+    pdfSolution: '/documents/exercices/maths/Interrogation_0_correction.pdf'
   },
+
   {
     id: 'integrals',
     subject: 'maths',
@@ -487,6 +265,8 @@ const resources = [
     hasVideo: true,
     videoUrl: 'dQw4w9WgXcQ'
   },
+
+
   // Physique
   {
     id: 'mechanics',
@@ -505,6 +285,8 @@ const resources = [
     hasVideo: true,
     videoUrl: 'dQw4w9WgXcQ'
   },
+
+
   // Chimie
   {
     id: 'equilibrium',
@@ -531,33 +313,19 @@ const methodologyItems = [
   { id: 3, iconClass: 'fas fa-users' }
 ]
 
-// --- Computed ---
+// --- Computed (inchangé) ---
 const filteredResources = computed(() => {
   return resources.filter(resource => resource.subject === activeSubject.value)
 })
 
-// --- Methods ---
-const t = (key) => {
-  const keys = key.split('.')
-  let value = translations[currentLang.value]
-  for (const k of keys) {
-    value = value?.[k]
-  }
-  return value || key
-}
+// --- Methods (suppression de la fonction t() et toggleLanguage()) ---
 
-const toggleLanguage = () => {
-  currentLang.value = currentLang.value === 'fr' ? 'en' : 'fr'
-  localStorage.setItem('language', currentLang.value)
-  if (mobileMenuOpen.value) {
-    mobileMenuOpen.value = false
-  }
-}
+// ✅ SUPPRIMÉ : const t = (key) => { ... }
+// ✅ SUPPRIMÉ : const toggleLanguage = () => { ... }
 
 const handleScroll = () => {
   scrolled.value = window.scrollY > 100
 }
-
 
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value
@@ -596,12 +364,9 @@ const closeResourceModal = () => {
 
 // --- Lifecycle Hooks ---
 onMounted(() => {
-  // Charger la langue sauvegardée
-  const savedLang = localStorage.getItem('language')
-  if (savedLang && ['fr', 'en'].includes(savedLang)) {
-    currentLang.value = savedLang
-  }
-  
+  // 🎯 UTILISE LA FONCTION DU COMPOSABLE (au lieu de localStorage manuel)
+  loadSavedLanguage()
+
   window.addEventListener('scroll', handleScroll)
   handleScroll()
 })
@@ -612,6 +377,7 @@ onUnmounted(() => {
 })
 </script>
 
+<!-- Les styles restent identiques -->
 <style>
 /* Tous les styles précédents + ajouts pour la langue */
 
