@@ -1,231 +1,271 @@
-  # Jeremy Luccioni - Site Web Personnel
+# Jeremy Luccioni - Site Web Personnel
 
-  Site web personnel de Jeremy Luccioni, étudiant à l'École Centrale de Lyon et professeur particulier en Mathématiques, Physique et Chimie.
+Site web personnel de Jeremy Luccioni, étudiant à l'École Centrale de Lyon et professeur particulier en Mathématiques, Physique et Chimie.
 
-  ## Aperçu
+## Aperçu
 
-  Ce site présente :
-  - Ressources pédagogiques (exercices, cours, méthodes)
-  - Méthodologie d'enseignement
-  - Informations de contact
-  - Interface bilingue (Français/Anglais)
+Ce site présente :
+- Ressources pédagogiques (exercices, cours, méthodes)
+- Méthodologie d'enseignement
+- Informations de contact
+- Interface bilingue (Français/Anglais)
 
-  **Site en ligne :** [jeremy-luccioni.fr](https://jeremy-luccioni.fr/)
+**Site en ligne :** [jeremy-luccioni.fr](https://jeremy-luccioni.fr/)
 
-  ## Technologies utilisées
+## Technologies utilisées
 
-  - **Vue.js 3** - Framework JavaScript réactif
-  - **Vite** - Outil de build moderne
-  - **Font Awesome** - Icônes
-  - **CSS3** - Styles avec variables CSS et responsive design
-  - **JavaScript ES6+** - Logique interactive
+- **Vue.js 3** - Framework JavaScript réactif
+- **Vite** - Outil de build moderne
+- **Font Awesome** - Icônes
+- **CSS3** - Styles avec variables CSS et responsive design
+- **JavaScript ES6+** - Logique interactive
 
-  ## Structure du projet
+## Structure du projet
 
-  ```
-  jeremy-tutoring/
-  ├── public/
-  │   ├── index.html          # Page HTML principale
-  │   └── favicon.ico         # Icône du site
-  ├── src/
-  │   ├── assets/
-  │   │   └── images/         # Images du site
-  │   ├── components/
-  │   │   └── ResourceModal.vue  # Modal des ressources
-  │   ├── App.vue             # Composant principal
-  │   └── main.js            # Point d'entrée
-  ├── package.json           # Dépendances et scripts
-  ├── vite.config.js        # Configuration Vite
-  └── README.md             # Ce fichier
-  ```
+```
+jeremy-tutoring/
+├── public/
+│   ├── index.html              # Page HTML principale
+│   └── favicon.ico             # Icône du site
+├── src/
+│   ├── assets/
+│   │   └── images/             # Images du site
+│   ├── components/
+│   │   └── ResourceModal.vue   # Modal des ressources
+│   ├── composables/
+│   │   └── useTranslations.js  # Composable pour les traductions
+│   ├── i18n/
+│   │   └── translations.js     # Fichier centralisé des traductions
+│   ├── App.vue                 # Composant principal
+│   └── main.js                 # Point d'entrée
+├── package.json                # Dépendances et scripts
+├── vite.config.js              # Configuration Vite
+└── README.md                   # Ce fichier
+```
 
-  ## Installation et lancement
+## Installation et lancement
 
-  ### Prérequis
-  - Node.js 16+ 
-  - npm ou yarn
+### Prérequis
+- Node.js 16+ 
+- npm ou yarn
 
-  ### Installation
-  ```bash
-  # Cloner le repository
-  git clone https://github.com/Kadzzzzz/tutoring-website.git
-  cd tutoring-website
+### Installation
+```bash
+# Cloner le repository
+git clone https://github.com/Kadzzzzz/tutoring-website.git
+cd tutoring-website
 
-  # Installer les dépendances
-  npm install
+# Installer les dépendances
+npm install
 
-  # Lancer le serveur de développement
-  npm run dev
+# Lancer le serveur de développement
+npm run dev
 
-  # Construire pour la production
-  npm run build
-  ```
+# Construire pour la production
+npm run build
+```
 
-  Le site sera accessible sur `http://localhost:5173`
+Le site sera accessible sur `http://localhost:5173`
 
-  ## Guide de maintenance et mise à jour
+## Guide de maintenance et mise à jour
 
-  ### 1. Modifier l'apparence du site
+### 1. Modifier l'apparence du site
 
-  #### Changer les couleurs
-  Les couleurs sont définies dans `src/App.vue` dans les variables CSS :
-  ```css
-  :root {
-    --primary-color: #2c3e50;    /* Couleur principale (header, titres) */
-    --secondary-color: #f8f9fa;  /* Couleur de fond */
-    --accent-color: #3498db;     /* Couleur d'accent (boutons, liens) */
-    --text-color: #333;          /* Couleur du texte */
-    --text-light: #666;          /* Couleur du texte secondaire */
-  }
-  ```
+#### Changer les couleurs
+Les couleurs sont définies dans `src/App.vue` dans les variables CSS :
+```css
+:root {
+  --primary-color: #2c3e50;    /* Couleur principale (header, titres) */
+  --secondary-color: #f8f9fa;  /* Couleur de fond */
+  --accent-color: #3498db;     /* Couleur d'accent (boutons, liens) */
+  --text-color: #333;          /* Couleur du texte */
+  --text-light: #666;          /* Couleur du texte secondaire */
+}
+```
 
-  #### Changer l'image de bannière
-  Dans `src/App.vue`, section `.hero-section` :
-  ```css
-  .hero-section {
-    background: linear-gradient(rgba(44, 62, 80, 0.7), rgba(44, 62, 80, 0.5)),
-                url('VOTRE_NOUVELLE_IMAGE_URL');
-  }
-  ```
+#### Changer l'image de bannière
+Dans `src/App.vue`, section `.hero-section` :
+```css
+.hero-section {
+  background: linear-gradient(rgba(44, 62, 80, 0.7), rgba(44, 62, 80, 0.5)),
+              url('VOTRE_NOUVELLE_IMAGE_URL');
+}
+```
 
-  Pour utiliser une image locale :
-  1. Placez l'image dans `src/assets/images/`
-  2. Remplacez l'URL par : `url('@/assets/images/votre-image.jpg')`
+Pour utiliser une image locale :
+1. Placez l'image dans `src/assets/images/`
+2. Remplacez l'URL par : `url('@/assets/images/votre-image.jpg')`
 
-  ### 2. Ajouter de nouvelles ressources pédagogiques
+### 2. Système de traductions
 
-  #### Étape 1 : Ajouter la ressource dans les données
-  Dans `src/App.vue`, section `resources` du script :
+Le site utilise un système centralisé de traductions :
+- **`src/i18n/translations.js`** : Contient toutes les traductions
+- **`src/composables/useTranslations.js`** : Gère la logique de traduction
+- Les composants utilisent le composable via `const { t, currentLang, toggleLanguage } = useTranslations()`
 
-  ```javascript
-  const resources = [
-    // Ajouter votre nouvelle ressource
-    {
-      id: 'votre-nouveau-exercice',           // Identifiant unique
-      subject: 'maths',                       // 'maths', 'physics', ou 'chemistry'
-      levelKey: 'terminale',                  // 'terminale', 'prepa1', 'prepa2'
-      typeKey: 'exercise',                    // 'exercise', 'course', 'method'
-      duration: '60 min',                     // Durée estimée
-      hasVideo: true,                         // true si vidéo disponible
-      videoUrl: 'dQw4w9WgXcQ'                // ID YouTube (optionnel)
-    }
-  ]
-  ```
-
-  #### Étape 2 : Ajouter les traductions
-  Dans la même section, ajoutez les traductions FR et EN :
-
-  ```javascript
-  const translations = {
-    fr: {
-      resources: {
-        exercises: {
-          maths: {  // ou physics/chemistry
-            'votre-nouveau-exercice': {
-              title: "Titre de votre exercice",
-              description: "Description courte",
-              fullDescription: "Description complète pour le modal",
-              notes: "Notes et conseils (optionnel)"
-            }
-          }
-        }
-      }
+#### Structure des traductions
+```javascript
+// src/i18n/translations.js
+export const translations = {
+  fr: {
+    nav: {
+      about: "À propos",
+      resources: "Ressources",
+      // ...
     },
-    en: {
-      resources: {
-        exercises: {
-          maths: {
-            'votre-nouveau-exercice': {
-              title: "Your exercise title",
-              description: "Short description",
-              fullDescription: "Full description for modal",
-              notes: "Notes and tips (optional)"
-            }
+    // ... autres sections
+  },
+  en: {
+    nav: {
+      about: "About",
+      resources: "Resources",
+      // ...
+    },
+    // ... autres sections
+  }
+}
+```
+
+### 3. Ajouter de nouvelles ressources pédagogiques
+
+#### Étape 1 : Ajouter la ressource dans App.vue
+Dans `src/App.vue`, section `resources` du script :
+
+```javascript
+const resources = [
+  // Ajouter votre nouvelle ressource
+  {
+    id: 'votre-nouveau-exercice',           // Identifiant unique
+    subject: 'maths',                       // 'maths', 'physics', ou 'chemistry'
+    levelKey: 'terminale',                  // 'terminale', 'prepa1', 'prepa2'
+    typeKey: 'exercise',                    // 'exercise', 'course', 'method', 'interro'
+    duration: '60 min',                     // Durée estimée
+    hasVideo: true,                         // true si vidéo disponible
+    videoUrl: 'dQw4w9WgXcQ',               // ID YouTube (optionnel)
+    pdfStatement: '/documents/exercices/maths/votre-exercice-sujet.pdf',    // PDF énoncé (optionnel)
+    pdfSolution: '/documents/exercices/maths/votre-exercice-correction.pdf' // PDF correction (optionnel)
+  }
+]
+```
+
+#### Étape 2 : Ajouter les traductions
+Dans `src/i18n/translations.js`, ajoutez les traductions :
+
+```javascript
+export const translations = {
+  fr: {
+    resources: {
+      exercises: {
+        maths: {  // ou physics/chemistry
+          'votre-nouveau-exercice': {
+            title: "Titre de votre exercice",
+            description: "Description courte",
+            fullDescription: "Description complète pour le modal",
+            notes: "Notes et conseils (optionnel)"
+          }
+        }
+      }
+    }
+  },
+  en: {
+    resources: {
+      exercises: {
+        maths: {
+          'votre-nouveau-exercice': {
+            title: "Your exercise title",
+            description: "Short description",
+            fullDescription: "Full description for modal",
+            notes: "Notes and tips (optional)"
           }
         }
       }
     }
   }
-  ```
+}
+```
 
-  #### Étape 3 : Mettre à jour le modal
-  Dans `src/components/ResourceModal.vue`, assurez-vous que les mêmes traductions sont présentes dans `fullTranslations`.
+### 4. Ajouter une nouvelle langue
 
-  ### 3. Ajouter une nouvelle langue
+#### Étape 1 : Ajouter les traductions
+Dans `src/i18n/translations.js`, ajoutez votre nouvelle langue :
 
-  #### Étape 1 : Ajouter la langue dans App.vue
-  Ajoutez votre langue dans l'objet `translations` avec toutes les clés existantes :
-
-  ```javascript
-  const translations = {
-    fr: { /* ... */ },
-    en: { /* ... */ },
-    es: {  // Exemple pour l'espagnol
-      nav: {
-        about: "Acerca de",
-        resources: "Recursos",
-        methodology: "Método",
-        contact: "Contacto"
-      },
-      hero: {
-        subtitle: "Estudiante de Ingeniería y Profesor Particular",
-        title: "Destaca en estudios científicos",
-        // ... toutes les autres traductions
-      }
-      // ... compléter toutes les sections
+```javascript
+export const translations = {
+  fr: { /* ... */ },
+  en: { /* ... */ },
+  es: {  // Exemple pour l'espagnol
+    nav: {
+      about: "Acerca de",
+      resources: "Recursos",
+      methodology: "Método",
+      contact: "Contacto"
+    },
+    hero: {
+      subtitle: "Estudiante de Ingeniería y Profesor Particular",
+      title: "Destaca en estudios científicos",
+      // ... toutes les autres traductions
     }
+    // ... compléter toutes les sections
   }
-  ```
+}
+```
 
-  #### Étape 2 : Modifier le sélecteur de langue
-  Remplacez la fonction `toggleLanguage` pour supporter plus de 2 langues :
+#### Étape 2 : Mettre à jour le composable (optionnel)
+Si vous voulez supporter plus de 2 langues avec un cycle au lieu d'un toggle :
 
-  ```javascript
-  const currentLang = ref('fr')
-  const availableLanguages = ['fr', 'en', 'es'] // Ajouter votre langue
+Dans `src/composables/useTranslations.js` :
+```javascript
+// Modifier toggleLanguage pour cycler entre plusieurs langues
+const availableLanguages = ['fr', 'en', 'es'] // Vos langues
 
-  const toggleLanguage = () => {
-    const currentIndex = availableLanguages.indexOf(currentLang.value)
-    const nextIndex = (currentIndex + 1) % availableLanguages.length
-    currentLang.value = availableLanguages[nextIndex]
-    localStorage.setItem('language', currentLang.value)
-  }
-  ```
+const toggleLanguage = () => {
+  const currentIndex = availableLanguages.indexOf(currentLang.value)
+  const nextIndex = (currentIndex + 1) % availableLanguages.length
+  currentLang.value = availableLanguages[nextIndex]
+  localStorage.setItem('language', currentLang.value)
+}
+```
 
-  #### Étape 3 : Mettre à jour ResourceModal.vue
-  Ajoutez les mêmes traductions dans `src/components/ResourceModal.vue`.
+### 5. Modifier le contenu
 
-  ### 4. Modifier le contenu
+#### Informations personnelles
+Dans `src/App.vue`, recherchez et modifiez :
+- **Nom :** `.logo` et `Jeremy Luccioni`
+- **Email :** `jeremy.luccioni@etu.ec-lyon.fr`
+- **Parcours académique :** Section timeline
+- **Liens sociaux :** LinkedIn, YouTube, GitHub
 
-  #### Informations personnelles
-  Dans `src/App.vue`, recherchez et modifiez :
-  - **Nom :** `.logo` et `Jeremy Luccioni`
-  - **Email :** `jeremy.luccioni@etu.ec-lyon.fr`
-  - **Parcours académique :** Section timeline
-  - **Description :** Section hero et about
+#### Textes du site
+Tous les textes sont centralisés dans `src/i18n/translations.js`. Modifiez directement ce fichier pour changer :
+- Titres et descriptions
+- Méthodologie d'enseignement
+- Informations de contact
 
-  #### Méthodologie d'enseignement
-  Modifiez la section `methodologyItems` et les traductions correspondantes.
+### 6. Ajouter des vidéos YouTube
 
-  #### Informations de contact
-  Modifiez la section contact dans le template et les traductions.
+Pour ajouter une vraie vidéo :
+1. Uploadez votre vidéo sur YouTube
+2. Récupérez l'ID de la vidéo (dans l'URL après `v=`)
+3. Dans la ressource, définissez `hasVideo: true` et `videoUrl: 'ID_DE_LA_VIDEO'`
 
-  ### 5. Ajouter des vidéos YouTube
+### 7. Ajouter des PDFs
 
-  Pour ajouter une vraie vidéo :
-  1. Uploadez votre vidéo sur YouTube
-  2. Récupérez l'ID de la vidéo (dans l'URL après `v=`)
-  3. Remplacez `dQw4w9WgXcQ` par votre ID dans la ressource
+Pour ajouter des documents PDF :
+1. Placez vos PDFs dans `public/documents/exercices/[matiere]/`
+2. Dans la ressource, ajoutez :
+   - `pdfStatement: '/documents/exercices/maths/nom-sujet.pdf'`
+   - `pdfSolution: '/documents/exercices/maths/nom-correction.pdf'`
 
-  ### 6. Tester le responsive
+### 8. Tester le responsive
 
-  Testez votre site sur différentes tailles d'écran :
-  - **Desktop :** 1200px+
-  - **Tablet :** 768px - 1199px  
-  - **Mobile :** < 768px
+Testez votre site sur différentes tailles d'écran :
+- **Desktop :** 1200px+
+- **Tablet :** 768px - 1199px  
+- **Mobile :** < 768px
 
-  Utilisez les outils de développement du navigateur (F12) pour simuler différents appareils.
+Utilisez les outils de développement du navigateur (F12) pour simuler différents appareils.
 
+---
 
 # Jeremy Luccioni - Personal Website
 
@@ -254,18 +294,22 @@ This website features:
 ```
 jeremy-tutoring/
 ├── public/
-│   ├── index.html          # Main HTML page
-│   └── favicon.ico         # Site icon
+│   ├── index.html              # Main HTML page
+│   └── favicon.ico             # Site icon
 ├── src/
 │   ├── assets/
-│   │   └── images/         # Site images
+│   │   └── images/             # Site images
 │   ├── components/
-│   │   └── ResourceModal.vue  # Resources modal
-│   ├── App.vue             # Main component
-│   └── main.js            # Entry point
-├── package.json           # Dependencies and scripts
-├── vite.config.js        # Vite configuration
-└── README.md             # This file
+│   │   └── ResourceModal.vue   # Resources modal
+│   ├── composables/
+│   │   └── useTranslations.js  # Translations composable
+│   ├── i18n/
+│   │   └── translations.js     # Centralized translations file
+│   ├── App.vue                 # Main component
+│   └── main.js                 # Entry point
+├── package.json                # Dependencies and scripts
+├── vite.config.js              # Vite configuration
+└── README.md                   # This file
 ```
 
 ## Installation and launch
@@ -321,9 +365,39 @@ To use a local image:
 1. Place the image in `src/assets/images/`
 2. Replace the URL with: `url('@/assets/images/your-image.jpg')`
 
-### 2. Add new educational resources
+### 2. Translation system
 
-#### Step 1: Add the resource in the data
+The site uses a centralized translation system:
+- **`src/i18n/translations.js`**: Contains all translations
+- **`src/composables/useTranslations.js`**: Manages translation logic
+- Components use the composable via `const { t, currentLang, toggleLanguage } = useTranslations()`
+
+#### Translation structure
+```javascript
+// src/i18n/translations.js
+export const translations = {
+  fr: {
+    nav: {
+      about: "À propos",
+      resources: "Ressources",
+      // ...
+    },
+    // ... other sections
+  },
+  en: {
+    nav: {
+      about: "About",
+      resources: "Resources",
+      // ...
+    },
+    // ... other sections
+  }
+}
+```
+
+### 3. Add new educational resources
+
+#### Step 1: Add the resource in App.vue
 In `src/App.vue`, `resources` section of the script:
 
 ```javascript
@@ -333,19 +407,21 @@ const resources = [
     id: 'your-new-exercise',           // Unique identifier
     subject: 'maths',                  // 'maths', 'physics', or 'chemistry'
     levelKey: 'terminale',             // 'terminale', 'prepa1', 'prepa2'
-    typeKey: 'exercise',               // 'exercise', 'course', 'method'
+    typeKey: 'exercise',               // 'exercise', 'course', 'method', 'interro'
     duration: '60 min',                // Estimated duration
     hasVideo: true,                    // true if video available
-    videoUrl: 'dQw4w9WgXcQ'           // YouTube ID (optional)
+    videoUrl: 'dQw4w9WgXcQ',          // YouTube ID (optional)
+    pdfStatement: '/documents/exercices/maths/your-exercise-statement.pdf',  // Statement PDF (optional)
+    pdfSolution: '/documents/exercices/maths/your-exercise-solution.pdf'     // Solution PDF (optional)
   }
 ]
 ```
 
 #### Step 2: Add translations
-In the same section, add FR and EN translations:
+In `src/i18n/translations.js`, add the translations:
 
 ```javascript
-const translations = {
+export const translations = {
   fr: {
     resources: {
       exercises: {
@@ -377,16 +453,13 @@ const translations = {
 }
 ```
 
-#### Step 3: Update the modal
-In `src/components/ResourceModal.vue`, make sure the same translations are present in `fullTranslations`.
+### 4. Add a new language
 
-### 3. Add a new language
-
-#### Step 1: Add the language in App.vue
-Add your language in the `translations` object with all existing keys:
+#### Step 1: Add translations
+In `src/i18n/translations.js`, add your new language:
 
 ```javascript
-const translations = {
+export const translations = {
   fr: { /* ... */ },
   en: { /* ... */ },
   es: {  // Example for Spanish
@@ -406,12 +479,13 @@ const translations = {
 }
 ```
 
-#### Step 2: Modify the language selector
-Replace the `toggleLanguage` function to support more than 2 languages:
+#### Step 2: Update the composable (optional)
+If you want to support more than 2 languages with cycling instead of toggling:
 
+In `src/composables/useTranslations.js`:
 ```javascript
-const currentLang = ref('fr')
-const availableLanguages = ['fr', 'en', 'es'] // Add your language
+// Modify toggleLanguage to cycle through multiple languages
+const availableLanguages = ['fr', 'en', 'es'] // Your languages
 
 const toggleLanguage = () => {
   const currentIndex = availableLanguages.indexOf(currentLang.value)
@@ -421,36 +495,41 @@ const toggleLanguage = () => {
 }
 ```
 
-#### Step 3: Update ResourceModal.vue
-Add the same translations in `src/components/ResourceModal.vue`.
-
-### 4. Modify content
+### 5. Modify content
 
 #### Personal information
 In `src/App.vue`, search and modify:
 - **Name:** `.logo` and `Jeremy Luccioni`
 - **Email:** `jeremy.luccioni@etu.ec-lyon.fr`
 - **Academic background:** Timeline section
-- **Description:** Hero and about sections
+- **Social links:** LinkedIn, YouTube, GitHub
 
-#### Teaching methodology
-Modify the `methodologyItems` section and corresponding translations.
+#### Site texts
+All texts are centralized in `src/i18n/translations.js`. Directly modify this file to change:
+- Titles and descriptions
+- Teaching methodology
+- Contact information
 
-#### Contact information
-Modify the contact section in the template and translations.
-
-### 5. Add YouTube videos
+### 6. Add YouTube videos
 
 To add a real video:
 1. Upload your video to YouTube
 2. Get the video ID (in the URL after `v=`)
-3. Replace `dQw4w9WgXcQ` with your ID in the resource
+3. In the resource, set `hasVideo: true` and `videoUrl: 'VIDEO_ID'`
 
-### 6. Test responsiveness
+### 7. Add PDFs
+
+To add PDF documents:
+1. Place your PDFs in `public/documents/exercices/[subject]/`
+2. In the resource, add:
+   - `pdfStatement: '/documents/exercices/maths/name-statement.pdf'`
+   - `pdfSolution: '/documents/exercices/maths/name-solution.pdf'`
+
+### 8. Test responsiveness
 
 Test your site on different screen sizes:
 - **Desktop:** 1200px+
 - **Tablet:** 768px - 1199px  
 - **Mobile:** < 768px
 
-Use browser development tools (F12) to simulate different devices.  
+Use browser development tools (F12) to simulate different devices.

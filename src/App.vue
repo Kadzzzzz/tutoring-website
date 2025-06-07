@@ -220,8 +220,7 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+<script setup>import { ref, onMounted, onUnmounted, computed } from 'vue'
 import ResourceModal from './components/ResourceModal.vue'
 // 🎣 IMPORT DU COMPOSABLE
 import { useTranslations } from '@/composables/useTranslations.js'
@@ -234,14 +233,23 @@ const scrolled = ref(false)
 const mobileMenuOpen = ref(false)
 const activeSubject = ref('maths')
 const selectedResource = ref(null)
-
-
 const subjects = [
-  { key: 'maths', name: 'Mathématiques', icon: 'fas fa-calculator' },
-  { key: 'physics', name: 'Physique', icon: 'fas fa-atom' },
-  { key: 'chemistry', name: 'Chimie', icon: 'fas fa-flask' }
+  {
+    key: 'maths',
+    name: 'Mathématiques',
+    icon: 'fas fa-calculator'
+  },
+  {
+    key: 'physics',
+    name: 'Physique',
+    icon: 'fas fa-atom'
+  },
+  {
+    key: 'chemistry',
+    name: 'Chimie',
+    icon: 'fas fa-flask'
+  }
 ]
-
 const resources = [
   // Mathématiques
   {
@@ -255,18 +263,6 @@ const resources = [
     pdfStatement: '/documents/exercices/maths/Interrogation_0_sujet.pdf',
     pdfSolution: '/documents/exercices/maths/Interrogation_0_correction.pdf'
   },
-
-  {
-    id: 'integrals',
-    subject: 'maths',
-    levelKey: 'prepa2',
-    typeKey: 'method',
-    duration: '90 min',
-    hasVideo: true,
-    videoUrl: 'dQw4w9WgXcQ'
-  },
-
-
   // Physique
   {
     id: 'mechanics',
@@ -276,17 +272,6 @@ const resources = [
     duration: '120 min',
     hasVideo: false
   },
-  {
-    id: 'electromagnetism',
-    subject: 'physics',
-    levelKey: 'prepa2',
-    typeKey: 'course',
-    duration: '150 min',
-    hasVideo: true,
-    videoUrl: 'dQw4w9WgXcQ'
-  },
-
-
   // Chimie
   {
     id: 'equilibrium',
@@ -304,18 +289,36 @@ const resources = [
     typeKey: 'method',
     duration: '75 min',
     hasVideo: false
+  },
+  {
+    id: 'integrals',
+    subject: 'maths',
+    levelKey: 'prepa2',
+    typeKey: 'exercise',
+    duration: '90',
+    hasVideo: false
   }
 ]
-
 const methodologyItems = [
-  { id: 1, iconClass: 'fas fa-heart' },
-  { id: 2, iconClass: 'fas fa-ear-listen' },
-  { id: 3, iconClass: 'fas fa-users' }
+  {
+    id: 1,
+    iconClass: 'fas fa-heart'
+  },
+  {
+    id: 2,
+    iconClass: 'fas fa-ear-listen'
+  },
+  {
+    id: 3,
+    iconClass: 'fas fa-users'
+  }
 ]
 
 // --- Computed (inchangé) ---
 const filteredResources = computed(() => {
-  return resources.filter(resource => resource.subject === activeSubject.value)
+  return resources.filter(
+    (resource) => resource.subject === activeSubject.value
+  )
 })
 
 // --- Methods (suppression de la fonction t() et toggleLanguage()) ---
@@ -326,37 +329,36 @@ const filteredResources = computed(() => {
 const handleScroll = () => {
   scrolled.value = window.scrollY > 100
 }
-
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value
   document.body.style.overflow = mobileMenuOpen.value ? 'hidden' : ''
 }
-
 const scrollToSection = (sectionId) => {
   const element = document.getElementById(sectionId)
   if (element) {
     const headerOffset = scrolled.value ? 70 : 0
     const elementPosition = element.getBoundingClientRect().top
     const offsetPosition = elementPosition + window.pageYOffset - headerOffset
-    window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    })
   }
 }
-
 const scrollToSectionMobile = (sectionId) => {
   scrollToSection(sectionId)
-  setTimeout(() => { mobileMenuOpen.value = false }, 150)
+  setTimeout(() => {
+    mobileMenuOpen.value = false
+  }, 150)
   document.body.style.overflow = ''
 }
-
 const setActiveSubject = (subject) => {
   activeSubject.value = subject
 }
-
 const openResourceModal = (resource) => {
   selectedResource.value = resource
   document.body.style.overflow = 'hidden'
 }
-
 const closeResourceModal = () => {
   selectedResource.value = null
   document.body.style.overflow = ''
@@ -366,11 +368,9 @@ const closeResourceModal = () => {
 onMounted(() => {
   // 🎯 UTILISE LA FONCTION DU COMPOSABLE (au lieu de localStorage manuel)
   loadSavedLanguage()
-
   window.addEventListener('scroll', handleScroll)
   handleScroll()
 })
-
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
   document.body.style.overflow = ''
