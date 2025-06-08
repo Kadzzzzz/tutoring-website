@@ -64,14 +64,28 @@ export const translations = {
             title: "Ultra FR",
             description: "Desc FR",
             fullDescription: "Full FR",
-            notes: "Notes FR"
+            notes: "Notes FR",
+          integrals: {
+            title: "test1",
+            description: "test1",
+            fullDescription: "undefined",
+            notes: "undefined"
+          }
+
           }}},
         physics: {
           mechanics: {
             title: "Mécanique du point",
             description: "Cours et exercices sur la cinématique et la dynamique",
             fullDescription: "Étude complète de la mécanique du point : référentiels, vitesse, accélération, forces et théorèmes de Newton.",
-            notes: "Exercices progressifs avec corrections détaillées"
+            notes: "Exercices progressifs avec corrections détaillées",
+          test: {
+            title: "test",
+            description: "test",
+            fullDescription: "undefined",
+            notes: "undefined"
+          }
+
           }},
         chemistry: {
           equilibrium: {
@@ -177,14 +191,28 @@ export const translations = {
             title: "Ultra EN",
             description: "Desc EN",
             fullDescription: "Full EN",
-            notes: "Notes EN"
+            notes: "Notes EN",
+          integrals: {
+            title: "test1",
+            description: "test1",
+            fullDescription: "undefined",
+            notes: "undefined"
+          }
+
           }}},
         physics: {
           mechanics: {
             title: "Point mechanics",
             description: "Course and exercises on kinematics and dynamics",
             fullDescription: "Complete study of point mechanics: reference frames, velocity, acceleration, forces and Newton's theorems.",
-            notes: "Progressive exercises with detailed corrections"
+            notes: "Progressive exercises with detailed corrections",
+          test: {
+            title: "test",
+            description: "test",
+            fullDescription: "undefined",
+            notes: "undefined"
+          }
+
           }},
         chemistry: {
           equilibrium: {

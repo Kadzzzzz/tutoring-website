@@ -263,7 +263,6 @@ const resources = [
     pdfStatement: '/documents/exercices/maths/Interrogation_0_sujet.pdf',
     pdfSolution: '/documents/exercices/maths/Interrogation_0_correction.pdf'
   },
-  // Physique
   {
     id: 'mechanics',
     subject: 'physics',
@@ -288,14 +287,6 @@ const resources = [
     levelKey: 'prepa1',
     typeKey: 'method',
     duration: '75 min',
-    hasVideo: false
-  },
-  {
-    id: 'integrals',
-    subject: 'maths',
-    levelKey: 'prepa2',
-    typeKey: 'exercise',
-    duration: '90',
     hasVideo: false
   }
 ]
