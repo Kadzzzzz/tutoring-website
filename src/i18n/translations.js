@@ -62,11 +62,11 @@ export const translations = {
         maths: {
           interro0LLG: {
             title: 'Interrogation 0 PC*',
-            description: 'Couvre arithmétique, combinatoire et analyse.',
+            description: 'Couvre arithm\xE9tique, combinatoire et analyse.',
             fullDescription:
-              "L'exercice 1 traite de l'irrationnalité de ln(3)/ln(2) par une démonstration par l'absurde.\nL'exercice 2 développe l'arithmétique des nombres premiers avec des estimations logarithmiques et aboutit à la preuve de l'infinité des nombres premiers.\nLes exercices 3 et 5 explorent la combinatoire des ensembles finis : dénombrement de parties avec contraintes, formule de la crosse de hockey, et propriétés des intersections démontrées par récurrence.\nL'exercice 4 combine analyse et trigonométrie avec des inégalités sur des suites, l'utilisation de l'arctangente, et des identités impliquant tan(π/12) = 2 - √3.",
+              "L'exercice 1 traite de l'irrationnalit\xE9 de ln(3)/ln(2) par une d\xE9monstration par l'absurde.\nL'exercice 2 d\xE9veloppe l'arithm\xE9tique des nombres premiers avec des estimations logarithmiques et aboutit \xE0 la preuve de l'infinit\xE9 des nombres premiers.\nLes exercices 3 et 5 explorent la combinatoire des ensembles finis : d\xE9nombrement de parties avec contraintes, formule de la crosse de hockey, et propri\xE9t\xE9s des intersections d\xE9montr\xE9es par r\xE9currence.\nL'exercice 4 combine analyse et trigonom\xE9trie avec des in\xE9galit\xE9s sur des suites, l'utilisation de l'arctangente, et des identit\xE9s impliquant tan(\u03C0/12) = 2 - \u221A3.",
             notes:
-              "Interrogation de haut niveau nécessitant une excellente maîtrise des techniques fondamentales. L'exercice est issu de la PC*3 du Lycée Louis-le-Grand."
+              "Interrogation de haut niveau n\xE9cessitant une excellente ma\xEEtrise des techniques fondamentales. L'exercice est issu de la PC*3 du Lyc\xE9e Louis-le-Grand."
           }
         },
         physics: {
@@ -187,9 +187,9 @@ export const translations = {
             title: 'Quiz 0 PC*',
             description: 'Covering arithmetic, combinatorics, and analysis.',
             fullDescription:
-              'Exercise 1 deals with the irrationality of ln(3)/ln(2) through a proof by contradiction.\nExercise 2 explores prime number arithmetic using logarithmic estimates and leads to a proof of the infinitude of prime numbers.\nExercises 3 and 5 delve into combinatorics on finite sets: counting subsets under constraints, the hockey stick identity, and properties of intersections proved by induction.\nExercise 4 combines analysis and trigonometry with inequalities on sequences, the use of arctangent, and identities involving tan(π/12) = 2 - √3.',
+              'Exercise 1 deals with the irrationality of ln(3)/ln(2) through a proof by contradiction.\nExercise 2 explores prime number arithmetic using logarithmic estimates and leads to a proof of the infinitude of prime numbers.\nExercises 3 and 5 delve into combinatorics on finite sets: counting subsets under constraints, the hockey stick identity, and properties of intersections proved by induction.\nExercise 4 combines analysis and trigonometry with inequalities on sequences, the use of arctangent, and identities involving tan(\u03C0/12) = 2 - \u221A3.',
             notes:
-              'High-level quiz requiring excellent command of fundamental techniques. The exercise originates from the PC*3 class at Lycée Louis-le-Grand.'
+              'High-level quiz requiring excellent command of fundamental techniques. The exercise originates from the PC*3 class at Lyc\xE9e Louis-le-Grand.'
           },
           testUltraSimple: {
             title: 'Ultra EN',

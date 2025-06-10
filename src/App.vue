@@ -251,7 +251,6 @@ const subjects = [
   }
 ]
 const resources = [
-  // Mathématiques
   {
     id: 'interro0LLG',
     subject: 'maths',
@@ -259,9 +258,8 @@ const resources = [
     typeKey: 'interro',
     duration: '2h',
     hasVideo: false,
-    videoUrl: '',
-    pdfStatement: '/documents/exercices/maths/Interrogation_0_sujet.pdf',
-    pdfSolution: '/documents/exercices/maths/Interrogation_0_correction.pdf'
+    pdfStatement: '/documents/exercices/maths/interro0LLG-enonce.pdf',
+    pdfSolution: '/documents/exercices/maths/interro0LLG-correction.pdf'
   },
   {
     id: 'mechanics',
