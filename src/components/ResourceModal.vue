@@ -1,7 +1,7 @@
 <template>
   <div class="modal" @click.self="$emit('close')">
     <div class="modal-content">
-      <button @click="$emit('close')" class="modal-close" aria-label="Fermer">×</button>
+      <button @click="$emit('close')" class="modal-close" aria-label="Close">×</button>
       
       <div class="modal-header">
         <h2 class="modal-title">{{ t(`resources.exercises.${resource.subject}.${resource.id}.title`) }}</h2>
@@ -13,18 +13,18 @@
         <p class="modal-description">{{ t(`resources.exercises.${resource.subject}.${resource.id}.fullDescription`) || t(`resources.exercises.${resource.subject}.${resource.id}.description`) }}</p>
       </div>
 
-      <!-- Vidéo si disponible -->
+      <!-- Video if available -->
       <div v-if="resource.hasVideo && resource.videoUrl" class="modal-video">
         <iframe
           :src="`https://www.youtube.com/embed/${resource.videoUrl}`"
-          title="Vidéo explicative"
+          title="Explanatory video"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen
         ></iframe>
       </div>
 
-      <!-- Boutons de téléchargement PDF -->
+      <!-- PDF download buttons -->
       <div v-if="resource.pdfStatement || resource.pdfSolution" class="modal-downloads">
         <a
           v-if="resource.pdfStatement"
@@ -48,7 +48,7 @@
         </a>
       </div>
 
-      <!-- Message si pas de PDF disponible -->
+      <!-- Message when no PDF available -->
       <div v-else class="modal-downloads">
         <div class="no-pdf-message">
           <i class="fas fa-info-circle"></i>
@@ -56,7 +56,7 @@
         </div>
       </div>
 
-      <!-- Notes et conseils -->
+      <!-- Notes and tips -->
       <div v-if="t(`resources.exercises.${resource.subject}.${resource.id}.notes`)" class="modal-notes">
         <h4>{{ t('resources.notes') }}</h4>
         <p>{{ t(`resources.exercises.${resource.subject}.${resource.id}.notes`) }}</p>
@@ -66,27 +66,26 @@
 </template>
 
 <script setup>
-// 🎣 IMPORT DU COMPOSABLE (au lieu de duplication)
-import {useTranslations} from '@/composables/useTranslations.js'
+// Import the centralized translation composable
+import { useTranslations } from '@/composables/useTranslations.js'
 
 const props = defineProps({
   resource: {
     type: Object,
     required: true
   }
-  // ✅ PLUS DE PROP currentLang !
 })
 
 const emit = defineEmits(['close'])
 
-// 🎯 UTILISATION DU COMPOSABLE (remplace tout l'ancien système)
-const {t, currentLang} = useTranslations()
+// Use the translation composable (replaces old duplication system)
+const { t, currentLang } = useTranslations()
 
-// ✅ SUPPRIMÉ : const translations = { ... }
-// ✅ SUPPRIMÉ : const fullTranslations = { ... }
-// ✅ SUPPRIMÉ : const getTranslation = (key) => { ... }
-
-// 🏷️ Génération du nom de fichier pour le téléchargement
+/**
+ * Generates filename for PDF downloads
+ * @param {string} type - File type ('statement' or 'solution')
+ * @returns {string} Generated filename
+ */
 const getFileName = (type) => {
   const subject = t(`resources.subjects.${props.resource.subject}`).toLowerCase()
   const title = t(`resources.exercises.${props.resource.subject}.${props.resource.id}.title`)
@@ -101,9 +100,6 @@ const getFileName = (type) => {
 
   return `${subject}-${title}-${typeText}.pdf`
 }
-
-// ✅ FINI ! Plus de duplication de traductions !
-// ✅ Le composable gère tout automatiquement
 </script>
 
 <style scoped>

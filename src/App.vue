@@ -25,7 +25,7 @@
       </div>
     </header>
 
-    <!-- Menu Mobile -->
+    <!-- Mobile Menu -->
     <div class="mobile-menu" :class="{ 'active': mobileMenuOpen }">
       <ul>
         <li><a href="#about" @click="scrollToSectionMobile('about')">{{ t('nav.about') }}</a></li>
@@ -41,7 +41,7 @@
     </div>
 
     <main>
-      <!-- Section Hero -->
+      <!-- Hero Section -->
       <section id="hero" class="hero-section">
         <div class="hero-content">
           <h2 class="subtitle">{{ t('hero.subtitle') }}</h2>
@@ -56,7 +56,7 @@
         </div>
       </section>
 
-      <!-- Section About -->
+      <!-- About Section -->
       <section id="about" class="content-section about-section">
         <div class="container">
           <div class="section-content layout-split">
@@ -89,7 +89,7 @@
         </div>
       </section>
 
-      <!-- Section Resources -->
+      <!-- Resources Section -->
       <section id="resources" class="content-section resources-section">
         <div class="container">
           <h2>{{ t('resources.title') }}</h2>
@@ -132,7 +132,7 @@
         </div>
       </section>
 
-      <!-- Section Methodology -->
+      <!-- Methodology Section -->
       <section id="methodology" class="content-section methodology-section">
         <div class="container">
           <h2>{{ t('methodology.title') }}</h2>
@@ -148,7 +148,7 @@
         </div>
       </section>
 
-      <!-- Section Contact -->
+      <!-- Contact Section -->
       <section id="contact" class="content-section contact-section">
         <div class="container">
           <div class="contact-info-centered">
@@ -170,7 +170,7 @@
               </div>
             </div>
 
-            <!-- Nouveaux liens sociaux -->
+            <!-- Social Links -->
             <div class="social-links">
               <h3>{{ t('contact.followMe') }}</h3>
               <div class="social-icons">
@@ -211,7 +211,7 @@
       </div>
     </footer>
 
-    <!-- Resource Modal - ✅ PLUS DE PROP current-lang ! -->
+    <!-- Resource Modal -->
     <ResourceModal
       v-if="selectedResource"
       :resource="selectedResource"
@@ -220,19 +220,35 @@
   </div>
 </template>
 
-<script setup>import { ref, onMounted, onUnmounted, computed } from 'vue'
+<script setup>
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import ResourceModal from './components/ResourceModal.vue'
-// 🎣 IMPORT DU COMPOSABLE
 import { useTranslations } from '@/composables/useTranslations.js'
 
-// 🎯 UTILISATION DU COMPOSABLE (remplace tout l'ancien système)
+// ==========================================
+// COMPOSABLES
+// ==========================================
+
+// Translation composable replaces old manual translation system
 const { t, currentLang, toggleLanguage, loadSavedLanguage } = useTranslations()
 
-// --- State (sans les traductions et currentLang maintenant !) ---
+// ==========================================
+// REACTIVE STATE
+// ==========================================
+
+// UI state
 const scrolled = ref(false)
 const mobileMenuOpen = ref(false)
 const activeSubject = ref('maths')
 const selectedResource = ref(null)
+
+// ==========================================
+// STATIC DATA
+// ==========================================
+
+/**
+ * Available subjects with their display properties
+ */
 const subjects = [
   {
     key: 'maths',
@@ -250,6 +266,10 @@ const subjects = [
     icon: 'fas fa-flask'
   }
 ]
+
+/**
+ * Available resources - should be loaded from API in production
+ */
 const resources = [
   {
     id: 'interro0LLG',
@@ -262,32 +282,18 @@ const resources = [
     pdfSolution: '/documents/exercices/maths/interro0LLG-correction.pdf'
   },
   {
-    id: 'mechanics',
-    subject: 'physics',
-    levelKey: 'prepa1',
-    typeKey: 'course',
-    duration: '120 min',
-    hasVideo: false
-  },
-  // Chimie
-  {
-    id: 'equilibrium',
-    subject: 'chemistry',
+    id: 'test',
+    subject: 'maths',
     levelKey: 'terminale',
     typeKey: 'exercise',
-    duration: '60 min',
-    hasVideo: true,
-    videoUrl: 'dQw4w9WgXcQ'
-  },
-  {
-    id: 'kinetics',
-    subject: 'chemistry',
-    levelKey: 'prepa1',
-    typeKey: 'method',
-    duration: '75 min',
+    duration: '30',
     hasVideo: false
   }
 ]
+
+/**
+ * Methodology items configuration
+ */
 const methodologyItems = [
   {
     id: 1,
@@ -303,25 +309,27 @@ const methodologyItems = [
   }
 ]
 
-// --- Computed (inchangé) ---
+// ==========================================
+// COMPUTED PROPERTIES
+// ==========================================
+
+/**
+ * Filters resources based on active subject
+ */
 const filteredResources = computed(() => {
   return resources.filter(
     (resource) => resource.subject === activeSubject.value
   )
 })
 
-// --- Methods (suppression de la fonction t() et toggleLanguage()) ---
+// ==========================================
+// NAVIGATION METHODS
+// ==========================================
 
-// ✅ SUPPRIMÉ : const t = (key) => { ... }
-// ✅ SUPPRIMÉ : const toggleLanguage = () => { ... }
-
-const handleScroll = () => {
-  scrolled.value = window.scrollY > 100
-}
-const toggleMobileMenu = () => {
-  mobileMenuOpen.value = !mobileMenuOpen.value
-  document.body.style.overflow = mobileMenuOpen.value ? 'hidden' : ''
-}
+/**
+ * Scrolls to a specific section with smooth animation
+ * @param {string} sectionId - The ID of the section to scroll to
+ */
 const scrollToSection = (sectionId) => {
   const element = document.getElementById(sectionId)
   if (element) {
@@ -334,6 +342,11 @@ const scrollToSection = (sectionId) => {
     })
   }
 }
+
+/**
+ * Scrolls to section and closes mobile menu
+ * @param {string} sectionId - The ID of the section to scroll to
+ */
 const scrollToSectionMobile = (sectionId) => {
   scrollToSection(sectionId)
   setTimeout(() => {
@@ -341,36 +354,75 @@ const scrollToSectionMobile = (sectionId) => {
   }, 150)
   document.body.style.overflow = ''
 }
+
+// ==========================================
+// UI INTERACTION METHODS
+// ==========================================
+
+/**
+ * Handles scroll event to update header appearance
+ */
+const handleScroll = () => {
+  scrolled.value = window.scrollY > 100
+}
+
+/**
+ * Toggles mobile menu visibility
+ */
+const toggleMobileMenu = () => {
+  mobileMenuOpen.value = !mobileMenuOpen.value
+  document.body.style.overflow = mobileMenuOpen.value ? 'hidden' : ''
+}
+
+/**
+ * Sets the active subject filter
+ * @param {string} subject - Subject key to filter by
+ */
 const setActiveSubject = (subject) => {
   activeSubject.value = subject
 }
+
+/**
+ * Opens the resource modal
+ * @param {Object} resource - Resource object to display
+ */
 const openResourceModal = (resource) => {
   selectedResource.value = resource
   document.body.style.overflow = 'hidden'
 }
+
+/**
+ * Closes the resource modal
+ */
 const closeResourceModal = () => {
   selectedResource.value = null
   document.body.style.overflow = ''
 }
 
-// --- Lifecycle Hooks ---
+// ==========================================
+// LIFECYCLE HOOKS
+// ==========================================
+
 onMounted(() => {
-  // 🎯 UTILISE LA FONCTION DU COMPOSABLE (au lieu de localStorage manuel)
+  // Load saved language preference
   loadSavedLanguage()
+  
+  // Set up scroll event listener
   window.addEventListener('scroll', handleScroll)
   handleScroll()
 })
+
 onUnmounted(() => {
+  // Clean up event listeners and body styles
   window.removeEventListener('scroll', handleScroll)
   document.body.style.overflow = ''
 })
 </script>
 
-<!-- Les styles restent identiques -->
 <style>
-/* Tous les styles précédents + ajouts pour la langue */
-
-/* --- Variables CSS --- */
+/* ==========================================
+   CSS VARIABLES
+   ========================================== */
 :root {
   --primary-color: #2c3e50;
   --secondary-color: #f8f9fa;
@@ -386,9 +438,20 @@ onUnmounted(() => {
   --header-height: 70px;
 }
 
-/* --- Reset et styles de base --- */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; font-size: 16px; }
+/* ==========================================
+   RESET AND BASE STYLES
+   ========================================== */
+* { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
+}
+
+html { 
+  scroll-behavior: smooth; 
+  font-size: 16px; 
+}
+
 body {
   font-family: var(--body-font);
   line-height: 1.7;
@@ -396,7 +459,15 @@ body {
   background-color: var(--secondary-color);
   overflow-x: hidden;
 }
-.container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 25px; }
+
+.container { 
+  width: 100%; 
+  max-width: 1200px; 
+  margin: 0 auto; 
+  padding: 0 25px; 
+}
+
+/* Typography */
 h2, h3, h4, h5, h6 {
   font-family: var(--heading-font);
   font-weight: 700;
@@ -404,11 +475,25 @@ h2, h3, h4, h5, h6 {
   color: var(--primary-color);
   margin-bottom: 1rem;
 }
+
 h2 { font-size: 2.2rem; }
 h3 { font-size: 1.5rem; }
-p { margin-bottom: 1.2rem; color: var(--text-light); }
-a { text-decoration: none; color: var(--accent-color); transition: color var(--transition-speed); }
-a:hover { color: #2980b9; }
+
+p { 
+  margin-bottom: 1.2rem; 
+  color: var(--text-light); 
+}
+
+a { 
+  text-decoration: none; 
+  color: var(--accent-color); 
+  transition: color var(--transition-speed); 
+}
+
+a:hover { 
+  color: #2980b9; 
+}
+
 button {
   cursor: pointer;
   border: none;
@@ -418,7 +503,9 @@ button {
   transition: all var(--transition-speed);
 }
 
-/* --- Header --- */
+/* ==========================================
+   HEADER STYLES
+   ========================================== */
 .header {
   position: fixed;
   top: 0;
@@ -431,31 +518,37 @@ button {
   display: flex;
   align-items: center;
 }
+
 .header-scrolled {
   background-color: rgba(44, 62, 80, 0.95);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
 }
+
 .header-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
 .header .logo {
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--text-white);
 }
+
 .nav-links ul {
   display: flex;
   list-style: none;
   gap: 35px;
 }
+
 .nav-links a {
   color: var(--text-white);
   font-weight: 500;
   position: relative;
   padding-bottom: 5px;
 }
+
 .nav-links a::after {
   content: '';
   position: absolute;
@@ -466,12 +559,16 @@ button {
   background-color: var(--accent-color);
   transition: width var(--transition-speed);
 }
-.nav-links a:hover::after { width: 100%; }
 
-/* --- Sélecteur de langue --- */
+.nav-links a:hover::after { 
+  width: 100%; 
+}
+
+/* Language Selector */
 .language-selector {
   margin-left: 20px;
 }
+
 .lang-btn {
   background-color: rgba(255, 255, 255, 0.1);
   color: var(--text-white);
@@ -481,22 +578,12 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.3);
   transition: all var(--transition-speed);
 }
+
 .lang-btn:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
-.mobile-language {
-  padding: 15px 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-.mobile-lang-btn {
-  color: var(--text-white);
-  font-size: 1rem;
-  padding: 10px;
-  width: 100%;
-  text-align: left;
-}
 
-/* --- Menu mobile --- */
+/* Mobile Menu */
 .mobile-menu-btn {
   display: none;
   flex-direction: column;
@@ -505,6 +592,7 @@ button {
   height: 22px;
   z-index: 1101;
 }
+
 .mobile-menu-btn span {
   width: 100%;
   height: 3px;
@@ -512,9 +600,19 @@ button {
   border-radius: 1px;
   transition: transform 0.3s ease;
 }
-.mobile-menu-btn.active span:nth-child(1) { transform: translateY(9.5px) rotate(45deg); }
-.mobile-menu-btn.active span:nth-child(2) { opacity: 0; }
-.mobile-menu-btn.active span:nth-child(3) { transform: translateY(-9.5px) rotate(-45deg); }
+
+.mobile-menu-btn.active span:nth-child(1) { 
+  transform: translateY(9.5px) rotate(45deg); 
+}
+
+.mobile-menu-btn.active span:nth-child(2) { 
+  opacity: 0; 
+}
+
+.mobile-menu-btn.active span:nth-child(3) { 
+  transform: translateY(-9.5px) rotate(-45deg); 
+}
+
 .mobile-menu {
   display: none;
   position: fixed;
@@ -528,9 +626,19 @@ button {
   padding: 80px 30px 40px 30px;
   transition: right 0.4s ease;
 }
-.mobile-menu.active { right: 0; }
-.mobile-menu ul { list-style: none; }
-.mobile-menu li { margin-bottom: 15px; }
+
+.mobile-menu.active { 
+  right: 0; 
+}
+
+.mobile-menu ul { 
+  list-style: none; 
+}
+
+.mobile-menu li { 
+  margin-bottom: 15px; 
+}
+
 .mobile-menu a {
   color: var(--text-white);
   font-size: 1.2rem;
@@ -538,7 +646,22 @@ button {
   padding: 12px 0;
 }
 
-/* --- Section Hero --- */
+.mobile-language {
+  padding: 15px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-lang-btn {
+  color: var(--text-white);
+  font-size: 1rem;
+  padding: 10px;
+  width: 100%;
+  text-align: left;
+}
+
+/* ==========================================
+   HERO SECTION
+   ========================================== */
 .hero-section {
   height: 100vh;
   min-height: 600px;
@@ -555,29 +678,34 @@ button {
   color: var(--text-white);
   text-align: center;
 }
+
 .hero-content {
   position: relative;
   z-index: 2;
   padding: 20px;
 }
+
 .subtitle {
   font-size: clamp(1rem, 3vw, 1.3rem);
   letter-spacing: 3px;
   margin-bottom: 15px;
   color: rgba(255, 255, 255, 0.9);
 }
+
 .title {
   font-size: clamp(3rem, 8vw, 5rem);
   letter-spacing: 3px;
   margin-bottom: 30px;
   font-weight: 800;
 }
+
 .hero-description {
   font-size: 1.1rem;
   max-width: 600px;
   margin: 0 auto 30px;
   color: rgba(255, 255, 255, 0.85);
 }
+
 .scroll-indicator {
   position: absolute;
   bottom: 40px;
@@ -585,12 +713,14 @@ button {
   transform: translateX(-50%);
   text-align: center;
 }
+
 .scroll-indicator span {
   display: block;
   font-size: 0.9rem;
   margin-bottom: 15px;
   color: var(--text-white);
 }
+
 .arrow-down {
   width: 28px;
   height: 28px;
@@ -601,23 +731,31 @@ button {
   animation: bounce 2s infinite;
 }
 
-/* --- Sections de contenu --- */
+/* ==========================================
+   CONTENT SECTIONS
+   ========================================== */
 .content-section {
   padding: 80px 0;
   border-bottom: 1px solid var(--border-color);
 }
-.content-section:last-of-type { border-bottom: none; }
+
+.content-section:last-of-type { 
+  border-bottom: none; 
+}
+
 .section-content {
   display: flex;
   flex-direction: column;
   gap: 40px;
 }
+
 .layout-split {
   display: grid;
   grid-template-columns: 1fr;
   gap: 50px;
   align-items: center;
 }
+
 .text-content h2::after {
   content: '';
   display: block;
@@ -627,6 +765,7 @@ button {
   margin-top: 15px;
   margin-bottom: 25px;
 }
+
 .section-description {
   text-align: center;
   max-width: 700px;
@@ -634,30 +773,33 @@ button {
   color: var(--text-light);
 }
 
-/* --- Section About --- */
-.about-section { background-color: var(--secondary-color); }
+/* About Section */
+.about-section { 
+  background-color: var(--secondary-color); 
+}
+
 .timeline {
   margin-top: 30px;
   position: relative;
 }
+
 .timeline::before {
   content: '';
   position: absolute;
   left: 20px;
-  top: 60px; /* Décalé pour éviter de traverser le titre */
+  top: 60px;
   bottom: 0;
   width: 2px;
   background-color: var(--accent-color);
 }
 
-/* Timeline items normaux */
 .timeline-item {
   position: relative;
   padding: 20px 0 20px 60px;
   margin-bottom: 20px;
 }
 
-.timeline-item:not(.double)::before {
+.timeline-item::before {
   content: '';
   position: absolute;
   left: 10px;
@@ -667,48 +809,6 @@ button {
   border-radius: 50%;
   background-color: var(--accent-color);
   border: 4px solid var(--secondary-color);
-}
-
-/* Timeline items doubles */
-.timeline-item.double {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.timeline-content {
-  display: flex;
-  flex-direction: column;
-}
-
-.timeline-content.double {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  align-items: start;
-  margin-top: 10px;
-}
-
-.timeline-entry {
-  position: relative;
-}
-
-/* Points pour les entrées doubles */
-.timeline-entry::before {
-  content: '';
-  position: absolute;
-  left: -50px;
-  top: 8px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background-color: var(--accent-color);
-  border: 4px solid var(--secondary-color);
-}
-
-/* Cacher le point principal pour les items doubles */
-.timeline-item.double::before {
-  display: none;
 }
 
 .timeline-year {
@@ -724,15 +824,19 @@ button {
   line-height: 1.4;
 }
 
-/* --- Section Resources --- */
+/* ==========================================
+   RESOURCES SECTION
+   ========================================== */
 .resources-section {
   background-color: white;
   text-align: center;
 }
+
 .resources-section h2::after {
   margin-left: auto;
   margin-right: auto;
 }
+
 .subject-filters {
   display: flex;
   justify-content: center;
@@ -740,6 +844,7 @@ button {
   margin: 40px 0;
   flex-wrap: wrap;
 }
+
 .filter-btn {
   padding: 12px 30px;
   border-radius: 25px;
@@ -750,17 +855,20 @@ button {
   background: none;
   transition: all var(--transition-speed);
 }
+
 .filter-btn.active,
 .filter-btn:hover {
   background-color: var(--accent-color);
   color: white;
 }
+
 .resources-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 30px;
   margin-top: 40px;
 }
+
 .resource-item {
   background-color: white;
   border-radius: 10px;
@@ -770,38 +878,53 @@ button {
   transition: transform var(--transition-speed);
   border: 1px solid #eee;
 }
+
 .resource-item:hover {
   transform: translateY(-5px);
   box-shadow: var(--box-shadow);
 }
+
 .resource-tags {
   padding: 15px;
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
 }
+
 .tag {
   padding: 4px 12px;
   border-radius: 15px;
   font-size: 0.8rem;
   font-weight: 500;
 }
-.tag.level { background-color: #e8f4fd; color: #3498db; }
-.tag.type { background-color: #f0f9ff; color: #2563eb; }
+
+.tag.level { 
+  background-color: #e8f4fd; 
+  color: #3498db; 
+}
+
+.tag.type { 
+  background-color: #f0f9ff; 
+  color: #2563eb; 
+}
+
 .resource-content {
   padding: 20px;
   text-align: left;
 }
+
 .resource-title {
   font-size: 1.2rem;
   margin-bottom: 10px;
   color: var(--primary-color);
 }
+
 .resource-description {
   color: var(--text-light);
   font-size: 0.95rem;
   margin-bottom: 15px;
 }
+
 .resource-meta {
   display: flex;
   align-items: center;
@@ -809,36 +932,45 @@ button {
   font-size: 0.9rem;
   color: var(--text-light);
 }
+
 .resource-meta i {
   color: var(--accent-color);
 }
 
-/* --- Section Methodology --- */
+/* ==========================================
+   METHODOLOGY SECTION
+   ========================================== */
 .methodology-section {
   background-color: var(--primary-color);
   color: var(--text-white);
   text-align: center;
 }
+
 .methodology-section h2 {
   color: var(--text-white);
 }
+
 .methodology-section h2::after {
   margin-left: auto;
   margin-right: auto;
 }
+
 .methodology-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 40px;
   margin-top: 60px;
 }
+
 .methodology-item {
   padding: 20px;
   transition: transform var(--transition-speed);
 }
+
 .methodology-item:hover {
   transform: translateY(-8px);
 }
+
 .methodology-icon {
   width: 75px;
   height: 75px;
@@ -851,28 +983,35 @@ button {
   font-size: 2.2rem;
   color: var(--text-white);
 }
+
 .methodology-item h3 {
   margin-bottom: 15px;
   font-size: 1.3rem;
   color: var(--text-white);
 }
+
 .methodology-item p {
   color: rgba(255, 255, 255, 0.8);
 }
 
-/* --- Section Contact --- */
+/* ==========================================
+   CONTACT SECTION
+   ========================================== */
 .contact-section {
   background-color: var(--secondary-color);
 }
+
 .contact-info-centered {
   text-align: center;
   max-width: 600px;
   margin: 0 auto;
 }
+
 .contact-info-centered h2::after {
   margin-left: auto;
   margin-right: auto;
 }
+
 .contact-items {
   display: flex;
   justify-content: center;
@@ -880,6 +1019,7 @@ button {
   flex-wrap: wrap;
   margin-top: 40px;
 }
+
 .contact-item {
   display: flex;
   flex-direction: column;
@@ -887,26 +1027,30 @@ button {
   text-align: center;
   min-width: 200px;
 }
+
 .contact-item i {
   color: var(--accent-color);
   font-size: 2rem;
   margin-bottom: 15px;
 }
+
 .contact-item h3 {
   font-size: 1.1rem;
   margin-bottom: 10px;
   color: var(--primary-color);
 }
+
 .contact-item p {
   margin-bottom: 0;
   color: var(--text-light);
 }
+
 .contact-item a {
   color: var(--accent-color);
   font-weight: 500;
 }
 
-/* --- Liens sociaux --- */
+/* Social Links */
 .social-links {
   margin-top: 50px;
   text-align: center;
@@ -955,6 +1099,7 @@ button {
   transition: color var(--transition-speed);
 }
 
+/* Social Link Colors */
 .social-link.linkedin i { color: #0077B5; }
 .social-link.linkedin span { color: #0077B5; }
 .social-link.linkedin:hover { background-color: #0077B5; }
@@ -973,83 +1118,83 @@ button {
 .social-link.github:hover i,
 .social-link.github:hover span { color: white; }
 
-/* --- Footer --- */
+/* ==========================================
+   FOOTER
+   ========================================== */
 .footer {
   background-color: #1a1a1a;
   color: rgba(255, 255, 255, 0.7);
   padding: 40px 0 20px;
   text-align: center;
 }
+
 .footer-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
+
 .footer-logo {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-white);
 }
+
 .footer-nav {
   display: flex;
   gap: 30px;
 }
+
 .footer-nav a {
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.9rem;
 }
+
 .footer-nav a:hover {
   color: var(--accent-color);
 }
+
 .footer-bottom {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 20px;
   font-size: 0.9rem;
 }
 
-/* --- Animations --- */
+/* ==========================================
+   ANIMATIONS
+   ========================================== */
 @keyframes bounce {
-  0%, 100% { transform: translateY(0) rotate(45deg); }
-  50% { transform: translateY(-10px) rotate(45deg); }
+  0%, 100% { 
+    transform: translateY(0) rotate(45deg); 
+  }
+  50% { 
+    transform: translateY(-10px) rotate(45deg); 
+  }
 }
 
-/* --- Responsive --- */
+/* ==========================================
+   RESPONSIVE DESIGN
+   ========================================== */
 @media (min-width: 768px) {
-  .layout-split { grid-template-columns: 1fr 1fr; }
-}
-
-.timeline-content.double {
-  grid-template-columns: 1fr;
-  gap: 15px;
-}
-
-.timeline-entry::before {
-  left: -45px;
-}
-
-.timeline-title {
-  font-size: 0.9rem;
-  line-height: 1.3;
+  .layout-split { 
+    grid-template-columns: 1fr 1fr; 
+  }
 }
 
 @media (max-width: 814px) {
-  /* Cacher les liens de navigation sauf la langue */
   .nav-links ul li:not(.language-selector) {
     display: none;
   }
 
-  /* Garder le bouton de langue visible */
   .language-selector {
     margin-left: 0;
   }
 
-  /* Cacher complètement le menu hamburger */
   .mobile-menu-btn {
     display: none !important;
   }
 
-  /* Cacher le menu mobile */
   .mobile-menu {
     display: none !important;
   }
@@ -1064,26 +1209,31 @@ button {
     flex-direction: column;
     align-items: center;
   }
+
   .filter-btn {
     width: 200px;
   }
+
   .resources-grid {
     grid-template-columns: 1fr;
   }
+
   .contact-items {
     flex-direction: column;
     gap: 30px;
   }
+
   .footer-content {
     flex-direction: column;
     gap: 20px;
   }
+
   .footer-nav {
     flex-wrap: wrap;
     justify-content: center;
   }
 
-    .social-icons {
+  .social-icons {
     flex-direction: column;
     align-items: center;
     gap: 15px;
@@ -1104,7 +1254,12 @@ button {
 }
 
 @media (max-width: 576px) {
-  .title { font-size: 2.5rem; }
-  .subtitle { font-size: 0.9rem; }
+  .title { 
+    font-size: 2.5rem; 
+  }
+  
+  .subtitle { 
+    font-size: 0.9rem; 
+  }
 }
 </style>
