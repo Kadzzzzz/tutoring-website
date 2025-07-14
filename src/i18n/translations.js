@@ -32,20 +32,28 @@ export const translations = {
       title: "Ressources Pédagogiques",
       description: "Découvrez mes exercices corrigés, cours et méthodes classés par matière et niveau. Chaque ressource est accompagnée de corrections détaillées et parfois de vidéos explicatives.",
       subjects: {
+        all: "Toutes les matières",
         maths: "Mathématiques",
         physics: "Physique",
         chemistry: "Chimie"
       },
       types: {
+        all: "Tous les types",
         exercise: "Exercice",
         course: "Cours",
         method: "Méthode",
         interro: "Interrogation"
       },
       levels: {
+        all: "Tous les niveaux",
         terminale: "Terminale",
         prepa1: "Prépa 1A",
         prepa2: "Prépa 2A"
+      },
+      difficulty: {
+        facile: "Facile",
+        moyen: "Moyen",
+        difficile: "Difficile"
       },
       downloadTypes: {
         statement: "Énoncé",
@@ -54,6 +62,12 @@ export const translations = {
       hasVideo: "Vidéo",
       notes: "Notes et conseils",
       noPdfAvailable: "Documents PDF en cours de préparation",
+      noResourcesFound: "Aucune ressource trouvée",
+      noResourcesFoundDesc: "Essayez de changer les filtres ou la matière sélectionnée",
+      stats: {
+        total: "ressources",
+        withVideo: "avec vidéo"
+      },
       exercises: {
         maths: {interro0LLG: {
             title: "Interrogation 0 PC*",
@@ -145,20 +159,28 @@ export const translations = {
       title: "Educational Resources",
       description: "Discover my corrected exercises, courses and methods classified by subject and level. Each resource comes with detailed corrections and sometimes explanatory videos.",
       subjects: {
+        all: "All subjects",
         maths: "Mathematics",
         physics: "Physics",
         chemistry: "Chemistry"
       },
       types: {
+        all: "All types",
         exercise: "Exercise",
         course: "Course",
         method: "Method",
-        interro: "Quiz"
+        interro: "Test"
       },
       levels: {
+        all: "All levels",
         terminale: "Senior Year",
         prepa1: "Prep 1st Year",
         prepa2: "Prep 2nd Year"
+      },
+      difficulty: {
+        facile: "Easy",
+        moyen: "Medium",
+        difficile: "Hard"
       },
       downloadTypes: {
         statement: "Statement",
@@ -167,6 +189,12 @@ export const translations = {
       hasVideo: "Video",
       notes: "Notes and tips",
       noPdfAvailable: "PDF documents in preparation",
+      noResourcesFound: "No resources found",
+      noResourcesFoundDesc: "Try changing the filters or selected subject",
+      stats: {
+        total: "resources",
+        withVideo: "with video"
+      },
       exercises: {
         maths: {interro0LLG: {
             title: "Quiz 0 PC*",
