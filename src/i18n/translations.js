@@ -126,7 +126,7 @@ export const translations = {
       followMe: "Me suivre"
     },
     footer: {
-      rights: "Tous droits réservés"
+      rights: "Libre de droit"
     }
   },
   en: {
@@ -253,7 +253,7 @@ export const translations = {
       followMe: "Follow Me"
     },
     footer: {
-      rights: "All rights reserved"
+      rights: "Out of copyright"
     }
   }
 }
