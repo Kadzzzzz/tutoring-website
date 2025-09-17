@@ -1,14 +1,14 @@
 <template>
   <section id="methodology" class="content-section methodology-section">
     <div class="container">
-      <h2>{{ t('methodology.title') }}</h2>
+      <h2>Ma Méthode Pédagogique</h2>
       <div class="methodology-grid">
         <div v-for="item in methodologyItems" :key="item.id" class="methodology-item">
           <div class="methodology-icon" :style="{ backgroundColor: item.color }">
             <i :class="item.iconClass"></i>
           </div>
-          <h3>{{ t(`methodology.item${item.id}.title`) }}</h3>
-          <p>{{ t(`methodology.item${item.id}.description`) }}</p>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.description }}</p>
         </div>
       </div>
     </div>
@@ -16,10 +16,30 @@
 </template>
 
 <script setup>
-import { useTranslations } from '@/composables/useTranslations.js'
-import { methodologyItems } from '@/data/methodology.js'
-
-const { t } = useTranslations()
+// Données directement dans le composant (extrait des traductions)
+const methodologyItems = [
+  {
+    id: 1,
+    title: "Transmission de la Passion",
+    description: "Je crois fermement qu'exceller dans une discipline est beaucoup plus simple quand on l'aime. C'est pourquoi je m'attache à transmettre ma passion pour les sciences autant que mes connaissances.",
+    iconClass: "fas fa-heart",
+    color: "#e74c3c"
+  },
+  {
+    id: 2,
+    title: "Écoute et Personnalisation",
+    description: "Chaque élève est unique. Je suis très à l'écoute de mes élèves pour adapter ma pédagogie à leur profil, leurs difficultés et leurs objectifs personnels.",
+    iconClass: "fas fa-ear-listen",
+    color: "#3498db"
+  },
+  {
+    id: 3,
+    title: "Approche Bienveillante",
+    description: "En tant que jeune étudiant tout juste sorti de prépa, je comprends les défis que vivent mes élèves. J'offre un encadrement bienveillant qui permet de prendre confiance et de se projeter dans la réussite.",
+    iconClass: "fas fa-handshake",
+    color: "#27ae60"
+  }
+]
 </script>
 
 <style scoped>

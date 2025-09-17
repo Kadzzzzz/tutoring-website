@@ -3,28 +3,28 @@
     <div class="container">
       <div class="section-content layout-split">
         <div class="text-content">
-          <h2>{{ t('about.title') }}</h2>
-          <p>{{ t('about.paragraph1') }}</p>
-          <p>{{ t('about.paragraph2') }}</p>
-          <p>{{ t('about.paragraph3') }}</p>
+          <h2>Mon Parcours</h2>
+          <p>Actuellement étudiant en première année à l'École Centrale de Lyon et en parallèle en L3 de Physique à l'Université Claude Bernard Lyon 1, je mets ma passion pour les sciences au service de la réussite de mes élèves.</p>
+          <p>Fort de mon expérience en classes préparatoires (PCSI puis PC à l'ENCPB, et PC* au lycée Louis-le-Grand), je comprends parfaitement les défis que rencontrent les étudiants dans ces filières exigeantes.</p>
+          <p>J'aime beaucoup transmettre mon savoir et ma passion pour les sciences. C'est pourquoi je donne régulièrement des cours particuliers à des élèves allant de la seconde à la première année de prépa, et je gère également des salles de travail à Centrale.</p>
         </div>
         <div class="timeline">
-          <h3>{{ t('about.academicPath') }}</h3>
+          <h3>Parcours Académique</h3>
           <div class="timeline-item">
             <div class="timeline-year">2021-2023</div>
-            <div class="timeline-title">{{ t('about.timeline.prepa') }}</div>
+            <div class="timeline-title">Prépa PCSI puis PC - ENCPB Paris</div>
           </div>
           <div class="timeline-item">
             <div class="timeline-year">2023-2024</div>
-            <div class="timeline-title">{{ t('about.timeline.prepastar') }}</div>
+            <div class="timeline-title">Prépa PC* - Lycée Louis-le-Grand</div>
           </div>
           <div class="timeline-item">
             <div class="timeline-year">2024-2027</div>
-            <div class="timeline-title">{{ t('about.timeline.centrale') }}</div>
+            <div class="timeline-title">École Centrale de Lyon</div>
           </div>
           <div class="timeline-item">
             <div class="timeline-year">2024-2025</div>
-            <div class="timeline-title">{{ t('about.timeline.physics') }}</div>
+            <div class="timeline-title">L3 Physique - Université Claude Bernard Lyon 1</div>
           </div>
         </div>
       </div>
@@ -33,9 +33,7 @@
 </template>
 
 <script setup>
-import { useTranslations } from '@/composables/useTranslations.js'
-
-const { t } = useTranslations()
+// Plus besoin d'imports de traductions
 </script>
 
 <style scoped>

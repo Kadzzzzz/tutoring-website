@@ -1,30 +1,28 @@
 <template>
   <section id="resources" class="content-section resources-section">
     <div class="container">
-      <h2>{{ t('resources.title') }}</h2>
-      <p class="section-description">{{ t('resources.description') }}</p>
+      <h2>Ressources Pédagogiques</h2>
+      <p class="section-description">Découvrez mes exercices corrigés, cours et méthodes classés par matière et niveau. Chaque ressource est accompagnée de corrections détaillées et parfois de vidéos explicatives.</p>
 
-      <!-- Filtres par matière -->
-      <SubjectFilters
-        :activeSubject="activeSubject"
-        @update:activeSubject="setActiveSubject"
-      />
+      <!-- Aperçu des 3 ressources les plus récentes -->
+      <div class="resources-preview-grid">
+        <ResourceCard
+          v-for="resource in recentResources"
+          :key="resource.id"
+          :resource="resource"
+          @click="openResourceModal"
+        />
+      </div>
 
-      <!-- Grille des ressources -->
-      <ResourceGrid
-        :resources="filteredResources"
-        @resourceClick="openResourceModal"
-      />
-
-      <!-- Statistiques (optionnel) -->
-      <div v-if="showStats" class="resources-stats">
-        <div class="stat-item">
-          <span class="stat-number">{{ filteredStats.total }}</span>
-          <span class="stat-label">{{ t('resources.stats.total') }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-number">{{ filteredStats.withVideo }}</span>
-          <span class="stat-label">{{ t('resources.stats.withVideo') }}</span>
+      <!-- Bouton vers la page complète -->
+      <div class="preview-actions">
+        <button @click="goToFullResources" class="btn btn-primary btn-large">
+          <i class="fas fa-book-open"></i>
+          Découvrir toutes mes ressources ({{ totalResources }})
+        </button>
+        <div class="preview-stats">
+          <span class="stat">{{ resourcesWithVideo }} avec vidéo</span>
+          <span class="stat">{{ collesCount }} colles disponibles</span>
         </div>
       </div>
     </div>
@@ -32,33 +30,38 @@
 </template>
 
 <script setup>
-import { useTranslations } from '@/composables/useTranslations.js'
-import { useResources } from '@/composables/useResources.js'
-import SubjectFilters from '@/components/resources/SubjectFilters.vue'
-import ResourceGrid from '@/components/resources/ResourceGrid.vue'
+import { computed } from 'vue'
+import ResourceCard from '@/components/resources/ResourceCard.vue'
+import { resources, getResourceStats } from '@/data/resources'
 
-const { t } = useTranslations()
-const {
-  activeSubject,
-  filteredResources,
-  filteredStats,
-  setActiveSubject
-} = useResources()
-
-// Props
-defineProps({
-  showStats: {
-    type: Boolean,
-    default: false
-  }
-})
-
-// Emits
+// Props et émissions
 const emit = defineEmits(['openResourceModal'])
 
-// Méthodes
+// 3 ressources les plus récentes
+const recentResources = computed(() => {
+  return [...resources]
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 3)
+})
+
+// Statistiques
+const stats = computed(() => getResourceStats())
+const totalResources = computed(() => stats.value.total)
+const resourcesWithVideo = computed(() => stats.value.withVideo)
+const collesCount = computed(() => resources.filter(r => r.typeKey === 'interro').length)
+
+// Actions
 const openResourceModal = (resource) => {
   emit('openResourceModal', resource)
+}
+
+const goToFullResources = () => {
+  // Pour l'instant, scroll vers le haut et alerte
+  // Plus tard on remplacera par du routing
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+  setTimeout(() => {
+    alert('Page ressources complète à venir ! Filtres par classe, matière, type de ressource...')
+  }, 500)
 }
 </script>
 
@@ -101,38 +104,80 @@ const openResourceModal = (resource) => {
 .section-description {
   text-align: center;
   max-width: 700px;
-  margin: 0 auto 40px auto;
+  margin: 0 auto 50px auto;
   color: var(--text-light, #666);
   line-height: 1.7;
+  font-size: 1.1rem;
 }
 
-.resources-stats {
+.resources-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin: 40px 0 60px 0;
+}
+
+.preview-actions {
   display: flex;
-  justify-content: center;
-  gap: 40px;
-  margin-top: 40px;
-  padding: 30px;
-  background-color: var(--secondary-color, #f8f9fa);
-  border-radius: 10px;
+  flex-direction: column;
+  align-items: center;
+  gap: 25px;
+}
+
+.btn-large {
+  padding: 16px 32px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--accent-color, #3498db);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.btn-large:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+  background: #2980b9;
+}
+
+.preview-stats {
+  display: flex;
+  gap: 30px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
-.stat-item {
-  text-align: center;
-}
-
-.stat-number {
-  display: block;
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--accent-color, #3498db);
-  margin-bottom: 5px;
-}
-
-.stat-label {
-  font-size: 0.9rem;
+.stat {
   color: var(--text-light, #666);
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-size: 0.95rem;
+  padding: 8px 16px;
+  background: var(--secondary-color, #f8f9fa);
+  border-radius: 20px;
+  border: 1px solid var(--border-color, #ddd);
+}
+
+@media (max-width: 768px) {
+  .resources-preview-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .preview-stats {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .btn-large {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+  }
 }
 </style>

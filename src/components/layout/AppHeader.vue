@@ -4,37 +4,23 @@
       <a href="#hero" @click.prevent="scrollToSection('hero')" class="logo">Jeremy Luccioni</a>
       <nav class="nav-links">
         <ul>
-          <li><a href="#about" @click.prevent="scrollToSection('about')">{{ t('nav.about') }}</a></li>
-          <li><a href="#resources" @click.prevent="scrollToSection('resources')">{{ t('nav.resources') }}</a></li>
-          <li><a href="#methodology" @click.prevent="scrollToSection('methodology')">{{ t('nav.methodology') }}</a></li>
-          <li><a href="#contact" @click.prevent="scrollToSection('contact')">{{ t('nav.contact') }}</a></li>
-          <li class="language-selector">
-            <button @click="toggleLanguage" class="lang-btn">
-              {{ currentLang.toUpperCase() }}
-            </button>
-          </li>
+          <li><a href="#about" @click.prevent="scrollToSection('about')">À propos</a></li>
+          <li><a href="#resources" @click.prevent="scrollToSection('resources')">Ressources</a></li>
+          <li><a href="#methodology" @click.prevent="scrollToSection('methodology')">Méthode</a></li>
+          <li><a href="#contact" @click.prevent="scrollToSection('contact')">Contact</a></li>
         </ul>
       </nav>
-      <button @click="toggleMobileMenu" class="mobile-menu-btn" :class="{ 'active': mobileMenuOpen }">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
     </div>
   </header>
 </template>
 
 <script setup>
-import { useTranslations } from '@/composables/useTranslations.js'
 import { useNavigation } from '@/composables/useNavigation.js'
 
-// Composables
-const { t, currentLang, toggleLanguage } = useTranslations()
-const { scrolled, mobileMenuOpen, scrollToSection, toggleMobileMenu } = useNavigation()
+const { scrolled, scrollToSection } = useNavigation()
 </script>
 
 <style scoped>
-/* Variables CSS héritées du parent */
 .header {
   position: fixed;
   top: 0;
@@ -94,71 +80,10 @@ const { scrolled, mobileMenuOpen, scrollToSection, toggleMobileMenu } = useNavig
   width: 100%;
 }
 
-/* Sélecteur de langue */
-.language-selector {
-  margin-left: 20px;
-}
-
-.lang-btn {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--text-white, #ffffff);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-weight: 500;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  transition: all var(--transition-speed, 0.3s);
-  cursor: pointer;
-}
-
-.lang-btn:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Menu mobile */
-.mobile-menu-btn {
-  display: none;
-  flex-direction: column;
-  justify-content: space-around;
-  width: 28px;
-  height: 22px;
-  z-index: 1101;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.mobile-menu-btn span {
-  width: 100%;
-  height: 3px;
-  background-color: var(--text-white, #ffffff);
-  border-radius: 1px;
-  transition: transform 0.3s ease;
-}
-
-.mobile-menu-btn.active span:nth-child(1) {
-  transform: translateY(9.5px) rotate(45deg);
-}
-
-.mobile-menu-btn.active span:nth-child(2) {
-  opacity: 0;
-}
-
-.mobile-menu-btn.active span:nth-child(3) {
-  transform: translateY(-9.5px) rotate(-45deg);
-}
-
-/* Responsive */
-@media (max-width: 814px) {
-  .nav-links ul li:not(.language-selector) {
+/* Responsive - cache la navigation sur petit écran */
+@media (max-width: 768px) {
+  .nav-links {
     display: none;
-  }
-
-  .language-selector {
-    margin-left: 0;
-  }
-
-  .mobile-menu-btn {
-    display: none !important;
   }
 }
 </style>

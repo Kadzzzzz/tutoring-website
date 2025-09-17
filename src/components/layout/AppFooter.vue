@@ -4,24 +4,22 @@
       <div class="footer-content">
         <div class="footer-logo">Jeremy Luccioni</div>
         <nav class="footer-nav">
-          <a href="#about" @click.prevent="scrollToSection('about')">{{ t('nav.about') }}</a>
-          <a href="#resources" @click.prevent="scrollToSection('resources')">{{ t('nav.resources') }}</a>
-          <a href="#methodology" @click.prevent="scrollToSection('methodology')">{{ t('nav.methodology') }}</a>
-          <a href="#contact" @click.prevent="scrollToSection('contact')">{{ t('nav.contact') }}</a>
+          <a href="#about" @click.prevent="scrollToSection('about')">À propos</a>
+          <a href="#resources" @click.prevent="scrollToSection('resources')">Ressources</a>
+          <a href="#methodology" @click.prevent="scrollToSection('methodology')">Méthode</a>
+          <a href="#contact" @click.prevent="scrollToSection('contact')">Contact</a>
         </nav>
       </div>
       <div class="footer-bottom">
-        <p>© {{ new Date().getFullYear() }} Jeremy Luccioni. {{ t('footer.rights') }}</p>
+        <p>© {{ new Date().getFullYear() }} Jeremy Luccioni. Libre de droit</p>
       </div>
     </div>
   </footer>
 </template>
 
 <script setup>
-import { useTranslations } from '@/composables/useTranslations.js'
 import { useNavigation } from '@/composables/useNavigation.js'
 
-const { t } = useTranslations()
 const { scrollToSection } = useNavigation()
 </script>
 

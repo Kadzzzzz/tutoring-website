@@ -2,26 +2,26 @@
   <section id="contact" class="content-section contact-section">
     <div class="container">
       <div class="contact-info-centered">
-        <h2>{{ t('contact.title') }}</h2>
+        <h2>Me Contacter</h2>
         <div class="contact-items">
           <div class="contact-item">
             <i class="fas fa-envelope"></i>
             <div>
-              <h3>{{ t('contact.email') }}</h3>
+              <h3>Email</h3>
               <p><a href="mailto:jeremy.luccioni@etu.ec-lyon.fr">jeremy.luccioni@etu.ec-lyon.fr</a></p>
             </div>
           </div>
           <div class="contact-item">
             <i class="fas fa-graduation-cap"></i>
             <div>
-              <h3>{{ t('contact.levels') }}</h3>
-              <p>{{ t('contact.levelsDescription') }}</p>
+              <h3>Niveaux enseignés</h3>
+              <p>De la Seconde à la Prépa (1A et 2A)</p>
             </div>
           </div>
         </div>
 
         <div class="social-links">
-          <h3>{{ t('contact.followMe') }}</h3>
+          <h3>Me suivre</h3>
           <div class="social-icons">
             <a
               href="https://www.linkedin.com/in/jeremy-luccioni-695365bb/"
@@ -58,9 +58,7 @@
 </template>
 
 <script setup>
-import { useTranslations } from '@/composables/useTranslations.js'
-
-const { t } = useTranslations()
+// Plus besoin d'imports de traductions
 </script>
 
 <style scoped>

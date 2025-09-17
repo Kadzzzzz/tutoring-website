@@ -10,17 +10,14 @@
     <!-- Message si aucune ressource -->
     <div v-if="resources.length === 0" class="no-resources">
       <i class="fas fa-search"></i>
-      <h3>{{ t('resources.noResourcesFound') }}</h3>
-      <p>{{ t('resources.noResourcesFoundDesc') }}</p>
+      <h3>Aucune ressource trouvée</h3>
+      <p>Essayez de changer les filtres ou la matière sélectionnée</p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useTranslations } from '@/composables/useTranslations.js'
 import ResourceCard from './ResourceCard.vue'
-
-const { t } = useTranslations()
 
 // Props
 defineProps({

@@ -1,19 +1,19 @@
 <template>
   <div class="resource-item" @click="$emit('click', resource)">
     <div class="resource-tags">
-      <span class="tag level">{{ t(`resources.levels.${resource.levelKey}`) }}</span>
-      <span class="tag type">{{ t(`resources.types.${resource.typeKey}`) }}</span>
+      <span class="tag level">{{ getLevelDisplay(resource.levelKey) }}</span>
+      <span class="tag type">{{ getTypeDisplay(resource.typeKey) }}</span>
       <span v-if="resource.difficulty" class="tag difficulty" :class="resource.difficulty">
-        {{ t(`resources.difficulty.${resource.difficulty}`) }}
+        {{ getDifficultyDisplay(resource.difficulty) }}
       </span>
     </div>
 
     <div class="resource-content">
       <h3 class="resource-title">
-        {{ t(`resources.exercises.${resource.subject}.${resource.id}.title`) }}
+        {{ getResourceTitle(resource) }}
       </h3>
       <p class="resource-description">
-        {{ t(`resources.exercises.${resource.subject}.${resource.id}.description`) }}
+        {{ getResourceDescription(resource) }}
       </p>
 
       <!-- Tags -->
@@ -33,7 +33,7 @@
         </span>
         <span v-if="resource.hasVideo" class="meta-item video">
           <i class="fas fa-video"></i>
-          {{ t('resources.hasVideo') }}
+          Vidéo
         </span>
         <span class="meta-item">
           <i class="fas fa-file-pdf"></i>
@@ -45,10 +45,6 @@
 </template>
 
 <script setup>
-import { useTranslations } from '@/composables/useTranslations.js'
-
-const { t } = useTranslations()
-
 // Props
 defineProps({
   resource: {
@@ -59,6 +55,69 @@ defineProps({
 
 // Emits
 defineEmits(['click'])
+
+// Fonctions d'affichage (remplacent les traductions)
+const getLevelDisplay = (levelKey) => {
+  const levels = {
+    terminale: 'Terminale',
+    prepa1: 'Prépa 1A',
+    prepa2: 'Prépa 2A'
+  }
+  return levels[levelKey] || levelKey
+}
+
+const getTypeDisplay = (typeKey) => {
+  const types = {
+    exercise: 'Exercice',
+    course: 'Cours',
+    method: 'Méthode',
+    interro: 'Interrogation'
+  }
+  return types[typeKey] || typeKey
+}
+
+const getDifficultyDisplay = (difficulty) => {
+  const difficulties = {
+    facile: 'Facile',
+    moyen: 'Moyen',
+    difficile: 'Difficile'
+  }
+  return difficulties[difficulty] || difficulty
+}
+
+const getResourceTitle = (resource) => {
+  // Mapping des titres depuis les traductions
+  const titles = {
+    'maths': {
+      'interro0LLG': 'Interrogation 0 PC*'
+    },
+    'physics': {
+      'mechanics': 'Mécanique du point'
+    },
+    'chemistry': {
+      'equilibrium': 'Équilibres chimiques',
+      'kinetics': 'Cinétique chimique'
+    }
+  }
+  return titles[resource.subject]?.[resource.id] || `Ressource ${resource.id}`
+}
+
+const getResourceDescription = (resource) => {
+  // Mapping des descriptions depuis les traductions
+  const descriptions = {
+    'maths': {
+      'interro0LLG': 'Couvre arithmétique, combinatoire et analyse.'
+    },
+    'physics': {
+      'mechanics': 'Cours et exercices sur la cinématique et la dynamique'
+    },
+    'chemistry': {
+      'equilibrium': 'Constantes d\'équilibre et déplacements',
+      'kinetics': 'Vitesse de réaction et mécanismes'
+    }
+  }
+  return descriptions[resource.subject]?.[resource.id] || 'Description de la ressource'
+}
 </script>
 
 <style scoped>

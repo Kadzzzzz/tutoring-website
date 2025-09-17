@@ -8,17 +8,19 @@
       @click="$emit('update:activeSubject', subject.key)"
     >
       <i :class="subject.icon"></i>
-      {{ t(`resources.subjects.${subject.key}`) }}
+      {{ subject.name }}
     </button>
   </div>
 </template>
 
 <script setup>
-import { useTranslations } from '@/composables/useTranslations.js'
-import { useSubjects } from '@/composables/useSubjects.js'
-
-const { t } = useTranslations()
-const { subjectOptions } = useSubjects()
+// Options en dur (remplace les traductions)
+const subjectOptions = [
+  { key: 'all', name: 'Toutes les matières', icon: 'fas fa-list' },
+  { key: 'maths', name: 'Mathématiques', icon: 'fas fa-calculator' },
+  { key: 'physics', name: 'Physique', icon: 'fas fa-atom' },
+  { key: 'chemistry', name: 'Chimie', icon: 'fas fa-flask' }
+]
 
 // Props
 defineProps({

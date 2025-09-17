@@ -3,9 +3,6 @@
     <!-- Header -->
     <AppHeader/>
 
-    <!-- Menu Mobile -->
-    <MobileMenu/>
-
     <main>
       <!-- Section Hero -->
       <HeroSection/>
@@ -15,10 +12,6 @@
 
       <!-- Section Resources -->
       <ResourcesSection
-        :subjects="subjects"
-        :resources="resources"
-        :activeSubject="activeSubject"
-        @update:activeSubject="setActiveSubject"
         @openResourceModal="openResourceModal"
       />
 
@@ -28,6 +21,7 @@
       <!-- Section Contact -->
       <ContactSection/>
     </main>
+
     <!-- Footer -->
     <AppFooter/>
 
@@ -41,23 +35,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref } from 'vue'
 import ResourceModal from './components/ResourceModal.vue'
-import { useTranslations } from '@/composables/useTranslations.js'
 
 //IMPORTS MODULAIRES
 import AppHeader from '@/components/layout/AppHeader.vue'
-import MobileMenu from '@/components/layout/MobileMenu.vue'
 import HeroSection from '@/components/sections/HeroSection.vue'
 import AboutSection from '@/components/sections/AboutSection.vue'
 import ResourcesSection from '@/components/sections/ResourcesSection.vue'
 import MethodologySection from '@/components/sections/MethodologySection.vue'
 import ContactSection from '@/components/sections/ContactSection.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
-
-
-// COMPOSABLE
-const { loadSavedLanguage } = useTranslations()
 
 // ÉTAT GLOBAL MINIMAL (juste la modal)
 const selectedResource = ref(null)
@@ -72,16 +60,7 @@ const closeResourceModal = () => {
   selectedResource.value = null
   document.body.style.overflow = ''
 }
-
-// LIFECYCLE
-onMounted(() => {
-  loadSavedLanguage()
-})
-
 </script>
-
-
-
 
 <style>
 /* Variables CSS globales (partagées par tous les composants) */
@@ -162,5 +141,4 @@ button {
   font-family: inherit;
   transition: all var(--transition-speed);
 }
-
 </style>

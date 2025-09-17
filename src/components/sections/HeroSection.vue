@@ -1,12 +1,12 @@
 <template>
   <section id="hero" class="hero-section">
     <div class="hero-content">
-      <h2 class="subtitle">{{ t('hero.subtitle') }}</h2>
-      <h1 class="title">{{ t('hero.title') }}</h1>
-      <p class="hero-description">{{ t('hero.description') }}</p>
+      <h2 class="subtitle">Étudiant Ingénieur & Professeur Particulier</h2>
+      <h1 class="title">Réussissez vos études scientifiques</h1>
+      <p class="hero-description">Cours particuliers en Mathématiques, Physique et Chimie pour lycéens et préparationnaires.</p>
     </div>
     <div class="scroll-indicator">
-      <span>{{ t('hero.scrollDown') }}</span>
+      <span>Découvrir</span>
       <a href="#about" @click.prevent="scrollToSection('about')">
         <div class="arrow-down"></div>
       </a>
@@ -15,10 +15,8 @@
 </template>
 
 <script setup>
-import { useTranslations } from '@/composables/useTranslations.js'
 import { useNavigation } from '@/composables/useNavigation.js'
 
-const { t } = useTranslations()
 const { scrollToSection } = useNavigation()
 </script>
 
