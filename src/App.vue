@@ -3,63 +3,20 @@
     <!-- Header -->
     <AppHeader/>
 
+    <!-- Contenu principal géré par le router -->
     <main>
-      <!-- Section Hero -->
-      <HeroSection/>
-
-      <!-- Section About -->
-      <AboutSection/>
-
-      <!-- Section Resources -->
-      <ResourcesSection
-        @openResourceModal="openResourceModal"
-      />
-
-      <!-- Section Methodology -->
-      <MethodologySection/>
-
-      <!-- Section Contact -->
-      <ContactSection/>
+      <router-view />
     </main>
 
     <!-- Footer -->
     <AppFooter/>
-
-    <!-- Resource Modal -->
-    <ResourceModal
-      v-if="selectedResource"
-      :resource="selectedResource"
-      @close="closeResourceModal"
-    />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import ResourceModal from './components/ResourceModal.vue'
-
 //IMPORTS MODULAIRES
 import AppHeader from '@/components/layout/AppHeader.vue'
-import HeroSection from '@/components/sections/HeroSection.vue'
-import AboutSection from '@/components/sections/AboutSection.vue'
-import ResourcesSection from '@/components/sections/ResourcesSection.vue'
-import MethodologySection from '@/components/sections/MethodologySection.vue'
-import ContactSection from '@/components/sections/ContactSection.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
-
-// ÉTAT GLOBAL MINIMAL (juste la modal)
-const selectedResource = ref(null)
-
-// MÉTHODES GLOBALES
-const openResourceModal = (resource) => {
-  selectedResource.value = resource
-  document.body.style.overflow = 'hidden'
-}
-
-const closeResourceModal = () => {
-  selectedResource.value = null
-  document.body.style.overflow = ''
-}
 </script>
 
 <style>
@@ -140,5 +97,16 @@ button {
   background: none;
   font-family: inherit;
   transition: all var(--transition-speed);
+}
+
+/* Styles spécifiques à l'app */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
 }
 </style>

@@ -16,10 +16,10 @@
 
       <!-- Bouton vers la page complète -->
       <div class="preview-actions">
-        <button @click="goToFullResources" class="btn btn-primary btn-large">
+        <router-link to="/resources" class="btn btn-primary btn-large">
           <i class="fas fa-book-open"></i>
           Découvrir toutes mes ressources ({{ totalResources }})
-        </button>
+        </router-link>
         <div class="preview-stats">
           <span class="stat">{{ resourcesWithVideo }} avec vidéo</span>
           <span class="stat">{{ collesCount }} colles disponibles</span>
@@ -53,15 +53,6 @@ const collesCount = computed(() => resources.filter(r => r.typeKey === 'interro'
 // Actions
 const openResourceModal = (resource) => {
   emit('openResourceModal', resource)
-}
-
-const goToFullResources = () => {
-  // Pour l'instant, scroll vers le haut et alerte
-  // Plus tard on remplacera par du routing
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-  setTimeout(() => {
-    alert('Page ressources complète à venir ! Filtres par classe, matière, type de ressource...')
-  }, 500)
 }
 </script>
 
@@ -144,6 +135,7 @@ const goToFullResources = () => {
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
   background: #2980b9;
+  color: white;
 }
 
 .preview-stats {
