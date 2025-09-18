@@ -4,7 +4,7 @@
       <div class="section-content layout-split">
         <div class="text-content">
           <h2>Mon Parcours</h2>
-          <p>Actuellement étudiant en première année à l'École Centrale de Lyon et en parallèle en L3 de Physique à l'Université Claude Bernard Lyon 1, je mets ma passion pour les sciences au service de la réussite de mes élèves.</p>
+          <p>Actuellement étudiant en deuxième année à l'École Centrale de Lyon et en parallèle en L3 de Physique à l'Université Claude Bernard Lyon 1, je mets ma passion pour les sciences au service de la réussite de mes élèves.</p>
           <p>Fort de mon expérience en classes préparatoires (PCSI puis PC à l'ENCPB, et PC* au lycée Louis-le-Grand), je comprends parfaitement les défis que rencontrent les étudiants dans ces filières exigeantes.</p>
           <p>J'aime beaucoup transmettre mon savoir et ma passion pour les sciences. C'est pourquoi je donne régulièrement des cours particuliers à des élèves allant de la seconde à la première année de prépa, et je gère également des salles de travail à Centrale.</p>
         </div>

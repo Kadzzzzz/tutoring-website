@@ -1,13 +1,21 @@
 <template>
   <header class="header" :class="{ 'header-scrolled': scrolled }">
     <div class="container header-container">
-      <a href="#hero" @click.prevent="scrollToSection('hero')" class="logo">Jeremy Luccioni</a>
+      <router-link to="/" class="logo">Jeremy Luccioni</router-link>
       <nav class="nav-links">
         <ul>
-          <li><a href="#about" @click.prevent="scrollToSection('about')">À propos</a></li>
-          <li><a href="#resources" @click.prevent="scrollToSection('resources')">Ressources</a></li>
-          <li><a href="#methodology" @click.prevent="scrollToSection('methodology')">Méthode</a></li>
-          <li><a href="#contact" @click.prevent="scrollToSection('contact')">Contact</a></li>
+          <li><a href="#about" @click.prevent="scrollToSection('about')" v-if="isHomePage">À propos</a></li>
+          <li><a href="#resources" @click.prevent="scrollToSection('resources')" v-if="isHomePage">Ressources</a></li>
+          <li><a href="#methodology" @click.prevent="scrollToSection('methodology')" v-if="isHomePage">Méthode</a></li>
+          <li><a href="#contact" @click.prevent="scrollToSection('contact')" v-if="isHomePage">Contact</a></li>
+
+          <!-- Navigation pour les autres pages -->
+          <li v-if="!isHomePage">
+            <router-link to="/" class="nav-router-link">Accueil</router-link>
+          </li>
+          <li>
+            <router-link to="/colles" class="nav-router-link">Colles</router-link>
+          </li>
         </ul>
       </nav>
     </div>
@@ -15,9 +23,15 @@
 </template>
 
 <script setup>
-import { useNavigation } from '@/composables/useNavigation.js'
+import {computed} from 'vue'
+import {useRoute} from 'vue-router'
+import {useNavigation} from '@/composables/useNavigation.js'
 
-const { scrolled, scrollToSection } = useNavigation()
+const route = useRoute()
+const {scrolled, scrollToSection} = useNavigation()
+
+// Déterminer si on est sur la page d'accueil
+const isHomePage = computed(() => route.name === 'Home')
 </script>
 
 <style scoped>
@@ -49,6 +63,12 @@ const { scrolled, scrollToSection } = useNavigation()
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--text-white, #ffffff);
+  text-decoration: none;
+  transition: color var(--transition-speed);
+}
+
+.header .logo:hover {
+  color: var(--accent-color, #3498db);
 }
 
 .nav-links ul {
@@ -63,6 +83,7 @@ const { scrolled, scrollToSection } = useNavigation()
   position: relative;
   padding-bottom: 5px;
   text-decoration: none;
+  transition: color var(--transition-speed);
 }
 
 .nav-links a::after {
@@ -80,10 +101,41 @@ const { scrolled, scrollToSection } = useNavigation()
   width: 100%;
 }
 
+.nav-links a:hover {
+  color: var(--accent-color, #3498db);
+}
+
+/* Styles spécifiques pour les router-links */
+.nav-router-link {
+  display: inline-block;
+}
+
+.nav-router-link.router-link-active {
+  color: var(--accent-color, #3498db);
+}
+
+.nav-router-link.router-link-active::after {
+  width: 100%;
+}
+
 /* Responsive - cache la navigation sur petit écran */
 @media (max-width: 768px) {
   .nav-links {
     display: none;
+  }
+
+  /* TODO: Ajouter un menu hamburger pour mobile */
+}
+
+/* Style pour les pages autres que l'accueil */
+.header:not(.header-scrolled) {
+  background-color: rgba(44, 62, 80, 0.9);
+}
+
+/* Assurer que le header est visible sur toutes les pages */
+@media (max-width: 768px) {
+  .header {
+    background-color: rgba(44, 62, 80, 0.95);
   }
 }
 </style>

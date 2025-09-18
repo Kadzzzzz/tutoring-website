@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
 import Resources from '@/views/Resources.vue'
+import Colles from '@/views/Colles.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -20,14 +21,23 @@ const router = createRouter({
       meta: {
         title: 'Toutes les Ressources - Jeremy Luccioni'
       }
+    },
+    {
+      path: '/colles',
+      name: 'Colles',
+      component: Colles,
+      meta: {
+        title: 'Exercices de Colles - Jeremy Luccioni'
+      }
     }
   ],
   scrollBehavior(to, from, savedPosition) {
+    // Si on a une position sauvegardée (navigation avec boutons back/forward)
     if (savedPosition) {
       return savedPosition
-    } else {
-      return { top: 0 }
     }
+    // Pour toute autre navigation, aller en haut
+    return { top: 0, behavior: 'smooth' }
   }
 })
 
