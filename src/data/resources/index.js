@@ -1,5 +1,5 @@
 // src/data/resources/index.js
-// Données des ressources pédagogiques étendues avec les colles
+// Données des ressources pédagogiques enrichies avec les textes intégrés
 
 export const resources = [
   // Mathématiques
@@ -15,7 +15,12 @@ export const resources = [
     pdfSolution: '/documents/exercices/maths/Interrogation_0_correction.pdf',
     difficulty: 'moyen',
     tags: ['analyse', 'intégrales', 'équations différentielles'],
-    createdAt: '2024-01-15'
+    createdAt: '2024-01-15',
+    // Textes intégrés (extraits des traductions)
+    title: 'Interrogation 0 PC*',
+    description: 'Couvre arithmétique, combinatoire et analyse.',
+    fullDescription: 'L\'exercice 1 traite de l\'irrationnalité de ln(3)/ln(2) par une démonstration par l\'absurde.\nL\'exercice 2 développe l\'arithmétique des nombres premiers avec des estimations logarithmiques et aboutit à la preuve de l\'infinité des nombres premiers.\nLes exercices 3 et 5 explorent la combinatoire des ensembles finis : dénombrement de parties avec contraintes, formule de la crosse de hockey, et propriétés des intersections démontrées par récurrence.\nL\'exercice 4 combine analyse et trigonométrie avec des inégalités sur des suites, l\'utilisation de l\'arctangente, et des identités impliquant tan(π/12) = 2 - √3.',
+    notes: 'Interrogation de haut niveau nécessitant une excellente maîtrise des techniques fondamentales. L\'exercice est issu de la PC*3 du Lycée Louis-le-Grand.'
   },
 
   // Physique
@@ -31,7 +36,11 @@ export const resources = [
     pdfSolution: '',
     difficulty: 'facile',
     tags: ['mécanique', 'cinématique', 'dynamique'],
-    createdAt: '2024-02-01'
+    createdAt: '2024-02-01',
+    title: 'Mécanique du point',
+    description: 'Cours et exercices sur la cinématique et la dynamique',
+    fullDescription: 'Étude complète de la mécanique du point : référentiels, vitesse, accélération, forces et théorèmes de Newton.',
+    notes: 'Exercices progressifs avec corrections détaillées'
   },
 
   // Chimie
@@ -47,7 +56,11 @@ export const resources = [
     pdfSolution: '/documents/exercices/chemistry/equilibrium-solution.pdf',
     difficulty: 'facile',
     tags: ['équilibre chimique', 'constante d\'équilibre'],
-    createdAt: '2024-01-20'
+    createdAt: '2024-01-20',
+    title: 'Équilibres chimiques',
+    description: 'Constantes d\'équilibre et déplacements',
+    fullDescription: 'Étude des équilibres chimiques, calcul des constantes d\'équilibre et loi de Le Chatelier.',
+    notes: 'Méthodes de calcul et exemples concrets'
   },
   {
     id: 'kinetics',
@@ -61,11 +74,15 @@ export const resources = [
     pdfSolution: '/documents/exercices/chemistry/kinetics-solution.pdf',
     difficulty: 'difficile',
     tags: ['cinétique chimique', 'vitesse de réaction'],
-    createdAt: '2024-02-10'
+    createdAt: '2024-02-10',
+    title: 'Cinétique chimique',
+    description: 'Vitesse de réaction et mécanismes',
+    fullDescription: 'Étude de la vitesse des réactions chimiques, ordres de réaction et mécanismes réactionnels.',
+    notes: 'Approche expérimentale et théorique'
   }
 ]
 
-// === MÉTADONNÉES DES COLLES ===
+// === MÉTADONNÉES DES COLLES (inchangées) ===
 export const collesMetadata = {
   schools: [
     {
@@ -73,7 +90,6 @@ export const collesMetadata = {
       name: 'Lycée Jean Perrin',
       city: 'Lyon'
     }
-    // Préparé pour d'autres lycées futurs
   ],
 
   academicYears: [
@@ -128,9 +144,8 @@ export const collesMetadata = {
   }
 }
 
-// === FONCTIONS UTILITAIRES ÉTENDUES ===
+// === FONCTIONS UTILITAIRES (inchangées) ===
 
-// Fonctions existantes
 export const getResourcesBySubject = (subject) => {
   return resources.filter(resource => resource.subject === subject)
 }
@@ -151,7 +166,9 @@ export const searchResources = (query) => {
   const searchTerm = query.toLowerCase()
   return resources.filter(resource =>
     resource.tags.some(tag => tag.toLowerCase().includes(searchTerm)) ||
-    resource.id.toLowerCase().includes(searchTerm)
+    resource.id.toLowerCase().includes(searchTerm) ||
+    resource.title.toLowerCase().includes(searchTerm) ||
+    resource.description.toLowerCase().includes(searchTerm)
   )
 }
 

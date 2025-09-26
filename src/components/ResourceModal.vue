@@ -4,13 +4,13 @@
       <button @click="$emit('close')" class="modal-close" aria-label="Fermer">×</button>
       
       <div class="modal-header">
-        <h2 class="modal-title">{{ t(`resources.exercises.${resource.subject}.${resource.id}.title`) }}</h2>
+        <h2 class="modal-title">{{ resource.title }}</h2>
         <div class="modal-tags">
-          <span class="tag level">{{ t(`resources.subjects.${resource.subject}`) }}</span>
-          <span class="tag level">{{ t(`resources.levels.${resource.levelKey}`) }}</span>
-          <span class="tag type">{{ t(`resources.types.${resource.typeKey}`) }}</span>
+          <span class="tag level">{{ getSubjectLabel(resource.subject) }}</span>
+          <span class="tag level">{{ getLevelLabel(resource.levelKey) }}</span>
+          <span class="tag type">{{ getTypeLabel(resource.typeKey) }}</span>
         </div>
-        <p class="modal-description">{{ t(`resources.exercises.${resource.subject}.${resource.id}.fullDescription`) || t(`resources.exercises.${resource.subject}.${resource.id}.description`) }}</p>
+        <p class="modal-description">{{ resource.fullDescription || resource.description }}</p>
       </div>
 
       <!-- Vidéo si disponible -->
@@ -34,7 +34,7 @@
           :download="getFileName('statement')"
         >
           <i class="fas fa-file-text"></i>
-          {{ t('resources.downloadTypes.statement') }}
+          {{ DOWNLOAD_LABELS.statement }}
         </a>
         <a
           v-if="resource.pdfSolution"
@@ -44,7 +44,7 @@
           :download="getFileName('solution')"
         >
           <i class="fas fa-check-circle"></i>
-          {{ t('resources.downloadTypes.solution') }}
+          {{ DOWNLOAD_LABELS.solution }}
         </a>
       </div>
 
@@ -52,58 +52,52 @@
       <div v-else class="modal-downloads">
         <div class="no-pdf-message">
           <i class="fas fa-info-circle"></i>
-          {{ t('resources.noPdfAvailable') }}
+          {{ UI_LABELS.noPdfAvailable }}
         </div>
       </div>
 
       <!-- Notes et conseils -->
-      <div v-if="t(`resources.exercises.${resource.subject}.${resource.id}.notes`)" class="modal-notes">
-        <h4>{{ t('resources.notes') }}</h4>
-        <p>{{ t(`resources.exercises.${resource.subject}.${resource.id}.notes`) }}</p>
+      <div v-if="resource.notes" class="modal-notes">
+        <h4>{{ UI_LABELS.notes }}</h4>
+        <p>{{ resource.notes }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-// 🎣 IMPORT DU COMPOSABLE (au lieu de duplication)
-import {useTranslations} from '@/composables/useTranslations.js'
+import {
+  getSubjectLabel,
+  getLevelLabel,
+  getTypeLabel,
+  DOWNLOAD_LABELS,
+  UI_LABELS
+} from '@/utils/labels.js'
 
 const props = defineProps({
   resource: {
     type: Object,
     required: true
   }
-  // ✅ PLUS DE PROP currentLang !
 })
 
-const emit = defineEmits(['close'])
+defineEmits(['close'])
 
-// 🎯 UTILISATION DU COMPOSABLE (remplace tout l'ancien système)
-const {t, currentLang} = useTranslations()
-
-// ✅ SUPPRIMÉ : const translations = { ... }
-// ✅ SUPPRIMÉ : const fullTranslations = { ... }
-// ✅ SUPPRIMÉ : const getTranslation = (key) => { ... }
-
-// 🏷️ Génération du nom de fichier pour le téléchargement
+// Génération du nom de fichier pour le téléchargement
 const getFileName = (type) => {
-  const subject = t(`resources.subjects.${props.resource.subject}`).toLowerCase()
-  const title = t(`resources.exercises.${props.resource.subject}.${props.resource.id}.title`)
+  const subject = getSubjectLabel(props.resource.subject).toLowerCase()
+  const title = props.resource.title
       .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '')
 
-  const typeText = type === 'statement' ?
-      (currentLang.value === 'fr' ? 'enonce' : 'statement') :
-      (currentLang.value === 'fr' ? 'correction' : 'solution')
+  const typeText = type === 'statement' ? 'enonce' : 'correction'
 
   return `${subject}-${title}-${typeText}.pdf`
 }
-
-// ✅ FINI ! Plus de duplication de traductions !
-// ✅ Le composable gère tout automatiquement
 </script>
 
 <style scoped>
@@ -189,6 +183,7 @@ const getFileName = (type) => {
   color: var(--text-light);
   margin-bottom: 25px;
   line-height: 1.6;
+  white-space: pre-line;
 }
 
 .modal-video {
