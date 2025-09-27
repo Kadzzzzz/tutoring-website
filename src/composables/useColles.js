@@ -42,13 +42,17 @@ export function useColles() {
 
   const weekExercises = computed(() => {
     if (!selectedWeek.value || !contextSelected.value) return []
-    return getCollesByWeek(
+
+    const results = getCollesByWeek(
       selectedSchool.value,
       selectedYear.value,
       selectedWeek.value
     )
+
+
+    return results
       .filter(exercise =>
-        exercise.colleData?.class === selectedClass.value.toUpperCase()
+        exercise.colleData?.class?.toLowerCase() === selectedClass.value.toLowerCase()
       )
       .sort((a, b) => a.colleData.planche - b.colleData.planche)
   })
@@ -91,7 +95,6 @@ export function useColles() {
   const validateSelection = () => {
     if (!canValidateSelection.value) return false
 
-    // Sauvegarder le contexte dans localStorage
     const context = {
       school: selectedSchool.value,
       year: selectedYear.value,
@@ -104,7 +107,7 @@ export function useColles() {
       return true
     } catch (error) {
       console.warn('Impossible de sauvegarder le contexte:', error)
-      return true // Continue même si la sauvegarde échoue
+      return true
     }
   }
 
@@ -128,14 +131,12 @@ export function useColles() {
 
       const context = JSON.parse(saved)
 
-      // Vérifier que le contexte n'est pas trop ancien (7 jours)
-      const maxAge = 7 * 24 * 60 * 60 * 1000 // 7 jours en millisecondes
+      const maxAge = 7 * 24 * 60 * 60 * 1000
       if (context.timestamp && (Date.now() - context.timestamp) > maxAge) {
         localStorage.removeItem('colles-context')
         return false
       }
 
-      // Vérifier que les valeurs sont toujours valides
       const validSchool = schools.value.find(s => s.id === context.school)
       const validYear = academicYears.value.find(y => y.id === context.year)
       const validClass = classes.value.find(c => c.id === context.class)
@@ -147,7 +148,6 @@ export function useColles() {
         return true
       }
 
-      // Si les données ne sont plus valides, nettoyer
       localStorage.removeItem('colles-context')
       return false
     } catch (error) {
@@ -199,7 +199,6 @@ export function useColles() {
     })
   }
 
-  // Fonction pour obtenir les exercices d'un trinôme spécifique
   const getExercisesForTrinome = (trinomeNumber) => {
     if (!selectedWeek.value || !contextSelected.value) return []
 
@@ -208,14 +207,13 @@ export function useColles() {
     )
   }
 
-  // Fonction pour obtenir le programme de colles d'une semaine
   const getWeekProgram = (weekNumber) => {
     const exercises = getCollesByWeek(
       selectedSchool.value,
       selectedYear.value,
       weekNumber
     ).filter(exercise =>
-      exercise.colleData?.class === selectedClass.value.toUpperCase()
+      exercise.colleData?.class?.toLowerCase() === selectedClass.value.toLowerCase()
     )
 
     return {
@@ -243,6 +241,7 @@ export function useColles() {
     contextSelected,
     canValidateSelection,
     availableWeeks,
+    weekExercises,
     colleStats,
 
     // Actions

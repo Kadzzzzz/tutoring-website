@@ -238,7 +238,7 @@ const closeResourceModal = () => {
 // Gestion URL paramètres (optionnel)
 onMounted(() => {
   // Scroll vers le haut au chargement
-  window.scrollTo({ top: 0, behavior: 'smooth' })
+  window.scrollTo(0, 0)
 
   const urlParams = new URLSearchParams(window.location.search)
   if (urlParams.get('subject')) {

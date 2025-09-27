@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
 import Resources from '@/views/Resources.vue'
 import Colles from '@/views/Colles.vue'
+import ResourceEditor from '@/views/ResourceEditor.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -29,19 +30,24 @@ const router = createRouter({
       meta: {
         title: 'Exercices de Colles - Jeremy Luccioni'
       }
+    },
+    {
+      path: '/gestion-ressources',
+      name: 'ResourceEditor',
+      component: ResourceEditor,
+      meta: {
+        title: 'Gestion des Ressources - Jeremy Luccioni'
+      }
     }
   ],
   scrollBehavior(to, from, savedPosition) {
-    // Si on a une position sauvegardée (navigation avec boutons back/forward)
     if (savedPosition) {
       return savedPosition
     }
-    // Pour toute autre navigation, aller en haut
     return { top: 0, behavior: 'smooth' }
   }
 })
 
-// Mise à jour du titre de la page
 router.beforeEach((to, from, next) => {
   document.title = to.meta.title || 'Jeremy Luccioni - Cours Particuliers'
   next()
