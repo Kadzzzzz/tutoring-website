@@ -67,6 +67,18 @@ export const resourceTypes = [
     name: 'Interrogation',
     icon: 'fas fa-clipboard-question',
     color: '#e74c3c'
+  },
+  {
+    key: 'colle',
+    name: 'Colle',
+    icon: 'fas fa-chalkboard-teacher',
+    color: '#9b59b6'
+  },
+  {
+    key: 'programme',  // ← AJOUTER
+    name: 'Programme de colle',
+    icon: 'fas fa-list-check',
+    color: '#16a085'
   }
 ]
 

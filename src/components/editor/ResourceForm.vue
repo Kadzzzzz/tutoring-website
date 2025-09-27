@@ -50,7 +50,7 @@
               <option value="course">Cours</option>
               <option value="method">Méthode</option>
               <option value="interro">Interrogation</option>
-              <option value="colle">Colle</option>
+              <option value="programme">Programme de colle</option>
             </select>
           </div>
         </div>
@@ -164,73 +164,87 @@
         </div>
       </div>
 
-      <!-- Données de colle -->
-      <div v-if="form.typeKey === 'colle'" class="form-section">
-        <h3>Informations de colle</h3>
+      <!-- NOUVELLE SECTION : Catégorie Colle -->
+      <div class="form-section colle-category">
+        <h3>
+          <i class="fas fa-graduation-cap"></i>
+          Catégorie Colle
+        </h3>
 
         <div class="form-group">
-          <label class="checkbox-label">
+          <label class="checkbox-label colle-checkbox">
             <input v-model="form.isColle" type="checkbox">
-            <span>Marquer comme exercice de colle</span>
+            <span>
+              <strong>Cette ressource est une colle</strong>
+              <small>Disponible pour exercices, méthodes, programmes, etc.</small>
+            </span>
           </label>
         </div>
 
-        <template v-if="form.isColle">
-          <div class="form-row">
-            <div class="form-group">
-              <label>École</label>
-              <input v-model="colleForm.school" type="text" placeholder="jean-perrin">
+        <!-- Champs spécifiques colle (affichés seulement si isColle = true) -->
+        <transition name="slide-fade">
+          <div v-if="form.isColle" class="colle-specific-fields">
+            <div class="info-banner">
+              <i class="fas fa-info-circle"></i>
+              <p>Remplissez les informations spécifiques pour cette colle</p>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>École <span class="required">*</span></label>
+                <input v-model="colleForm.school" type="text" placeholder="jean-perrin" required>
+              </div>
+
+              <div class="form-group">
+                <label>Année scolaire <span class="required">*</span></label>
+                <input v-model="colleForm.year" type="text" placeholder="2025-2026" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Classe <span class="required">*</span></label>
+                <select v-model="colleForm.class" required>
+                  <option value="">Sélectionner...</option>
+                  <option value="mpsi">MPSI</option>
+                  <option value="pcsi">PCSI</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Semaine <span class="required">*</span></label>
+                <input v-model.number="colleForm.week" type="number" min="1" placeholder="1" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Date de la semaine <span class="required">*</span></label>
+                <input v-model="colleForm.weekDate" type="date" required>
+              </div>
+
+              <div class="form-group">
+                <label>Planche <span class="required">*</span></label>
+                <input v-model.number="colleForm.planche" type="number" min="1" placeholder="1" required>
+              </div>
             </div>
 
             <div class="form-group">
-              <label>Année scolaire</label>
-              <input v-model="colleForm.year" type="text" placeholder="2025-2026">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Classe</label>
-              <select v-model="colleForm.class">
-                <option value="">Sélectionner...</option>
-                <option value="mpsi">MPSI</option>
-                <option value="pcsi">PCSI</option>
-              </select>
+              <label>Professeur</label>
+              <input v-model="colleForm.teacher" type="text" placeholder="Jeremy Luccioni">
             </div>
 
             <div class="form-group">
-              <label>Semaine</label>
-              <input v-model.number="colleForm.week" type="number" min="1" placeholder="1">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Date de la semaine</label>
-              <input v-model="colleForm.weekDate" type="date">
+              <label>Créneau horaire</label>
+              <input v-model="colleForm.timeSlot" type="text" placeholder="Lundi 14h-15h">
             </div>
 
             <div class="form-group">
-              <label>Planche</label>
-              <input v-model.number="colleForm.planche" type="number" min="1" placeholder="1">
+              <label>Trinômes (séparés par des virgules)</label>
+              <input v-model="trinomesInput" type="text" placeholder="1,2,3,4">
             </div>
           </div>
-
-          <div class="form-group">
-            <label>Professeur</label>
-            <input v-model="colleForm.teacher" type="text" placeholder="Jeremy Luccioni">
-          </div>
-
-          <div class="form-group">
-            <label>Créneau horaire</label>
-            <input v-model="colleForm.timeSlot" type="text" placeholder="Lundi 14h-15h">
-          </div>
-
-          <div class="form-group">
-            <label>Trinômes (séparés par des virgules)</label>
-            <input v-model="trinomesInput" type="text" placeholder="1,2,3,4">
-          </div>
-        </template>
+        </transition>
       </div>
 
       <!-- Date de création -->
@@ -258,6 +272,8 @@
     </form>
   </div>
 </template>
+
+
 
 <script setup>
 import { ref, computed, watch } from 'vue'
@@ -303,12 +319,10 @@ const colleForm = ref({
   weekDate: '',
   planche: 1,
   teacher: 'Jeremy Luccioni',
-  timeSlot: '',
-  trinomes: []
+  timeSlot: ''
 })
 
 const tagInput = ref('')
-const trinomesInput = ref('')
 const today = new Date().toISOString().split('T')[0]
 
 // Initialiser avec la ressource à éditer
@@ -317,7 +331,6 @@ if (props.resource) {
 
   if (props.resource.colleData) {
     colleForm.value = { ...props.resource.colleData }
-    trinomesInput.value = props.resource.colleData.trinomes?.join(',') || ''
   }
 }
 
@@ -365,19 +378,11 @@ const handleSubmit = () => {
   }
 
   // Données de colle
-  if (form.value.isColle && form.value.typeKey === 'colle') {
-    // Parser les trinômes
-    const trinomes = trinomesInput.value
-      .split(',')
-      .map(t => parseInt(t.trim()))
-      .filter(t => !isNaN(t))
-
+  if (form.value.isColle) {
     resourceData.colleData = {
-      ...colleForm.value,
-      trinomes
+      ...colleForm.value
     }
   } else {
-    delete resourceData.isColle
     delete resourceData.colleData
   }
 
@@ -541,4 +546,5 @@ const handleSubmit = () => {
     padding: 20px;
   }
 }
+
 </style>

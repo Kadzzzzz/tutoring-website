@@ -220,19 +220,24 @@ const generateIndexFile = (resources) => {
       lines.push(`${indent}  notes: "${escape(r.notes)}",`)
     }
 
-    // Données de colle
+    // Données de colle - CORRECTION ICI
     if (r.isColle && r.colleData) {
       lines.push(`${indent}  isColle: true,`)
       lines.push(`${indent}  colleData: {`)
-      lines.push(`${indent}    school: "${r.colleData.school}",`)
-      lines.push(`${indent}    year: "${r.colleData.year}",`)
-      lines.push(`${indent}    class: "${r.colleData.class}",`)
-      lines.push(`${indent}    week: ${r.colleData.week},`)
-      lines.push(`${indent}    weekDate: "${r.colleData.weekDate}",`)
-      lines.push(`${indent}    planche: ${r.colleData.planche},`)
-      lines.push(`${indent}    teacher: "${r.colleData.teacher}",`)
-      lines.push(`${indent}    timeSlot: "${r.colleData.timeSlot}",`)
-      lines.push(`${indent}    trinomes: [${r.colleData.trinomes.join(", ")}]`)
+      lines.push(`${indent}    school: "${r.colleData.school || ""}",`)
+      lines.push(`${indent}    year: "${r.colleData.year || ""}",`)
+      lines.push(`${indent}    class: "${r.colleData.class || ""}",`)
+      lines.push(`${indent}    week: ${r.colleData.week || 0},`)
+      lines.push(`${indent}    weekDate: "${r.colleData.weekDate || ""}",`)
+      lines.push(`${indent}    planche: ${r.colleData.planche || 0},`)
+      lines.push(`${indent}    teacher: "${r.colleData.teacher || ""}",`)
+      lines.push(`${indent}    timeSlot: "${r.colleData.timeSlot || ""}",`)
+
+      // ✅ CORRECTION : Vérification sécurisée des trinomes
+      const trinomesStr = Array.isArray(r.colleData.trinomes) && r.colleData.trinomes.length > 0
+        ? r.colleData.trinomes.join(", ")
+        : ""
+      lines.push(`${indent}    trinomes: [${trinomesStr}]`)
       lines.push(`${indent}  }`)
     }
 

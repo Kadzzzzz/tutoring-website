@@ -21,7 +21,7 @@ export const TYPE_LABELS = {
   course: 'Cours',
   method: 'Méthode',
   interro: 'Interrogation',
-  colle: 'Colle'
+  programme: 'Programme de colle'
 }
 
 // Labels de difficulté

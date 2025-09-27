@@ -76,6 +76,7 @@
                 <option value="method">Méthode</option>
                 <option value="interro">Interrogation</option>
                 <option value="colle">Colle</option>
+                <option value="programme">Programme de colle</option>
               </select>
             </div>
 
@@ -193,6 +194,7 @@ const filteredResources = computed(() => {
     filtered = filtered.filter(resource => resource.hasVideo)
   }
 
+
   return filtered
 })
 
@@ -209,7 +211,7 @@ const resourcesWithVideo = computed(() =>
 )
 
 const totalColles = computed(() =>
-  filteredResources.value.filter(r => r.typeKey === 'colle').length
+  filteredResources.value.filter(r => r.isColle === true).length
 )
 
 // Actions

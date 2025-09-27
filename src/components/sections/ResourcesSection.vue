@@ -48,7 +48,7 @@ const recentResources = computed(() => {
 const stats = computed(() => getResourceStats())
 const totalResources = computed(() => stats.value.total)
 const resourcesWithVideo = computed(() => stats.value.withVideo)
-const collesCount = computed(() => resources.filter(r => r.typeKey === 'interro').length)
+const collesCount = computed(() => resources.filter(r => r.isColle === true).length)
 
 // Actions
 const openResourceModal = (resource) => {
