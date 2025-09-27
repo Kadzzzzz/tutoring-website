@@ -7,9 +7,7 @@
           <h1>Exercices de Colles</h1>
           <p class="header-description">
             Retrouvez tous vos exercices de colles organisés par semaine.
-            Chaque planche contient les énoncés et corrections détaillées.
           </p>
-
           <router-link to="/" class="back-link">
             ← Retour à l'accueil
           </router-link>
@@ -89,7 +87,6 @@
         <div class="context-info">
           <div class="context-details">
             <h3>{{ getSchoolName(selectedSchool) }} - {{ selectedYear }} - {{ getClassName(selectedClass) }}</h3>
-            <p>{{ availableWeeks.length }} semaines de colles disponibles</p>
           </div>
           <button @click="resetSelection" class="change-context-btn">
             Changer d'établissement
@@ -108,27 +105,92 @@
             >
               <div class="week-number">S{{ week.number }}</div>
               <div class="week-date">{{ formatDate(week.date) }}</div>
-              <div class="week-label">{{ week.label }}</div>
             </div>
           </div>
         </div>
 
         <!-- Exercices de la semaine sélectionnée -->
         <div v-if="selectedWeek" class="week-exercises">
-          <h3>Semaine {{ selectedWeek }} - {{ getWeekLabel(selectedWeek) }}</h3>
+          <h3 class="section-title">Semaine {{ selectedWeek }} - {{ getWeekLabel(selectedWeek) }}</h3>
 
-          <div class="exercises-grid">
-            <ColleExerciseCard
-              v-for="exercise in weekExercises"
-              :key="exercise.id"
-              :exercise="exercise"
-              @click="openResourceModal"
-            />
+          <!-- Programme de colle et Questions de cours -->
+          <div class="category-section">
+            <h4 class="category-title">Programme de colle et Questions de cours</h4>
+            <div class="resources-grid">
+              <ResourceCard
+                v-for="exercise in programmeExercises"
+                :key="exercise.id"
+                :resource="exercise"
+                @click="openResourceModal"
+              />
+            </div>
+            <div v-if="programmeExercises.length === 0" class="no-exercises">
+              <p>Aucun programme disponible pour cette semaine.</p>
+            </div>
           </div>
 
-          <!-- Message si pas d'exercices -->
-          <div v-if="weekExercises.length === 0" class="no-exercises">
-            <p>Aucun exercice disponible pour cette semaine.</p>
+          <!-- Planche 1 -->
+          <div class="category-section">
+            <h4 class="category-title">Planche 1</h4>
+            <div class="resources-grid">
+              <ResourceCard
+                v-for="exercise in planche1Exercises"
+                :key="exercise.id"
+                :resource="exercise"
+                @click="openResourceModal"
+              />
+            </div>
+            <div v-if="planche1Exercises.length === 0" class="no-exercises">
+              <p>Aucun exercice disponible pour Planche 1.</p>
+            </div>
+          </div>
+
+          <!-- Planche 2 -->
+          <div class="category-section">
+            <h4 class="category-title">Planche 2</h4>
+            <div class="resources-grid">
+              <ResourceCard
+                v-for="exercise in planche2Exercises"
+                :key="exercise.id"
+                :resource="exercise"
+                @click="openResourceModal"
+              />
+            </div>
+            <div v-if="planche2Exercises.length === 0" class="no-exercises">
+              <p>Aucun exercice disponible pour Planche 2.</p>
+            </div>
+          </div>
+
+          <!-- Planche 3 -->
+          <div class="category-section">
+            <h4 class="category-title">Planche 3</h4>
+            <div class="resources-grid">
+              <ResourceCard
+                v-for="exercise in planche3Exercises"
+                :key="exercise.id"
+                :resource="exercise"
+                @click="openResourceModal"
+              />
+            </div>
+            <div v-if="planche3Exercises.length === 0" class="no-exercises">
+              <p>Aucun exercice disponible pour Planche 3.</p>
+            </div>
+          </div>
+
+          <!-- Bonus -->
+          <div class="category-section">
+            <h4 class="category-title">Bonus</h4>
+            <div class="resources-grid">
+              <ResourceCard
+                v-for="exercise in bonusExercises"
+                :key="exercise.id"
+                :resource="exercise"
+                @click="openResourceModal"
+              />
+            </div>
+            <div v-if="bonusExercises.length === 0" class="no-exercises">
+              <p>Aucun exercice bonus pour cette semaine.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -147,7 +209,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useColles } from '@/composables/useColles'
 import ResourceModal from '@/components/ResourceModal.vue'
-import ColleExerciseCard from '@/components/colles/ColleExerciseCard.vue'
+import ResourceCard from '@/components/resources/ResourceCard.vue'
 
 // Utilisation du composable
 const {
@@ -192,20 +254,68 @@ const localClass = ref('')
 // État local pour la modal
 const selectedResource = ref(null)
 
+// Computed pour séparer les exercices par catégorie
+const programmeExercises = computed(() => {
+  return weekExercises.value.filter(ex =>
+    ex.colleData?.planche === 0 || ex.typeKey === 'course'
+  )
+})
+
+const planche1Exercises = computed(() => {
+  return weekExercises.value.filter(ex => ex.colleData?.planche === 1)
+})
+
+const planche2Exercises = computed(() => {
+  return weekExercises.value.filter(ex => ex.colleData?.planche === 2)
+})
+
+const planche3Exercises = computed(() => {
+  return weekExercises.value.filter(ex => ex.colleData?.planche === 3)
+})
+
+const bonusExercises = computed(() => {
+  return weekExercises.value.filter(ex =>
+    ex.colleData?.planche === 4 || ex.notes?.toLowerCase().includes('bonus')
+  )
+})
+
+const canValidateSelection = computed(() => {
+  return localSchool.value && localYear.value && localClass.value
+})
+
+// Méthodes
+const selectYear = (yearId) => {
+  localYear.value = yearId
+  setYear(yearId)
+}
+
+const selectSchool = (schoolId) => {
+  localSchool.value = schoolId
+  setSchool(schoolId)
+}
+
+const selectClass = (classId) => {
+  localClass.value = classId
+  setClass(classId)
+}
+
+const selectWeek = (weekNumber) => {
+  setWeek(weekNumber)
+}
+
+const handleValidateSelection = () => {
+  validateSelection()
+}
+
+const openResourceModal = (resource) => {
+  selectedResource.value = resource
+}
+
+const closeResourceModal = () => {
+  selectedResource.value = null
+}
+
 // Synchronisation des variables locales avec le composable
-watch(localSchool, (newValue) => {
-  setSchool(newValue)
-})
-
-watch(localYear, (newValue) => {
-  setYear(newValue)
-})
-
-watch(localClass, (newValue) => {
-  setClass(newValue)
-})
-
-// Synchronisation inverse (du composable vers les variables locales)
 watch(selectedSchool, (newValue) => {
   localSchool.value = newValue
 })
@@ -218,150 +328,82 @@ watch(selectedClass, (newValue) => {
   localClass.value = newValue
 })
 
-// Validation de sélection calculée localement
-const canValidateSelection = computed(() =>
-  localSchool.value && localYear.value && localClass.value
-)
-
-// Actions pour la sélection par boutons
-const selectYear = (yearId) => {
-  localYear.value = yearId
-  // Reset les sélections suivantes
-  localSchool.value = ''
-  localClass.value = ''
-}
-
-const selectSchool = (schoolId) => {
-  localSchool.value = schoolId
-  // Reset la sélection de classe
-  localClass.value = ''
-}
-
-const selectClass = (classId) => {
-  localClass.value = classId
-}
-
-// Actions locales
-const handleValidateSelection = () => {
-  if (validateSelection()) {
-    // Scroll vers le haut après validation
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-}
-
-const selectWeek = (weekNumber) => {
-  setWeek(weekNumber)
-}
-
-const openResourceModal = (resource) => {
-  selectedResource.value = resource
-  document.body.style.overflow = 'hidden'
-}
-
-const closeResourceModal = () => {
-  selectedResource.value = null
-  document.body.style.overflow = ''
-}
-
-// Chargement initial
+// Initialisation
 onMounted(() => {
-  // Scroll vers le haut au chargement
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-
-  // Restaurer le contexte sauvegardé
-  const contextLoaded = loadSavedContext()
-
-  // Si pas de contexte sauvegardé, définir l'année par défaut
-  if (!contextLoaded) {
-    setDefaultYear()
-  }
+  setDefaultYear()
+  loadSavedContext()
 })
 </script>
 
 <style scoped>
-.colles-page {
-  min-height: 100vh;
-  padding-top: var(--header-height);
-}
-
+/* En-tête */
 .colles-header {
-  background: linear-gradient(135deg, var(--primary-color) 0%, #34495e 100%);
-  color: var(--text-white);
-  padding: 4rem 0;
-  margin-bottom: 3rem;
-}
-
-.header-content {
+  background: linear-gradient(135deg, rgba(44, 62, 80, 0.9), rgba(52, 73, 94, 0.9)),
+              url('https://images.pexels.com/photos/8197497/pexels-photo-8197497.jpeg?auto=compress&cs=tinysrgb&w=2000') center/cover;
+  color: white;
+  padding: 4rem 0 3rem;
   text-align: center;
-  max-width: 800px;
-  margin: 0 auto;
+  position: relative;
 }
 
-.colles-header h1 {
-  font-size: 3rem;
-  margin-bottom: 1.5rem;
-  color: var(--text-white);
-  font-weight: 700;
+.header-content h1 {
+  font-size: 2.8rem;
+  margin-bottom: 1rem;
 }
 
 .header-description {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  color: rgba(255, 255, 255, 0.9);
-  line-height: 1.6;
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-bottom: 1.5rem;
 }
 
 .back-link {
+  color: white;
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
-  color: var(--text-white);
-  text-decoration: none;
-  font-weight: 500;
+  gap: 0.5rem;
   padding: 0.8rem 1.5rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 25px;
-  transition: all var(--transition-speed);
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  transition: all 0.3s;
 }
 
 .back-link:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.5);
-  color: var(--text-white);
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.3);
 }
 
+/* Sélection du contexte */
 .context-selection {
-  padding: 2rem 0 4rem 0;
-  background-color: #f8f9fa;
+  padding: 3rem 0;
+  background: var(--bg-light);
 }
 
 .selection-card {
-  max-width: 800px;
-  margin: 0 auto;
   background: white;
-  padding: 3rem;
   border-radius: 15px;
-  box-shadow: var(--box-shadow);
+  padding: 3rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .selection-card h2 {
-  text-align: center;
   color: var(--primary-color);
-  margin-bottom: 3rem;
-  font-size: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
 }
 
 .step {
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
 }
 
 .step h3 {
-  color: var(--primary-color);
-  margin-bottom: 1.5rem;
-  font-size: 1.3rem;
+  color: var(--text-color);
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
 }
 
-/* Boutons d'année */
 .year-buttons {
   display: flex;
   gap: 1rem;
@@ -372,185 +414,114 @@ onMounted(() => {
 .year-btn {
   background: white;
   border: 2px solid var(--border-color);
-  padding: 1.5rem 2rem;
-  border-radius: 12px;
+  padding: 1rem 2rem;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all var(--transition-speed);
-  text-align: center;
-  min-width: 180px;
+  transition: all 0.3s;
+  position: relative;
 }
 
 .year-btn:hover {
   border-color: var(--accent-color);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(52, 152, 219, 0.15);
 }
 
 .year-btn.active {
   border-color: var(--accent-color);
-  background: rgba(52, 152, 219, 0.05);
-}
-
-.year-label {
-  display: block;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--primary-color);
-  margin-bottom: 0.5rem;
+  background: var(--accent-color);
+  color: white;
 }
 
 .current-badge {
-  display: inline-block;
-  background: var(--accent-color);
-  color: white;
-  padding: 0.2rem 0.8rem;
-  border-radius: 15px;
-  font-size: 0.8rem;
-  font-weight: 500;
+  display: block;
+  font-size: 0.75rem;
+  margin-top: 0.3rem;
+  opacity: 0.8;
 }
 
-/* Grille des lycées */
-.school-grid {
+.school-grid, .class-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-}
-
-.school-card {
-  background: white;
-  border: 2px solid var(--border-color);
-  padding: 2rem;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all var(--transition-speed);
-  text-align: center;
-}
-
-.school-card:hover {
-  border-color: var(--accent-color);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}
-
-.school-card.active {
-  border-color: var(--accent-color);
-  background: rgba(52, 152, 219, 0.05);
-}
-
-.school-card h4 {
-  color: var(--primary-color);
-  margin-bottom: 0.5rem;
-  font-size: 1.1rem;
-}
-
-.school-card p {
-  color: var(--text-light);
-  margin: 0;
-  font-size: 0.9rem;
-}
-
-/* Grille des classes */
-.class-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
 }
 
-.class-card {
+.school-card, .class-card {
   background: white;
   border: 2px solid var(--border-color);
   padding: 1.5rem;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all var(--transition-speed);
+  transition: all 0.3s;
   text-align: center;
 }
 
-.class-card:hover {
+.school-card:hover, .class-card:hover {
   border-color: var(--accent-color);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-.class-card.active {
+.school-card.active, .class-card.active {
   border-color: var(--accent-color);
   background: rgba(52, 152, 219, 0.05);
 }
 
 .class-name {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.3rem;
+  font-weight: 600;
   color: var(--primary-color);
   margin-bottom: 0.5rem;
 }
 
 .class-description {
-  color: var(--text-light);
   font-size: 0.9rem;
+  color: var(--text-light);
 }
 
-/* Section de validation */
 .validation-section {
   text-align: center;
-  margin-top: 3rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--border-color);
+  margin-top: 2rem;
 }
 
 .validate-btn {
   background: var(--accent-color);
   color: white;
   border: none;
-  padding: 1.2rem 3rem;
-  border-radius: 50px;
+  padding: 1rem 3rem;
+  border-radius: 10px;
   font-size: 1.1rem;
-  font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-speed);
   display: inline-flex;
   align-items: center;
   gap: 1rem;
+  transition: all 0.3s;
 }
 
 .validate-btn:hover {
-  background: #2980b9;
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
-}
-
-.arrow {
-  font-size: 1.2rem;
-  transition: transform var(--transition-speed);
-}
-
-.validate-btn:hover .arrow {
-  transform: translateX(5px);
+  background: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 /* Interface des colles */
 .colles-interface {
-  padding: 2rem 0 4rem 0;
+  padding: 3rem 0;
 }
 
 .context-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
   padding: 1.5rem;
+  background: white;
   border-radius: 10px;
-  box-shadow: var(--box-shadow);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   margin-bottom: 3rem;
 }
 
 .context-details h3 {
   color: var(--primary-color);
-  margin-bottom: 0.5rem;
-}
-
-.context-details p {
-  color: var(--text-light);
-  margin: 0;
+  margin-bottom: 0.3rem;
 }
 
 .change-context-btn {
@@ -560,7 +531,7 @@ onMounted(() => {
   padding: 0.8rem 1.5rem;
   border-radius: 5px;
   cursor: pointer;
-  transition: all var(--transition-speed);
+  transition: all 0.3s;
 }
 
 .change-context-btn:hover {
@@ -568,6 +539,7 @@ onMounted(() => {
   color: white;
 }
 
+/* Navigation semaines */
 .weeks-navigation {
   margin-bottom: 3rem;
 }
@@ -579,7 +551,7 @@ onMounted(() => {
 
 .weeks-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 1rem;
 }
 
@@ -587,16 +559,16 @@ onMounted(() => {
   background: white;
   padding: 1.5rem;
   border-radius: 10px;
-  box-shadow: var(--box-shadow);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   text-align: center;
   cursor: pointer;
-  transition: all var(--transition-speed);
+  transition: all 0.3s;
   border: 2px solid transparent;
 }
 
 .week-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .week-card.active {
@@ -605,62 +577,68 @@ onMounted(() => {
 }
 
 .week-number {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--accent-color);
   margin-bottom: 0.5rem;
 }
 
 .week-date {
-  font-size: 0.9rem;
-  color: var(--text-light);
-  margin-bottom: 0.3rem;
-}
-
-.week-label {
   font-size: 0.85rem;
-  color: var(--text-color);
-  font-weight: 500;
+  color: var(--text-light);
 }
 
-.week-exercises h3 {
+/* Exercices */
+.week-exercises {
+  margin-top: 2rem;
+}
+
+.section-title {
   color: var(--primary-color);
   margin-bottom: 2rem;
+  font-size: 1.8rem;
 }
 
-.exercises-grid {
+.category-section {
+  margin-bottom: 3rem;
+}
+
+.category-title {
+  color: var(--text-color);
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--accent-color);
+}
+
+.resources-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1.5rem;
 }
 
 .no-exercises {
   text-align: center;
-  padding: 3rem;
+  padding: 2rem;
   color: var(--text-light);
+  font-style: italic;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   .colles-header h1 {
-    font-size: 2.2rem;
+    font-size: 2rem;
   }
 
   .selection-card {
     padding: 2rem 1.5rem;
-    margin: 0 1rem;
   }
 
   .year-buttons {
     flex-direction: column;
-    align-items: center;
   }
 
-  .school-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .class-grid {
+  .school-grid, .class-grid {
     grid-template-columns: 1fr;
   }
 
@@ -671,10 +649,10 @@ onMounted(() => {
   }
 
   .weeks-grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   }
 
-  .exercises-grid {
+  .resources-grid {
     grid-template-columns: 1fr;
   }
 }

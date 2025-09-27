@@ -253,16 +253,19 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
 .resources-page {
   min-height: 100vh;
   padding-top: var(--header-height);
 }
 
 .resources-header {
-  background: linear-gradient(135deg, var(--primary-color) 0%, #34495e 100%);
+  background: linear-gradient(135deg, rgba(44, 62, 80, 0.9), rgba(52, 73, 94, 0.9)),
+              url('https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?q=80&w=2070') center/cover;
   color: var(--text-white);
   padding: 4rem 0;
   margin-bottom: 3rem;
+  position: relative;
 }
 
 .header-content {

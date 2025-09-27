@@ -129,7 +129,7 @@ const isHomePage = computed(() => route.name === 'Home')
 
 /* Style pour les pages autres que l'accueil */
 .header:not(.header-scrolled) {
-  background-color: rgba(44, 62, 80, 0.9);
+  background-color: rgba(44, 62, 80, 0.95);
 }
 
 /* Assurer que le header est visible sur toutes les pages */
