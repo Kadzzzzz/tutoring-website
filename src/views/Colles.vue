@@ -21,7 +21,7 @@
         <div class="selection-card">
           <h2>Accès aux exercices de colles</h2>
 
-          <!-- Sélection année -->
+          <!-- ===== SECTION COMMENTÉE: Sélection année =====
           <div class="step">
             <h3>1. Choisissez l'année scolaire</h3>
             <div class="year-buttons">
@@ -36,8 +36,9 @@
               </button>
             </div>
           </div>
+          ===== FIN SECTION COMMENTÉE ===== -->
 
-          <!-- Sélection lycée -->
+          <!-- ===== SECTION COMMENTÉE: Sélection lycée =====
           <div v-if="localYear" class="step">
             <h3>2. Sélectionnez votre lycée</h3>
             <div class="school-grid">
@@ -52,10 +53,11 @@
               </div>
             </div>
           </div>
+          ===== FIN SECTION COMMENTÉE ===== -->
 
-          <!-- Sélection classe -->
-          <div v-if="localSchool" class="step">
-            <h3>3. Choisissez votre classe</h3>
+          <!-- Sélection classe (numérotation changée de 3 à 1) -->
+          <div class="step">
+            <h3>Choisissez votre classe</h3>
             <div class="class-grid">
               <div
                 v-for="cls in classes"
@@ -89,7 +91,7 @@
             <h3>{{ getSchoolName(selectedSchool) }} - {{ selectedYear }} - {{ getClassName(selectedClass) }}</h3>
           </div>
           <button @click="resetSelection" class="change-context-btn">
-            Changer d'établissement
+            Changer de classe
           </button>
         </div>
 
@@ -279,8 +281,9 @@ const bonusExercises = computed(() => {
   )
 })
 
+// MODIFICATION: canValidateSelection ne vérifie plus que la classe
 const canValidateSelection = computed(() => {
-  return localSchool.value && localYear.value && localClass.value
+  return localClass.value
 })
 
 // Méthodes
@@ -297,6 +300,24 @@ const selectSchool = (schoolId) => {
 const selectClass = (classId) => {
   localClass.value = classId
   setClass(classId)
+
+  // Validation automatique après sélection de la classe
+  // S'assurer que l'année et le lycée sont définis
+  if (!localYear.value && academicYears.value.length > 0) {
+    const currentYear = academicYears.value.find(y => y.isCurrent)
+    if (currentYear) {
+      selectYear(currentYear.id)
+    }
+  }
+
+  if (!localSchool.value && schools.value.length > 0) {
+    selectSchool(schools.value[0].id)
+  }
+
+  // Valider immédiatement
+  setTimeout(() => {
+    validateSelection()
+  }, 100)
 }
 
 const selectWeek = (weekNumber) => {
@@ -304,6 +325,18 @@ const selectWeek = (weekNumber) => {
 }
 
 const handleValidateSelection = () => {
+  // S'assurer que l'année et le lycée sont définis avant validation
+  if (!localYear.value && academicYears.value.length > 0) {
+    const currentYear = academicYears.value.find(y => y.isCurrent)
+    if (currentYear) {
+      selectYear(currentYear.id)
+    }
+  }
+
+  if (!localSchool.value && schools.value.length > 0) {
+    selectSchool(schools.value[0].id)
+  }
+
   validateSelection()
 }
 
@@ -328,9 +361,34 @@ watch(selectedClass, (newValue) => {
   localClass.value = newValue
 })
 
-// Initialisation
+// ===== NOUVELLE FONCTION: Réinitialiser l'année et le lycée après un reset =====
+const initializeDefaultContext = () => {
+  if (academicYears.value.length > 0) {
+    const currentYear = academicYears.value.find(y => y.isCurrent)
+    if (currentYear) {
+      selectYear(currentYear.id)
+    }
+  }
+
+  if (schools.value.length > 0) {
+    selectSchool(schools.value[0].id)
+  }
+}
+
+// Watch pour réinitialiser après un reset
+watch(contextSelected, (newValue) => {
+  if (!newValue) {
+    // Quand on revient à la sélection, réinitialiser l'année et le lycée
+    setTimeout(() => {
+      initializeDefaultContext()
+    }, 100)
+  }
+})
+
+// ===== MODIFICATION: Initialisation automatique =====
 onMounted(() => {
   setDefaultYear()
+  initializeDefaultContext()
   loadSavedContext()
 })
 </script>

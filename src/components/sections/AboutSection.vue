@@ -56,7 +56,7 @@
       <!-- Bouton LinkedIn centré en bas -->
       <div class="linkedin-container">
         <a
-          href="https://www.linkedin.com/in/jeremy-luccioni"
+          href="https://www.linkedin.com/in/jeremy-luccioni/"
           target="_blank"
           rel="noopener noreferrer"
           class="linkedin-button"
@@ -95,18 +95,15 @@ const GraduationIcon = {
   </svg>`
 }
 
+// INVERSÉ : Du plus récent (en haut) au plus ancien (en bas)
 const parcours = [
   {
-    year: '2021-2023',
-    title: 'Prépa PCSI puis PC',
-    school: 'ENCPB Paris',
-    iconComponent: BookIcon
-  },
-  {
-    year: '2023-2024',
-    title: 'Prépa PC*',
-    school: 'Lycée Louis-le-Grand',
-    iconComponent: AwardIcon
+    year: '2024-2027',
+    title: 'École Centrale de Lyon',
+    school: 'Actuellement en 2ème année',
+    iconComponent: GraduationIcon,
+    badge: 'En cours',
+    badgeClass: 'badge-current'
   },
   {
     year: '2024-2025',
@@ -117,12 +114,16 @@ const parcours = [
     badgeClass: 'badge-completed'
   },
   {
-    year: '2024-2027',
-    title: 'École Centrale de Lyon',
-    school: 'Actuellement en 2ème année',
-    iconComponent: GraduationIcon,
-    badge: 'En cours',
-    badgeClass: 'badge-current'
+    year: '2023-2024',
+    title: 'Prépa PC*',
+    school: 'Lycée Louis-le-Grand',
+    iconComponent: AwardIcon
+  },
+  {
+    year: '2021-2023',
+    title: 'Prépa PCSI puis PC',
+    school: 'ENCPB Paris',
+    iconComponent: BookIcon
   }
 ]
 </script>

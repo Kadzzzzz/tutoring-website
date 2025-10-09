@@ -24,7 +24,7 @@
           <h3>Me suivre</h3>
           <div class="social-icons">
             <a
-              href="https://www.linkedin.com/in/jeremy-luccioni-695365bb/"
+              href="https://www.linkedin.com/in/jeremy-luccioni/"
               target="_blank"
               rel="noopener noreferrer"
               class="social-link linkedin"

@@ -80,6 +80,17 @@
               </select>
             </div>
 
+            <!-- Filtre par difficulté -->
+            <div class="filter-group">
+              <label>Difficulté :</label>
+              <select v-model="selectedDifficulty" class="filter-select">
+                <option value="all">Toutes les difficultés</option>
+                <option value="facile">Facile</option>
+                <option value="moyen">Moyen</option>
+                <option value="difficile">Difficile</option>
+              </select>
+            </div>
+
             <!-- Filtre avec vidéo -->
             <div class="filter-group">
               <label class="checkbox-label">
@@ -156,6 +167,7 @@ const searchQuery = ref('')
 const selectedSubject = ref('all')
 const selectedLevel = ref('all')
 const selectedType = ref('all')
+const selectedDifficulty = ref('all')
 const showOnlyWithVideo = ref(false)
 const selectedResource = ref(null)
 
@@ -189,11 +201,15 @@ const filteredResources = computed(() => {
     filtered = filtered.filter(resource => resource.typeKey === selectedType.value)
   }
 
+  // Filtre par difficulté
+  if (selectedDifficulty.value !== 'all') {
+    filtered = filtered.filter(resource => resource.difficulty === selectedDifficulty.value)
+  }
+
   // Filtre vidéo
   if (showOnlyWithVideo.value) {
     filtered = filtered.filter(resource => resource.hasVideo)
   }
-
 
   return filtered
 })
@@ -224,6 +240,7 @@ const resetFilters = () => {
   selectedSubject.value = 'all'
   selectedLevel.value = 'all'
   selectedType.value = 'all'
+  selectedDifficulty.value = 'all'
   showOnlyWithVideo.value = false
 }
 
@@ -248,6 +265,9 @@ onMounted(() => {
   }
   if (urlParams.get('type')) {
     selectedType.value = urlParams.get('type')
+  }
+  if (urlParams.get('difficulty')) {
+    selectedDifficulty.value = urlParams.get('difficulty')
   }
 })
 </script>
