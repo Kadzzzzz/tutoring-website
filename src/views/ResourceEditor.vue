@@ -220,6 +220,10 @@ const generateIndexFile = (resources) => {
       lines.push(`${indent}  notes: "${escape(r.notes)}",`)
     }
 
+    if (r.showInResourcesPage === false) {
+      lines.push(`${indent}  showInResourcesPage: false,`)
+    }
+
     // Données de colle - CORRECTION ICI
     if (r.isColle && r.colleData) {
       lines.push(`${indent}  isColle: true,`)

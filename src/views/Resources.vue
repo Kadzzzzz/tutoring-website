@@ -175,6 +175,10 @@ const selectedResource = ref(null)
 const filteredResources = computed(() => {
   let filtered = [...resources]
 
+  if (selectedType.value !== 'programme') {
+    filtered = filtered.filter(resource => resource.showInResourcesPage !== false)
+  }
+
   // Filtre par recherche textuelle
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase()

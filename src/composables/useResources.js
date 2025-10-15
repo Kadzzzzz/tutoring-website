@@ -21,6 +21,10 @@ export function useResources() {
   const filteredResources = computed(() => {
     let filtered = [...resources]
 
+    if (activeType.value !== 'programme') {
+      filtered = filtered.filter(resource => resource.showInResourcesPage !== false)
+    }
+
     // Filtrer par matière
     if (activeSubject.value !== 'all') {
       filtered = filtered.filter(resource => resource.subject === activeSubject.value)

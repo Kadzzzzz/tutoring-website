@@ -164,7 +164,7 @@
         </div>
       </div>
 
-      <!-- NOUVELLE SECTION : Catégorie Colle -->
+      <!-- Catégorie Colle -->
       <div class="form-section colle-category">
         <h3>
           <i class="fas fa-graduation-cap"></i>
@@ -180,6 +180,26 @@
             </span>
           </label>
         </div>
+
+      <!-- Visibilité -->
+
+      <div class="form-section">
+        <h3>
+          <i class="fas fa-eye"></i>
+          Visibilité
+        </h3>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input v-model="form.showInResourcesPage" type="checkbox">
+          <span>
+            <strong>Visible sur la page Ressources</strong>
+            <small>Si décoché, cette ressource n'apparaîtra que dans la section Colles (utile pour les programmes de colle)</small>
+          </span>
+        </label>
+      </div>
+
 
         <!-- Champs spécifiques colle (affichés seulement si isColle = true) -->
         <transition name="slide-fade">
@@ -307,7 +327,8 @@ const form = ref({
   description: '',
   fullDescription: '',
   notes: '',
-  isColle: false
+  isColle: false,
+  showInResourcesPage: true
 })
 
 // Formulaire colle
