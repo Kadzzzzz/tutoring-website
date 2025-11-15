@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
+import Parcours from '@/views/Parcours.vue'
+import Pedagogie from '@/views/Pedagogie.vue'
 import Resources from '@/views/Resources.vue'
 import Colles from '@/views/Colles.vue'
 import ResourceEditor from '@/views/ResourceEditor.vue'
@@ -13,6 +15,22 @@ const router = createRouter({
       component: Home,
       meta: {
         title: 'Jeremy Luccioni - Cours Particuliers'
+      }
+    },
+    {
+      path: '/parcours',
+      name: 'Parcours',
+      component: Parcours,
+      meta: {
+        title: 'Mon Parcours - Jeremy Luccioni'
+      }
+    },
+    {
+      path: '/pedagogie',
+      name: 'Pedagogie',
+      component: Pedagogie,
+      meta: {
+        title: 'Pédagogie & Méthode - Jeremy Luccioni'
       }
     },
     {

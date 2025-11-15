@@ -4,21 +4,11 @@
       <div class="footer-content">
         <div class="footer-logo">Jeremy Luccioni</div>
         <nav class="footer-nav">
-          <!-- Si on est sur la page d'accueil, utiliser les ancres -->
-          <template v-if="isHomePage">
-            <a href="#about" @click.prevent="scrollToSection('about')">À propos</a>
-            <a href="#resources" @click.prevent="scrollToSection('resources')">Ressources</a>
-            <a href="#methodology" @click.prevent="scrollToSection('methodology')">Méthode</a>
-            <a href="#contact" @click.prevent="scrollToSection('contact')">Contact</a>
-          </template>
-
-          <!-- Si on est sur une autre page, utiliser des router-links -->
-          <template v-else>
-            <router-link to="/#about">À propos</router-link>
-            <router-link to="/resources">Ressources</router-link>
-            <router-link to="/#methodology">Méthode</router-link>
-            <router-link to="/#contact">Contact</router-link>
-          </template>
+          <router-link to="/">Accueil</router-link>
+          <router-link to="/parcours">Parcours</router-link>
+          <router-link to="/pedagogie">Pédagogie</router-link>
+          <router-link to="/resources">Ressources</router-link>
+          <router-link to="/colles">Colles</router-link>
         </nav>
       </div>
       <div class="footer-bottom">
@@ -29,15 +19,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { useNavigation } from '@/composables/useNavigation.js'
-
-const route = useRoute()
-const { scrollToSection } = useNavigation()
-
-// Déterminer si on est sur la page d'accueil
-const isHomePage = computed(() => route.name === 'Home')
+// Plus besoin d'imports complexes
 </script>
 
 <style scoped>

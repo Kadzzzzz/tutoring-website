@@ -13,52 +13,42 @@
       <!-- Navigation desktop -->
       <nav class="nav-links desktop-nav">
         <ul>
-          <!-- Navigation sur la page d'accueil -->
-          <template v-if="isHomePage">
-            <li><a href="#about" @click.prevent="scrollToSection('about')">À propos</a></li>
-            <li><a href="#resources" @click.prevent="scrollToSection('resources')">Ressources</a></li>
-            <li><a href="#methodology" @click.prevent="scrollToSection('methodology')">Méthode</a></li>
-            <li><a href="#contact" @click.prevent="scrollToSection('contact')">Contact</a></li>
-          </template>
-
-          <!-- Navigation pour les autres pages -->
-          <template v-else>
-            <li>
-              <router-link to="/" class="nav-router-link">Accueil</router-link>
-            </li>
-            <li>
-              <router-link to="/resources" class="nav-router-link">Ressources</router-link>
-            </li>
-            <li>
-              <router-link to="/colles" class="nav-router-link">Colles</router-link>
-            </li>
-          </template>
+          <li>
+            <router-link to="/" class="nav-router-link">Accueil</router-link>
+          </li>
+          <li>
+            <router-link to="/resources" class="nav-router-link">Ressources</router-link>
+          </li>
+          <li>
+            <router-link to="/colles" class="nav-router-link">Colles</router-link>
+          </li>
+          <li>
+            <router-link to="/pedagogie" class="nav-router-link">Pédagogie</router-link>
+          </li>
+          <li>
+            <router-link to="/parcours" class="nav-router-link">Parcours</router-link>
+          </li>
         </ul>
       </nav>
 
       <!-- Menu mobile -->
       <nav class="mobile-nav" :class="{ 'open': mobileMenuOpen }">
         <ul>
-          <!-- Navigation sur la page d'accueil -->
-          <template v-if="isHomePage">
-            <li><a href="#about" @click="handleMobileClick('about')">À propos</a></li>
-            <li><a href="#resources" @click="handleMobileClick('resources')">Ressources</a></li>
-            <li><a href="#methodology" @click="handleMobileClick('methodology')">Méthode</a></li>
-            <li><a href="#contact" @click="handleMobileClick('contact')">Contact</a></li>
-          </template>
-
-          <!-- Navigation pour les autres pages -->
-          <template v-else>
-            <li>
-              <router-link to="/" class="nav-router-link" @click="closeMobileMenu">Accueil</router-link>
-            </li>
-            <li>
-              <router-link to="/resources" class="nav-router-link" @click="closeMobileMenu">Ressources</router-link>
-            </li>
-            <li>
-              <router-link to="/colles" class="nav-router-link" @click="closeMobileMenu">Colles</router-link>
-            </li>
-          </template>
+          <li>
+            <router-link to="/" class="nav-router-link" @click="closeMobileMenu">Accueil</router-link>
+          </li>
+          <li>
+            <router-link to="/resources" class="nav-router-link" @click="closeMobileMenu">Ressources</router-link>
+          </li>
+          <li>
+            <router-link to="/colles" class="nav-router-link" @click="closeMobileMenu">Colles</router-link>
+          </li>
+          <li>
+            <router-link to="/pedagogie" class="nav-router-link" @click="closeMobileMenu">Pédagogie</router-link>
+          </li>
+          <li>
+            <router-link to="/parcours" class="nav-router-link" @click="closeMobileMenu">Parcours</router-link>
+          </li>
         </ul>
       </nav>
     </div>
@@ -69,18 +59,15 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useNavigation } from '@/composables/useNavigation.js'
 
 const route = useRoute()
-const { scrolled, scrollToSection } = useNavigation()
+const { scrolled } = useNavigation()
 
 // État du menu mobile
 const mobileMenuOpen = ref(false)
-
-// Déterminer si on est sur la page d'accueil
-const isHomePage = computed(() => route.name === 'Home')
 
 // Fonctions pour gérer le menu mobile
 const toggleMobileMenu = () => {
@@ -98,11 +85,6 @@ const closeMobileMenu = () => {
   document.body.style.overflow = ''
 }
 
-const handleMobileClick = (section) => {
-  scrollToSection(section)
-  closeMobileMenu()
-}
-
 // Fermer le menu quand on change de route
 watch(() => route.path, () => {
   closeMobileMenu()
@@ -117,7 +99,7 @@ watch(() => route.path, () => {
   width: 100%;
   z-index: 1000;
   height: var(--header-height, 70px);
-  background-color: transparent;
+  background-color: rgba(44, 62, 80, 0.95);
   transition: background-color var(--transition-speed, 0.3s), box-shadow var(--transition-speed, 0.3s);
   display: flex;
   align-items: center;
@@ -236,11 +218,6 @@ watch(() => route.path, () => {
 /* Overlay mobile */
 .mobile-overlay {
   display: none;
-}
-
-/* Style pour les pages autres que l'accueil */
-.header:not(.header-scrolled) {
-  background-color: rgba(44, 62, 80, 0.95);
 }
 
 /* Responsive - Afficher le menu hamburger sur mobile */
