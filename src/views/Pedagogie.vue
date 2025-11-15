@@ -32,37 +32,37 @@ const workMethodTips = [
   {
     id: 1,
     title: "Organisation et Planification",
-    description: "Apprenez à gérer votre temps efficacement avec des planning réalistes et des objectifs clairs. Une bonne organisation est la clé de la réussite en prépa.",
+    description: "Gérez votre temps efficacement en vous fixant des objectifs clairs et atteignables. Une bonne organisation est la clé de la réussite en prépa.",
     icon: "fas fa-calendar-alt"
   },
   {
     id: 2,
     title: "Fiches de Révision Efficaces",
-    description: "Maîtrisez l'art de créer des fiches synthétiques et visuelles qui facilitent la mémorisation et la compréhension des concepts clés.",
+    description: "Créez des fiches synthétiques et visuelles pour faciliter la mémorisation et la compréhension des concepts clés. Attention à ne pas perdre du temps à recopier votre cours en intégralité sur les fiches.",
     icon: "fas fa-file-alt"
   },
   {
     id: 3,
     title: "Entraînement Régulier",
-    description: "La régularité est essentielle. Pratiquez quotidiennement avec des exercices variés pour consolider vos acquis et développer vos automatismes.",
+    description: "La régularité est essentielle. Pratiquez quotidiennement, révisez vos cours et faites des exercices pour consolider vos acquis et développer des automatismes. La prépa est un marathon : il faut être constant et éviter les sprints improvisés.",
     icon: "fas fa-dumbbell"
   },
   {
     id: 4,
     title: "Apprentissage Actif",
-    description: "Ne vous contentez pas de relire : questionnez-vous, reformulez, enseignez à d'autres. L'apprentissage actif renforce durablement la compréhension.",
+    description: "Ne vous contentez pas de relire : questionnez-vous, reformulez, enseignez à d'autres. L'apprentissage actif renforce durablement la compréhension.Par exemple: entraînez-vous à retrouver les concepts clés de chaque partie de votre cours à partir du plan détaillé.",
     icon: "fas fa-brain"
   },
   {
     id: 5,
     title: "Gestion du Stress",
-    description: "Développez des techniques pour rester serein face aux examens et aux échéances. Un esprit apaisé est un esprit performant.",
+    description: "Le stress est très commun en prépa et c'est normal. Tout le monde stresse, même si c'est plus visible chez certains que chez d'autres. Trouvez des moyens de vous calmer et de prendre du recul sur votre travail. Un esprit apaisé est un esprit performant.",
     icon: "fas fa-heart"
   },
   {
     id: 6,
     title: "Analyse de vos Erreurs",
-    description: "Chaque erreur est une opportunité d'apprentissage. Prenez le temps d'analyser vos fautes pour ne plus les reproduire.",
+    description: "Chaque erreur est une opportunité d'apprentissage. Analysez vos fautes pour ne plus les reproduire. Relisez attentivement vos copies d'évaluations pour éviter de répéter les mêmes erreurs.",
     icon: "fas fa-search"
   }
 ]
