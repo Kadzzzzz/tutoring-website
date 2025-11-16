@@ -1,0 +1,25 @@
+# À copier dans public_html/.htaccess sur Hostinger
+# Empêche la mise en cache du fichier HTML principal
+<Files "index.html">
+  FileETag None
+  <IfModule mod_headers.c>
+    Header unset ETag
+    Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+  </IfModule>
+</Files>
+
+# Cache long pour les fichiers JS/CSS avec hash
+<FilesMatch "\.(js|css)$">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "max-age=31536000, immutable"
+  </IfModule>
+</FilesMatch>
+
+# Cache pour les images
+<FilesMatch "\.(jpg|jpeg|png|gif|svg|webp)$">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "max-age=604800, public"
+  </IfModule>
+</FilesMatch>
