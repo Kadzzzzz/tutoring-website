@@ -139,7 +139,10 @@ Réponds UNIQUEMENT avec le JSON, sans autre texte.`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const responseText = response.text().trim();
+    let responseText = response.text().trim();
+
+    // Nettoyer les backticks markdown si présents (```json ... ```)
+    responseText = responseText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
 
     // Essayer de parser le JSON
     try {
@@ -150,6 +153,7 @@ Réponds UNIQUEMENT avec le JSON, sans autre texte.`;
       };
     } catch (parseError) {
       console.error('Erreur parsing JSON de Gemini:', parseError);
+      console.error('Réponse brute:', responseText.substring(0, 200));
       // Retour par défaut
       return {
         title: `Exercice planche ${plancheNum}`,
