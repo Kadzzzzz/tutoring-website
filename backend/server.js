@@ -313,7 +313,94 @@ app.get('/api/download/:matiere/:classe/:semaine/:filename', async (req, res) =>
   }
 });
 
-// Route pour télécharger un package ZIP complet
+// Route POST pour télécharger un package ZIP avec métadonnées personnalisées
+app.post('/api/download-zip', async (req, res) => {
+  try {
+    const { matiere, classe, semaine, resources } = req.body;
+
+    if (!matiere || !classe || !semaine || !resources) {
+      return res.status(400).json({ error: 'Paramètres manquants' });
+    }
+
+    const outputDir = path.join(__dirname, 'output', matiere, `Colles-${classe}-S${semaine}`);
+
+    // Vérifier que le dossier existe
+    await fs.access(outputDir);
+
+    // Scanner les fichiers
+    const files = await fs.readdir(outputDir);
+    const pdfs = files.filter(f => f.endsWith('.pdf'));
+
+    if (pdfs.length === 0) {
+      return res.status(404).json({ error: 'Aucun PDF trouvé' });
+    }
+
+    // Créer le fichier INSTRUCTIONS.txt
+    const instructions = `📦 PACKAGE DE RESSOURCES - Colles ${classe} Semaine ${semaine}
+============================================================
+
+Contenu du package :
+${pdfs.map(f => `- ${f}`).join('\n')}
+
+ÉTAPES D'INSTALLATION :
+----------------------
+
+1️⃣ COPIER LES PDFs
+   → Placer tous les fichiers PDF dans :
+   public/documents/exercices/${matiere}/Colles-${classe}-S${semaine}/
+
+2️⃣ AJOUTER LES RESSOURCES
+   → Ouvrir le fichier : src/data/resources/index.js
+   → Copier le contenu de RESOURCES_TO_ADD.js
+   → Coller à la fin du tableau "export const resources = [...]"
+   → Attention : ajouter une virgule avant si nécessaire !
+
+3️⃣ VÉRIFIER
+   → Lancer le serveur de développement (npm run dev)
+   → Aller sur la page des colles pour vérifier
+
+4️⃣ DÉPLOYER
+   → Commit : git add . && git commit -m "Add colles S${semaine}"
+   → Push : git push
+   → Déployer sur Hostinger
+
+📝 NOTES :
+- Les PDFs doivent être dans le dossier public/documents/exercices/
+- Le code JavaScript doit être dans src/data/resources/index.js
+- N'oubliez pas de build avant de déployer !
+
+Bon courage ! 🚀
+`;
+
+    // Générer le code JavaScript avec les métadonnées personnalisées
+    const resourcesCode = generateResourcesCodeFromData(resources);
+
+    // Créer le ZIP
+    const archive = archiver('zip', { zlib: { level: 9 } });
+
+    res.attachment(`Colles-${classe}-S${semaine}.zip`);
+    archive.pipe(res);
+
+    // Ajouter les PDFs
+    for (const pdf of pdfs) {
+      const pdfPath = path.join(outputDir, pdf);
+      archive.file(pdfPath, { name: `PDFs/${pdf}` });
+    }
+
+    // Ajouter les fichiers d'instructions
+    archive.append(instructions, { name: 'INSTRUCTIONS.txt' });
+    archive.append(resourcesCode, { name: 'RESOURCES_TO_ADD.js' });
+
+    await archive.finalize();
+
+    console.log(`📦 ZIP généré avec métadonnées personnalisées: Colles-${classe}-S${semaine}.zip`);
+  } catch (error) {
+    console.error('❌ Erreur création ZIP:', error);
+    res.status(500).json({ error: 'Erreur lors de la création du ZIP', details: error.message });
+  }
+});
+
+// Route GET pour télécharger un package ZIP complet (ancienne version, gardée pour compatibilité)
 app.get('/api/download-zip/:matiere/:classe/:semaine', async (req, res) => {
   try {
     const { matiere, classe, semaine } = req.params;
@@ -395,7 +482,59 @@ Bon courage ! 🚀
   }
 });
 
-// Fonction pour générer le code des ressources
+// Fonction pour générer le code des ressources à partir de données personnalisées
+function generateResourcesCodeFromData(resources) {
+  // Générer le code JavaScript formaté
+  let code = '// 📝 RESSOURCES À AJOUTER DANS src/data/resources/index.js\n';
+  code += '// Copiez ce code et collez-le à la fin du tableau "export const resources = [...]"\n';
+  code += '// N\'oubliez pas d\'ajouter une virgule avant si nécessaire !\n\n';
+
+  resources.forEach((r, idx) => {
+    code += '  {\n';
+    code += `    id: "${r.id}",\n`;
+    code += `    subject: "${r.subject}",\n`;
+    code += `    levelKey: "${r.levelKey || 'prepa1'}",\n`;
+    code += `    typeKey: "${r.typeKey || 'exercise'}",\n`;
+    code += `    duration: "${r.duration || '45'}",\n`;
+    code += `    hasVideo: ${r.hasVideo || false},\n`;
+    code += `    videoUrl: "${r.videoUrl || ''}",\n`;
+    code += `    pdfStatement: "${r.pdfStatement}",\n`;
+    code += `    pdfSolution: "${r.pdfSolution || ''}",\n`;
+    code += `    difficulty: "${r.difficulty || 'moyen'}",\n`;
+    code += `    tags: [${r.tags ? r.tags.map(t => `"${t}"`).join(', ') : ''}],\n`;
+    code += `    createdAt: "${r.createdAt || new Date().toISOString().split('T')[0]}",\n`;
+    code += `    title: "${r.title || 'Exercice'}",\n`;
+    code += `    description: "${r.description || ''}",\n`;
+    if (r.fullDescription) code += `    fullDescription: "${r.fullDescription}",\n`;
+    if (r.notes) code += `    notes: "${r.notes}",\n`;
+    code += `    isColle: true,\n`;
+    if (r.showInResourcesPage === false) code += `    showInResourcesPage: false,\n`;
+
+    if (r.colleAssignments && r.colleAssignments.length > 0) {
+      code += `    colleAssignments: [\n`;
+      r.colleAssignments.forEach((assignment, aIdx) => {
+        code += `      {\n`;
+        code += `        school: "${assignment.school || 'jean-perrin'}",\n`;
+        code += `        year: "${assignment.year || '2025-2026'}",\n`;
+        code += `        class: "${assignment.class || ''}",\n`;
+        code += `        week: ${assignment.week || 0},\n`;
+        code += `        weekDate: "${assignment.weekDate || ''}",\n`;
+        code += `        planche: ${assignment.planche || 0},\n`;
+        code += `        teacher: "${assignment.teacher || 'Jeremy Luccioni'}",\n`;
+        code += `        timeSlot: "${assignment.timeSlot || ''}",\n`;
+        code += `        trinomes: ${assignment.trinomes ? JSON.stringify(assignment.trinomes) : '[]'}\n`;
+        code += `      }${aIdx < r.colleAssignments.length - 1 ? ',' : ''}\n`;
+      });
+      code += `    ]\n`;
+    }
+
+    code += `  }${idx < resources.length - 1 ? ',' : ''}\n\n`;
+  });
+
+  return code;
+}
+
+// Fonction pour générer le code des ressources (version originale)
 async function generateResourcesCode(outputDir, matiere, classe, semaine) {
   const files = await fs.readdir(outputDir);
   const pdfs = files.filter(f => f.endsWith('.pdf'));

@@ -130,14 +130,24 @@
           <!-- Résultats du traitement -->
           <div v-if="processedResources.length > 0" class="processed-results">
             <h3><i class="fas fa-check-circle"></i> Ressources générées ({{ processedResources.length }})</h3>
+            <p class="help-text">✏️ Vous pouvez personnaliser les titres et descriptions ci-dessous</p>
 
             <div class="resources-preview">
-              <div v-for="(resource, idx) in processedResources" :key="idx" class="resource-card">
+              <div v-for="(resource, idx) in processedResources" :key="idx" class="resource-card editable">
                 <div class="resource-header">
-                  <strong>{{ resource.title }}</strong>
+                  <input
+                    v-model="resource.title"
+                    class="editable-title"
+                    placeholder="Titre de l'exercice"
+                  />
                   <span class="badge">{{ resource.subject }}</span>
                 </div>
-                <p class="resource-desc">{{ resource.description }}</p>
+                <textarea
+                  v-model="resource.description"
+                  class="editable-description"
+                  placeholder="Description de l'exercice"
+                  rows="2"
+                ></textarea>
                 <div class="resource-meta">
                   <span><i class="fas fa-file-pdf"></i> {{ resource.pdfStatement }}</span>
                 </div>
@@ -482,11 +492,23 @@ const downloadZipPackage = async () => {
 
   try {
     const { matiere, classe, semaine } = lastProcessedData.value
-    const url = `${API_URL}/api/download-zip/${matiere}/${classe}/${semaine}`
+    const url = `${API_URL}/api/download-zip`
 
     showNotification('Préparation du package ZIP...', 'info')
 
-    const response = await fetch(url)
+    // Envoyer les ressources modifiées au backend
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        matiere,
+        classe,
+        semaine,
+        resources: processedResources.value  // Avec titres et descriptions modifiés
+      })
+    })
 
     if (!response.ok) {
       throw new Error('Erreur lors du téléchargement du ZIP')
@@ -1166,17 +1188,59 @@ export const getResourceStats = () => {
   padding: 15px;
   border-radius: 8px;
   border-left: 4px solid var(--accent-color);
+  transition: all 0.3s;
+}
+
+.resource-card.editable:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .resource-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  gap: 10px;
 }
 
 .resource-header strong {
   color: var(--primary-color);
+}
+
+.editable-title {
+  flex: 1;
+  padding: 8px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  transition: border-color 0.3s;
+}
+
+.editable-title:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  background: #f8f9fa;
+}
+
+.editable-description {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #555;
+  resize: vertical;
+  margin-bottom: 10px;
+  transition: border-color 0.3s;
+  font-family: inherit;
+}
+
+.editable-description:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  background: #f8f9fa;
 }
 
 .badge {
