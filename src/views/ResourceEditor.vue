@@ -233,7 +233,11 @@ import ResourceList from '@/components/editor/ResourceList.vue'
 import ResourceForm from '@/components/editor/ResourceForm.vue'
 
 // Configuration de l'API backend
-const API_URL = 'https://colle-splitter-api.onrender.com'
+// En développement local : utilise localhost:3001
+// En production : utilise l'API Render.com
+const API_URL = import.meta.env.DEV
+  ? 'http://localhost:3001'
+  : 'https://colle-splitter-api.onrender.com'
 
 // État
 const activeTab = ref('upload')
