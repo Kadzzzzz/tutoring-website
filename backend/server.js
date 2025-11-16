@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs').promises;
 const { spawn } = require('child_process');
+const archiver = require('archiver');
 require('dotenv').config();
 
 const app = express();
@@ -298,6 +299,183 @@ app.get('/api/download/:matiere/:classe/:semaine/:filename', async (req, res) =>
     res.status(404).json({ error: 'Fichier non trouvé' });
   }
 });
+
+// Route pour télécharger un package ZIP complet
+app.get('/api/download-zip/:matiere/:classe/:semaine', async (req, res) => {
+  try {
+    const { matiere, classe, semaine } = req.params;
+    const outputDir = path.join(__dirname, 'output', matiere, `Colles-${classe}-S${semaine}`);
+
+    // Vérifier que le dossier existe
+    await fs.access(outputDir);
+
+    // Scanner les fichiers
+    const files = await fs.readdir(outputDir);
+    const pdfs = files.filter(f => f.endsWith('.pdf'));
+
+    if (pdfs.length === 0) {
+      return res.status(404).json({ error: 'Aucun PDF trouvé' });
+    }
+
+    // Créer le fichier INSTRUCTIONS.txt
+    const instructions = `📦 PACKAGE DE RESSOURCES - Colles ${classe} Semaine ${semaine}
+============================================================
+
+Contenu du package :
+${pdfs.map(f => `- ${f}`).join('\n')}
+
+ÉTAPES D'INSTALLATION :
+----------------------
+
+1️⃣ COPIER LES PDFs
+   → Placer tous les fichiers PDF dans :
+   public/documents/exercices/${matiere}/Colles-${classe}-S${semaine}/
+
+2️⃣ AJOUTER LES RESSOURCES
+   → Ouvrir le fichier : src/data/resources/index.js
+   → Copier le contenu de RESOURCES_TO_ADD.js
+   → Coller à la fin du tableau "export const resources = [...]"
+   → Attention : ajouter une virgule avant si nécessaire !
+
+3️⃣ VÉRIFIER
+   → Lancer le serveur de développement (npm run dev)
+   → Aller sur la page des colles pour vérifier
+
+4️⃣ DÉPLOYER
+   → Commit : git add . && git commit -m "Add colles S${semaine}"
+   → Push : git push
+   → Déployer sur Hostinger
+
+📝 NOTES :
+- Les PDFs doivent être dans le dossier public/documents/exercices/
+- Le code JavaScript doit être dans src/data/resources/index.js
+- N'oubliez pas de build avant de déployer !
+
+Bon courage ! 🚀
+`;
+
+    // Créer le fichier RESOURCES_TO_ADD.js
+    const resourcesCode = await generateResourcesCode(outputDir, matiere, classe, parseInt(semaine));
+
+    // Créer le ZIP
+    const archive = archiver('zip', { zlib: { level: 9 } });
+
+    res.attachment(`Colles-${classe}-S${semaine}.zip`);
+    archive.pipe(res);
+
+    // Ajouter les PDFs
+    for (const pdf of pdfs) {
+      const pdfPath = path.join(outputDir, pdf);
+      archive.file(pdfPath, { name: `PDFs/${pdf}` });
+    }
+
+    // Ajouter les fichiers d'instructions
+    archive.append(instructions, { name: 'INSTRUCTIONS.txt' });
+    archive.append(resourcesCode, { name: 'RESOURCES_TO_ADD.js' });
+
+    await archive.finalize();
+
+    console.log(`📦 ZIP généré: Colles-${classe}-S${semaine}.zip`);
+  } catch (error) {
+    console.error('❌ Erreur création ZIP:', error);
+    res.status(500).json({ error: 'Erreur lors de la création du ZIP', details: error.message });
+  }
+});
+
+// Fonction pour générer le code des ressources
+async function generateResourcesCode(outputDir, matiere, classe, semaine) {
+  const files = await fs.readdir(outputDir);
+  const pdfs = files.filter(f => f.endsWith('.pdf'));
+
+  const resources = [];
+
+  // Ajouter le programme
+  if (pdfs.includes('Programme.pdf')) {
+    resources.push({
+      id: `programme-${classe.toLowerCase()}-s${semaine}`,
+      subject: matiere,
+      pdfStatement: `/documents/exercices/${matiere}/Colles-${classe}-S${semaine}/Programme.pdf`,
+      title: `Programme de colle ${classe} Semaine ${semaine}`,
+      description: `Programme de la semaine ${semaine}`,
+      isColle: true,
+      showInResourcesPage: false,
+      planche: 0
+    });
+  }
+
+  // Ajouter les exercices
+  const exercicePdfs = pdfs.filter(f => f !== 'Programme.pdf');
+
+  for (const pdf of exercicePdfs) {
+    const match = pdf.match(/^P(\d+)(?:-(\d+))?\.pdf$/);
+    if (match) {
+      const plancheNum = parseInt(match[1]);
+      const exerciceNum = match[2] ? parseInt(match[2]) : null;
+
+      const id = exerciceNum
+        ? `${matiere}-${classe.toLowerCase()}-s${semaine}-p${plancheNum}-${exerciceNum}`
+        : `${matiere}-${classe.toLowerCase()}-s${semaine}-p${plancheNum}`;
+
+      const title = exerciceNum
+        ? `Exercice planche ${plancheNum} - Partie ${exerciceNum}`
+        : `Exercice planche ${plancheNum}`;
+
+      resources.push({
+        id,
+        subject: matiere,
+        pdfStatement: `/documents/exercices/${matiere}/Colles-${classe}-S${semaine}/${pdf}`,
+        title,
+        description: `Exercice de ${matiere} - ${classe} Semaine ${semaine}`,
+        notes: `Planche ${plancheNum} - Semaine ${semaine}`,
+        isColle: true,
+        planche: plancheNum
+      });
+    }
+  }
+
+  // Générer le code JavaScript formaté
+  let code = '// 📝 RESSOURCES À AJOUTER DANS src/data/resources/index.js\n';
+  code += `// Colles ${classe} - Semaine ${semaine} - ${matiere}\n`;
+  code += '// Copiez ce code et collez-le à la fin du tableau "export const resources = [...]"\n';
+  code += '// N\'oubliez pas d\'ajouter une virgule avant si nécessaire !\n\n';
+
+  resources.forEach((r, idx) => {
+    code += '  {\n';
+    code += `    id: "${r.id}",\n`;
+    code += `    subject: "${r.subject}",\n`;
+    code += `    levelKey: "prepa1",\n`;
+    code += `    typeKey: "${r.showInResourcesPage === false ? 'programme' : 'exercise'}",\n`;
+    code += `    duration: "${r.showInResourcesPage === false ? '' : '45'}",\n`;
+    code += `    hasVideo: false,\n`;
+    code += `    videoUrl: "",\n`;
+    code += `    pdfStatement: "${r.pdfStatement}",\n`;
+    code += `    pdfSolution: "",\n`;
+    code += `    difficulty: "moyen",\n`;
+    code += `    tags: ["${r.subject}", "colle", "${classe.toLowerCase()}", "semaine ${semaine}"],\n`;
+    code += `    createdAt: "${new Date().toISOString().split('T')[0]}",\n`;
+    code += `    title: "${r.title}",\n`;
+    code += `    description: "${r.description}",\n`;
+    if (r.notes) code += `    notes: "${r.notes}",\n`;
+    code += `    isColle: true,\n`;
+    if (r.showInResourcesPage === false) code += `    showInResourcesPage: false,\n`;
+    code += `    colleAssignments: [\n`;
+    code += `      {\n`;
+    code += `        school: "jean-perrin",\n`;
+    code += `        year: "2025-2026",\n`;
+    code += `        class: "${classe.toLowerCase()}",\n`;
+    code += `        week: ${semaine},\n`;
+    code += `        weekDate: "",\n`;
+    code += `        planche: ${r.planche},\n`;
+    code += `        teacher: "Jeremy Luccioni",\n`;
+    code += `        timeSlot: "",\n`;
+    code += `        trinomes: []\n`;
+    code += `      }\n`;
+    code += `    ]\n`;
+    code += `  }${idx < resources.length - 1 ? ',' : ''}\n\n`;
+  });
+
+  return code;
+}
 
 // Route de health check
 app.get('/health', (req, res) => {

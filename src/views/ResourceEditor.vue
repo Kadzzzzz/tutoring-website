@@ -145,7 +145,10 @@
             </div>
 
             <div class="results-actions">
-              <button @click="copyGeneratedCode" class="btn btn-success">
+              <button @click="downloadZipPackage" class="btn btn-success btn-highlight">
+                <i class="fas fa-download"></i> 📦 Télécharger le package complet (ZIP)
+              </button>
+              <button @click="copyGeneratedCode" class="btn btn-secondary">
                 <i class="fas fa-copy"></i> Copier le code JavaScript
               </button>
               <button @click="addProcessedToResources" class="btn btn-primary">
@@ -233,11 +236,8 @@ import ResourceList from '@/components/editor/ResourceList.vue'
 import ResourceForm from '@/components/editor/ResourceForm.vue'
 
 // Configuration de l'API backend
-// En développement local : utilise localhost:3001
-// En production : utilise l'API Render.com
-const API_URL = import.meta.env.DEV
-  ? 'http://localhost:3001'
-  : 'https://colle-splitter-api.onrender.com'
+// Utilise toujours l'API Render.com (Python installé)
+const API_URL = 'https://colle-splitter-api.onrender.com'
 
 // État
 const activeTab = ref('upload')
@@ -260,6 +260,7 @@ const selectedFile = ref(null)
 const isUploading = ref(false)
 const processedResources = ref([])
 const generatedCode = ref('')
+const lastProcessedData = ref(null) // Pour stocker les infos du dernier traitement
 
 // Computed
 const hasChanges = computed(() => {
@@ -390,6 +391,13 @@ const handlePdfUpload = async () => {
     processedResources.value = data.resources || []
     generatedCode.value = generateCodeFromResources(processedResources.value)
 
+    // Stocker les infos pour le téléchargement ZIP
+    lastProcessedData.value = {
+      matiere: uploadData.value.matiere,
+      classe: uploadData.value.classe,
+      semaine: uploadData.value.semaine
+    }
+
     showNotification(
       `✅ ${processedResources.value.length} ressources générées avec succès !`,
       'success'
@@ -464,6 +472,39 @@ const addProcessedToResources = () => {
   // Basculer vers l'onglet de gestion
   activeTab.value = 'manage'
   processedResources.value = []
+}
+
+const downloadZipPackage = async () => {
+  if (!lastProcessedData.value) {
+    showNotification('Aucun traitement récent trouvé', 'error')
+    return
+  }
+
+  try {
+    const { matiere, classe, semaine } = lastProcessedData.value
+    const url = `${API_URL}/api/download-zip/${matiere}/${classe}/${semaine}`
+
+    showNotification('Préparation du package ZIP...', 'info')
+
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      throw new Error('Erreur lors du téléchargement du ZIP')
+    }
+
+    const blob = await response.blob()
+    const downloadUrl = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    link.download = `Colles-${classe}-S${semaine}.zip`
+    link.click()
+    window.URL.revokeObjectURL(downloadUrl)
+
+    showNotification('📦 Package ZIP téléchargé avec succès !', 'success')
+  } catch (error) {
+    console.error('Erreur téléchargement ZIP:', error)
+    showNotification(`❌ Erreur: ${error.message}`, 'error')
+  }
 }
 
 // À remplacer dans ResourceEditor.vue
@@ -1079,6 +1120,21 @@ export const getResourceStats = () => {
 .btn-large {
   padding: 15px 40px;
   font-size: 1.1rem;
+}
+
+.btn-highlight {
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+  font-weight: 700;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(39, 174, 96, 0.5);
+  }
 }
 
 .processed-results {
