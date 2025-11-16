@@ -921,7 +921,7 @@ export const resources = [
     }
   },
     {
-  id: "vitesse-liberation-mpsi-s5",
+  id: "vitesse-liberation-mpsi",
   subject: "physics",
   levelKey: "prepa1",
   typeKey: "exercise",
@@ -934,21 +934,34 @@ export const resources = [
   tags: ["énergie mécanique", "vitesse de libération", "gravitation", "astre", "Terre", "Lune", "colle"],
   createdAt: "2025-11-01",
   title: "Vitesse de libération",
-  description: "Énergie mécanique et vitesse minimale pour échapper à l’attraction d’un astre",
-  fullDescription: "Exercice complet sur la vitesse de libération. Rappel de l’énergie potentielle gravitationnelle, application du principe de conservation de l’énergie mécanique pour exprimer la vitesse de libération d’un astre. Détermination de l’expression en fonction de la masse volumique. Applications numériques pour la Terre et la Lune.",
-  notes: "Planche 1 - Question de cours P4 : théorème de la puissance cinétique et de l’énergie cinétique. Exercice de chimie sur l’ammoniac (structure, géométrie, polarité).",
+  description: "Énergie mécanique et vitesse minimale pour échapper à l'attraction d'un astre",
+  fullDescription: "Exercice complet sur la vitesse de libération. Rappel de l'énergie potentielle gravitationnelle, application du principe de conservation de l'énergie mécanique pour exprimer la vitesse de libération d'un astre. Détermination de l'expression en fonction de la masse volumique. Applications numériques pour la Terre et la Lune.",
+  notes: "Question de cours : théorème de la puissance cinétique et de l'énergie cinétique. Exercice de chimie sur l'ammoniac (structure, géométrie, polarité).",
   isColle: true,
-  colleData: {
-    school: "jean-perrin",
-    year: "2025-2026",
-    class: "mpsi",
-    week: 5,
-    weekDate: "2025-10-16",
-    planche: 1,
-    teacher: "Jeremy Luccioni",
-    timeSlot: "",
-    trinomes: []
-  }
+  colleAssignments: [
+    {
+      school: "jean-perrin",
+      year: "2025-2026",
+      class: "mpsi",
+      week: 4,
+      weekDate: "2025-10-06",
+      planche: 3,
+      teacher: "Jeremy Luccioni",
+      timeSlot: "",
+      trinomes: []
+    },
+    {
+      school: "jean-perrin",
+      year: "2025-2026",
+      class: "mpsi",
+      week: 5,
+      weekDate: "2025-10-16",
+      planche: 1,
+      teacher: "Jeremy Luccioni",
+      timeSlot: "",
+      trinomes: []
+    }
+  ]
 },
 {
   id: "trajectoire-terre-mpsi-s5",
@@ -1123,35 +1136,6 @@ export const resources = [
       week: 4,
       weekDate: "2025-10-06",
       planche: 2,
-      teacher: "Jeremy Luccioni",
-      timeSlot: "",
-      trinomes: []
-    }
-  },
-  {
-    id: "physique-mpsi-s4-p3",
-    subject: "physics",
-    levelKey: "prepa1",
-    typeKey: "exercise",
-    duration: "45",
-    hasVideo: false,
-    videoUrl: "",
-    pdfStatement: "/documents/exercices/physique/Colles-MPSI-S4/P3.pdf",
-    pdfSolution: "",
-    difficulty: "moyen",
-    tags: ["physique", "colle", "mécanique", "gravitation", "énergie potentielle", "vitesse de libération"],
-    createdAt: "2025-11-15",
-    title: "Vitesse de libération - Terre et Lune",
-    description: "Calcul de la vitesse de libération depuis la surface de la Terre et de la Lune en utilisant l'énergie potentielle gravitationnelle",
-    notes: "Exercice de colle semaine 4",
-    isColle: true,
-    colleData: {
-      school: "jean-perrin",
-      year: "2025-2026",
-      class: "mpsi",
-      week: 4,
-      weekDate: "2025-10-06",
-      planche: 3,
       teacher: "Jeremy Luccioni",
       timeSlot: "",
       trinomes: []
@@ -2103,31 +2087,71 @@ export const getColleResources = () => {
   return resources.filter(resource => resource.isColle === true)
 }
 
+// Helper: Get all assignments for a resource (supports both colleData and colleAssignments)
+const getResourceAssignments = (resource) => {
+  if (resource.colleAssignments && Array.isArray(resource.colleAssignments)) {
+    return resource.colleAssignments
+  }
+  // Backward compatibility with old colleData format
+  if (resource.colleData) {
+    return [resource.colleData]
+  }
+  return []
+}
+
 export const getCollesBySchoolAndYear = (school, year) => {
-  return getColleResources().filter(resource =>
-    resource.colleData?.school === school &&
-    resource.colleData?.year === year
-  )
+  return getColleResources().filter(resource => {
+    const assignments = getResourceAssignments(resource)
+    return assignments.some(assignment =>
+      assignment.school === school && assignment.year === year
+    )
+  })
 }
 
 export const getCollesByWeek = (school, year, week) => {
-  return getCollesBySchoolAndYear(school, year).filter(resource =>
-    resource.colleData?.week === week
-  )
+  return getColleResources().flatMap(resource => {
+    const assignments = getResourceAssignments(resource)
+    const matchingAssignments = assignments.filter(assignment =>
+      assignment.school === school &&
+      assignment.year === year &&
+      assignment.week === week
+    )
+
+    // Return a copy of the resource for each matching assignment
+    return matchingAssignments.map(assignment => ({
+      ...resource,
+      colleData: assignment // For backward compatibility with components
+    }))
+  })
 }
 
 export const getCollesByClass = (school, year, className) => {
-  return getCollesBySchoolAndYear(school, year).filter(resource =>
-    resource.colleData?.class === className
-  )
+  return getColleResources().filter(resource => {
+    const assignments = getResourceAssignments(resource)
+    return assignments.some(assignment =>
+      assignment.school === school &&
+      assignment.year === year &&
+      assignment.class === className
+    )
+  })
 }
 
 export const getWeeksWithColles = (school, year, className = null) => {
-  const colles = className ?
-    getCollesByClass(school, year, className) :
-    getCollesBySchoolAndYear(school, year)
+  const colles = getColleResources()
 
-  const weeks = [...new Set(colles.map(c => c.colleData?.week))].sort()
+  const allWeeks = new Set()
+  colles.forEach(resource => {
+    const assignments = getResourceAssignments(resource)
+    assignments.forEach(assignment => {
+      if (assignment.school === school && assignment.year === year) {
+        if (!className || assignment.class === className) {
+          allWeeks.add(assignment.week)
+        }
+      }
+    })
+  })
+
+  const weeks = [...allWeeks].sort((a, b) => a - b)
   return weeks.map(week => {
     const weekData = collesMetadata.collesCalendar[year]?.weeks.find(w => w.number === week)
     return {

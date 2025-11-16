@@ -181,90 +181,120 @@
           </label>
         </div>
 
-      <!-- Visibilité -->
-
-      <div class="form-section">
-        <h3>
-          <i class="fas fa-eye"></i>
-          Visibilité
-        </h3>
-      </div>
-
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input v-model="form.showInResourcesPage" type="checkbox">
-          <span>
-            <strong>Visible sur la page Ressources</strong>
-            <small>Si décoché, cette ressource n'apparaîtra que dans la section Colles (utile pour les programmes de colle)</small>
-          </span>
-        </label>
-      </div>
-
-
         <!-- Champs spécifiques colle (affichés seulement si isColle = true) -->
         <transition name="slide-fade">
           <div v-if="form.isColle" class="colle-specific-fields">
             <div class="info-banner">
               <i class="fas fa-info-circle"></i>
-              <p>Remplissez les informations spécifiques pour cette colle</p>
+              <p>Cette ressource peut être attribuée à plusieurs planches de colles</p>
             </div>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label>École <span class="required">*</span></label>
-                <input v-model="colleForm.school" type="text" placeholder="jean-perrin" required>
-              </div>
-
-              <div class="form-group">
-                <label>Année scolaire <span class="required">*</span></label>
-                <input v-model="colleForm.year" type="text" placeholder="2025-2026" required>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>Classe <span class="required">*</span></label>
-                <select v-model="colleForm.class" required>
-                  <option value="">Sélectionner...</option>
-                  <option value="mpsi">MPSI</option>
-                  <option value="pcsi">PCSI</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label>Semaine <span class="required">*</span></label>
-                <input v-model.number="colleForm.week" type="number" min="1" placeholder="1" required>
+            <!-- Liste des assignations existantes -->
+            <div v-if="colleAssignments.length > 0" class="assignments-list">
+              <h4><i class="fas fa-list"></i> Assignations de colles ({{ colleAssignments.length }})</h4>
+              <div v-for="(assignment, index) in colleAssignments" :key="index" class="assignment-card">
+                <div class="assignment-header">
+                  <span class="assignment-title">
+                    <strong>{{ assignment.class?.toUpperCase() || 'N/A' }}</strong> -
+                    Semaine {{ assignment.week }} -
+                    Planche {{ assignment.planche }}
+                  </span>
+                  <button type="button" @click="removeAssignment(index)" class="btn-remove-assignment">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+                <div class="assignment-details">
+                  <span><i class="fas fa-school"></i> {{ assignment.school }}</span>
+                  <span><i class="fas fa-calendar"></i> {{ assignment.year }}</span>
+                  <span><i class="fas fa-calendar-day"></i> {{ formatDate(assignment.weekDate) }}</span>
+                  <span v-if="assignment.teacher"><i class="fas fa-user"></i> {{ assignment.teacher }}</span>
+                </div>
               </div>
             </div>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label>Date de la semaine <span class="required">*</span></label>
-                <input v-model="colleForm.weekDate" type="date" required>
+            <!-- Formulaire pour ajouter une nouvelle assignation -->
+            <div class="add-assignment-form">
+              <h4><i class="fas fa-plus-circle"></i> Ajouter une assignation</h4>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>École</label>
+                  <input v-model="newAssignment.school" type="text" placeholder="jean-perrin">
+                </div>
+
+                <div class="form-group">
+                  <label>Année scolaire</label>
+                  <input v-model="newAssignment.year" type="text" placeholder="2025-2026">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Classe</label>
+                  <select v-model="newAssignment.class">
+                    <option value="">Sélectionner...</option>
+                    <option value="mpsi">MPSI</option>
+                    <option value="pcsi">PCSI</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Semaine</label>
+                  <input v-model.number="newAssignment.week" type="number" min="1" placeholder="1">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Date de la semaine</label>
+                  <input v-model="newAssignment.weekDate" type="date">
+                </div>
+
+                <div class="form-group">
+                  <label>Planche</label>
+                  <input v-model.number="newAssignment.planche" type="number" min="1" placeholder="1">
+                </div>
               </div>
 
               <div class="form-group">
-                <label>Planche <span class="required">*</span></label>
-                <input v-model.number="colleForm.planche" type="number" min="1" placeholder="1" required>
+                <label>Professeur</label>
+                <input v-model="newAssignment.teacher" type="text" placeholder="Jeremy Luccioni">
               </div>
-            </div>
 
-            <div class="form-group">
-              <label>Professeur</label>
-              <input v-model="colleForm.teacher" type="text" placeholder="Jeremy Luccioni">
-            </div>
+              <div class="form-group">
+                <label>Créneau horaire</label>
+                <input v-model="newAssignment.timeSlot" type="text" placeholder="Lundi 14h-15h">
+              </div>
 
-            <div class="form-group">
-              <label>Créneau horaire</label>
-              <input v-model="colleForm.timeSlot" type="text" placeholder="Lundi 14h-15h">
-            </div>
+              <div class="form-group">
+                <label>Trinômes (séparés par des virgules)</label>
+                <input v-model="newAssignment.trinomesInput" type="text" placeholder="1,2,3,4">
+              </div>
 
-            <div class="form-group">
-              <label>Trinômes (séparés par des virgules)</label>
-              <input v-model="trinomesInput" type="text" placeholder="1,2,3,4">
+              <button type="button" @click="addAssignment" class="btn btn-add-assignment">
+                <i class="fas fa-plus"></i> Ajouter cette assignation
+              </button>
             </div>
           </div>
         </transition>
+      </div>
+
+      <!-- Visibilité -->
+      <div class="form-section">
+        <h3>
+          <i class="fas fa-eye"></i>
+          Visibilité
+        </h3>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input v-model="form.showInResourcesPage" type="checkbox">
+            <span>
+              <strong>Visible sur la page Ressources</strong>
+              <small>Si décoché, cette ressource n'apparaîtra que dans la section Colles (utile pour les programmes de colle)</small>
+            </span>
+          </label>
+        </div>
       </div>
 
       <!-- Date de création -->
@@ -331,8 +361,11 @@ const form = ref({
   showInResourcesPage: true
 })
 
-// Formulaire colle
-const colleForm = ref({
+// Assignations de colles (tableau)
+const colleAssignments = ref([])
+
+// Nouvelle assignation (formulaire)
+const newAssignment = ref({
   school: 'jean-perrin',
   year: '2025-2026',
   class: '',
@@ -340,7 +373,8 @@ const colleForm = ref({
   weekDate: '',
   planche: 1,
   teacher: 'Jeremy Luccioni',
-  timeSlot: ''
+  timeSlot: '',
+  trinomesInput: ''
 })
 
 const tagInput = ref('')
@@ -350,8 +384,12 @@ const today = new Date().toISOString().split('T')[0]
 if (props.resource) {
   form.value = { ...props.resource }
 
-  if (props.resource.colleData) {
-    colleForm.value = { ...props.resource.colleData }
+  // Charger les assignations existantes (supporte les deux formats)
+  if (props.resource.colleAssignments && Array.isArray(props.resource.colleAssignments)) {
+    colleAssignments.value = [...props.resource.colleAssignments]
+  } else if (props.resource.colleData) {
+    // Backward compatibility: convertir colleData en colleAssignments
+    colleAssignments.value = [{ ...props.resource.colleData }]
   }
 }
 
@@ -377,6 +415,64 @@ const removeTag = (index) => {
   form.value.tags.splice(index, 1)
 }
 
+// Gestion des assignations de colles
+const addAssignment = () => {
+  // Validation
+  if (!newAssignment.value.school || !newAssignment.value.year ||
+      !newAssignment.value.class || !newAssignment.value.week ||
+      !newAssignment.value.weekDate || !newAssignment.value.planche) {
+    alert('Veuillez remplir tous les champs obligatoires de l\'assignation')
+    return
+  }
+
+  // Parser les trinômes
+  const trinomes = newAssignment.value.trinomesInput
+    ? newAssignment.value.trinomesInput.split(',').map(t => parseInt(t.trim())).filter(t => !isNaN(t))
+    : []
+
+  // Ajouter l'assignation
+  colleAssignments.value.push({
+    school: newAssignment.value.school,
+    year: newAssignment.value.year,
+    class: newAssignment.value.class,
+    week: newAssignment.value.week,
+    weekDate: newAssignment.value.weekDate,
+    planche: newAssignment.value.planche,
+    teacher: newAssignment.value.teacher || '',
+    timeSlot: newAssignment.value.timeSlot || '',
+    trinomes: trinomes
+  })
+
+  // Réinitialiser le formulaire
+  newAssignment.value = {
+    school: 'jean-perrin',
+    year: '2025-2026',
+    class: '',
+    week: null,
+    weekDate: '',
+    planche: 1,
+    teacher: 'Jeremy Luccioni',
+    timeSlot: '',
+    trinomesInput: ''
+  }
+}
+
+const removeAssignment = (index) => {
+  if (confirm('Supprimer cette assignation ?')) {
+    colleAssignments.value.splice(index, 1)
+  }
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  })
+}
+
 // Soumission du formulaire
 const handleSubmit = () => {
   // Validation
@@ -390,6 +486,12 @@ const handleSubmit = () => {
     return
   }
 
+  // Validation pour les colles
+  if (form.value.isColle && colleAssignments.value.length === 0) {
+    alert('Ajoutez au moins une assignation de colle')
+    return
+  }
+
   // Préparer les données
   const resourceData = { ...form.value }
 
@@ -398,12 +500,13 @@ const handleSubmit = () => {
     resourceData.createdAt = today
   }
 
-  // Données de colle
+  // Assignations de colles
   if (form.value.isColle) {
-    resourceData.colleData = {
-      ...colleForm.value
-    }
+    resourceData.colleAssignments = [...colleAssignments.value]
+    // Supprimer colleData si elle existe (migration)
+    delete resourceData.colleData
   } else {
+    delete resourceData.colleAssignments
     delete resourceData.colleData
   }
 
@@ -558,6 +661,143 @@ const handleSubmit = () => {
   background-color: #7f8c8d;
 }
 
+/* Styles pour les assignations de colles */
+.colle-specific-fields {
+  margin-top: 20px;
+}
+
+.info-banner {
+  background-color: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.info-banner i {
+  color: #2196f3;
+  font-size: 1.2rem;
+}
+
+.assignments-list {
+  margin-bottom: 30px;
+}
+
+.assignments-list h4 {
+  margin-bottom: 15px;
+  color: var(--primary-color);
+  font-size: 1.1rem;
+}
+
+.assignment-card {
+  background: white;
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 12px;
+  transition: all 0.3s;
+}
+
+.assignment-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.assignment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.assignment-title {
+  font-size: 1rem;
+  color: var(--text-color);
+}
+
+.btn-remove-assignment {
+  background-color: #e74c3c;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  transition: all 0.3s;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-remove-assignment:hover {
+  background-color: #c0392b;
+}
+
+.assignment-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.assignment-details span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.assignment-details i {
+  color: var(--accent-color);
+}
+
+.add-assignment-form {
+  background: white;
+  border: 2px dashed var(--border-color, #ddd);
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.add-assignment-form h4 {
+  margin-bottom: 20px;
+  color: var(--primary-color);
+  font-size: 1.1rem;
+}
+
+.btn-add-assignment {
+  background-color: #27ae60;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.btn-add-assignment:hover {
+  background-color: #229954;
+}
+
+/* Transitions */
+.slide-fade-enter-active {
+  transition: all 0.3s ease;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
+}
+
 @media (max-width: 768px) {
   .form-row {
     grid-template-columns: 1fr;
@@ -565,6 +805,17 @@ const handleSubmit = () => {
 
   .resource-form {
     padding: 20px;
+  }
+
+  .assignment-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .assignment-details {
+    flex-direction: column;
+    gap: 8px;
   }
 }
 

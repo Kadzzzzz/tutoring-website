@@ -224,25 +224,58 @@ const generateIndexFile = (resources) => {
       lines.push(`${indent}  showInResourcesPage: false,`)
     }
 
-    // Données de colle - CORRECTION ICI
-    if (r.isColle && r.colleData) {
+    // Données de colle - Support pour colleAssignments (nouveau format) et colleData (ancien format)
+    if (r.isColle) {
       lines.push(`${indent}  isColle: true,`)
-      lines.push(`${indent}  colleData: {`)
-      lines.push(`${indent}    school: "${r.colleData.school || ""}",`)
-      lines.push(`${indent}    year: "${r.colleData.year || ""}",`)
-      lines.push(`${indent}    class: "${r.colleData.class || ""}",`)
-      lines.push(`${indent}    week: ${r.colleData.week || 0},`)
-      lines.push(`${indent}    weekDate: "${r.colleData.weekDate || ""}",`)
-      lines.push(`${indent}    planche: ${r.colleData.planche || 0},`)
-      lines.push(`${indent}    teacher: "${r.colleData.teacher || ""}",`)
-      lines.push(`${indent}    timeSlot: "${r.colleData.timeSlot || ""}",`)
 
-      // ✅ CORRECTION : Vérification sécurisée des trinomes
-      const trinomesStr = Array.isArray(r.colleData.trinomes) && r.colleData.trinomes.length > 0
-        ? r.colleData.trinomes.join(", ")
-        : ""
-      lines.push(`${indent}    trinomes: [${trinomesStr}]`)
-      lines.push(`${indent}  }`)
+      // Nouveau format avec colleAssignments (tableau)
+      if (r.colleAssignments && Array.isArray(r.colleAssignments)) {
+        lines.push(`${indent}  colleAssignments: [`)
+
+        r.colleAssignments.forEach((assignment, idx) => {
+          lines.push(`${indent}    {`)
+          lines.push(`${indent}      school: "${assignment.school || ""}",`)
+          lines.push(`${indent}      year: "${assignment.year || ""}",`)
+          lines.push(`${indent}      class: "${assignment.class || ""}",`)
+          lines.push(`${indent}      week: ${assignment.week || 0},`)
+          lines.push(`${indent}      weekDate: "${assignment.weekDate || ""}",`)
+          lines.push(`${indent}      planche: ${assignment.planche || 0},`)
+          lines.push(`${indent}      teacher: "${assignment.teacher || ""}",`)
+          lines.push(`${indent}      timeSlot: "${assignment.timeSlot || ""}",`)
+
+          const trinomesStr = Array.isArray(assignment.trinomes) && assignment.trinomes.length > 0
+            ? assignment.trinomes.join(", ")
+            : ""
+          lines.push(`${indent}      trinomes: [${trinomesStr}]`)
+
+          // Virgule sauf pour le dernier élément
+          if (idx < r.colleAssignments.length - 1) {
+            lines.push(`${indent}    },`)
+          } else {
+            lines.push(`${indent}    }`)
+          }
+        })
+
+        lines.push(`${indent}  ]`)
+      }
+      // Ancien format avec colleData (rétrocompatibilité)
+      else if (r.colleData) {
+        lines.push(`${indent}  colleData: {`)
+        lines.push(`${indent}    school: "${r.colleData.school || ""}",`)
+        lines.push(`${indent}    year: "${r.colleData.year || ""}",`)
+        lines.push(`${indent}    class: "${r.colleData.class || ""}",`)
+        lines.push(`${indent}    week: ${r.colleData.week || 0},`)
+        lines.push(`${indent}    weekDate: "${r.colleData.weekDate || ""}",`)
+        lines.push(`${indent}    planche: ${r.colleData.planche || 0},`)
+        lines.push(`${indent}    teacher: "${r.colleData.teacher || ""}",`)
+        lines.push(`${indent}    timeSlot: "${r.colleData.timeSlot || ""}",`)
+
+        const trinomesStr = Array.isArray(r.colleData.trinomes) && r.colleData.trinomes.length > 0
+          ? r.colleData.trinomes.join(", ")
+          : ""
+        lines.push(`${indent}    trinomes: [${trinomesStr}]`)
+        lines.push(`${indent}  }`)
+      }
     }
 
     lines.push(`${indent}}`)
@@ -355,31 +388,71 @@ export const getColleResources = () => {
   return resources.filter(resource => resource.isColle === true)
 }
 
+// Helper: Get all assignments for a resource (supports both colleData and colleAssignments)
+const getResourceAssignments = (resource) => {
+  if (resource.colleAssignments && Array.isArray(resource.colleAssignments)) {
+    return resource.colleAssignments
+  }
+  // Backward compatibility with old colleData format
+  if (resource.colleData) {
+    return [resource.colleData]
+  }
+  return []
+}
+
 export const getCollesBySchoolAndYear = (school, year) => {
-  return getColleResources().filter(resource =>
-    resource.colleData?.school === school &&
-    resource.colleData?.year === year
-  )
+  return getColleResources().filter(resource => {
+    const assignments = getResourceAssignments(resource)
+    return assignments.some(assignment =>
+      assignment.school === school && assignment.year === year
+    )
+  })
 }
 
 export const getCollesByWeek = (school, year, week) => {
-  return getCollesBySchoolAndYear(school, year).filter(resource =>
-    resource.colleData?.week === week
-  )
+  return getColleResources().flatMap(resource => {
+    const assignments = getResourceAssignments(resource)
+    const matchingAssignments = assignments.filter(assignment =>
+      assignment.school === school &&
+      assignment.year === year &&
+      assignment.week === week
+    )
+
+    // Return a copy of the resource for each matching assignment
+    return matchingAssignments.map(assignment => ({
+      ...resource,
+      colleData: assignment // For backward compatibility with components
+    }))
+  })
 }
 
 export const getCollesByClass = (school, year, className) => {
-  return getCollesBySchoolAndYear(school, year).filter(resource =>
-    resource.colleData?.class === className
-  )
+  return getColleResources().filter(resource => {
+    const assignments = getResourceAssignments(resource)
+    return assignments.some(assignment =>
+      assignment.school === school &&
+      assignment.year === year &&
+      assignment.class === className
+    )
+  })
 }
 
 export const getWeeksWithColles = (school, year, className = null) => {
-  const colles = className ?
-    getCollesByClass(school, year, className) :
-    getCollesBySchoolAndYear(school, year)
+  const colles = getColleResources()
 
-  const weeks = [...new Set(colles.map(c => c.colleData?.week))].sort()
+  const allWeeks = new Set()
+  colles.forEach(resource => {
+    const assignments = getResourceAssignments(resource)
+    assignments.forEach(assignment => {
+      if (assignment.school === school && assignment.year === year) {
+        if (!className || assignment.class === className) {
+          allWeeks.add(assignment.week)
+        }
+      }
+    })
+  })
+
+  const weeks = [...allWeeks].sort((a, b) => a - b)
   return weeks.map(week => {
     const weekData = collesMetadata.collesCalendar[year]?.weeks.find(w => w.number === week)
     return {
