@@ -10,9 +10,22 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Configuration CORS - Autoriser votre site
+// Configuration CORS - Autoriser plusieurs origines
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://physique-jeanluccioni.fr',
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Permettre les requêtes sans origine (comme Postman) ou les origines autorisées
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
