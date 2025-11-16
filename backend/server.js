@@ -118,7 +118,7 @@ async function generateMetadataWithAI(text, matiere, plancheNum, exerciceNum) {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Tu es un assistant qui génère des titres et descriptions d'exercices de physique/chimie pour des étudiants de prépa.
 
