@@ -283,12 +283,10 @@ app.post('/api/split-colle', upload.single('pdf'), async (req, res) => {
     res.json({
       success: true,
       message: `${outputFiles.planches.length + 1} fichiers générés`,
-      data: {
-        outputDir: path.join('output', matiere, `Colles-${classe}-S${semaine}`),
-        programme: outputFiles.programme,
-        planches: outputFiles.planches,
-        resources: resources
-      }
+      resources: resources,  // Au premier niveau pour le frontend
+      outputDir: path.join('output', matiere, `Colles-${classe}-S${semaine}`),
+      programme: outputFiles.programme,
+      planches: outputFiles.planches
     });
 
   } catch (error) {
