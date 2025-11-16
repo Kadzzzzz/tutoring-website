@@ -3,21 +3,8 @@
     <div class="container">
       <header class="editor-header">
         <h1>Gestion des Ressources</h1>
-        <p>Ajoutez, modifiez ou supprimez vos ressources pédagogiques</p>
+        <p>Uploadez des PDF automatiquement ou gérez vos ressources manuellement</p>
       </header>
-
-      <!-- Actions principales -->
-      <div class="editor-actions">
-        <button @click="showForm = true; editingResource = null" class="btn btn-primary">
-          <i class="fas fa-plus"></i> Ajouter une ressource
-        </button>
-        <button @click="downloadIndexFile" class="btn btn-success" :disabled="!hasChanges">
-          <i class="fas fa-download"></i> Télécharger index.js
-        </button>
-        <button @click="resetChanges" class="btn btn-secondary" :disabled="!hasChanges">
-          <i class="fas fa-undo"></i> Annuler les modifications
-        </button>
-      </div>
 
       <!-- Notification -->
       <div v-if="notification" class="notification" :class="notification.type">
@@ -26,36 +13,204 @@
         <button @click="notification = null" class="close-btn">&times;</button>
       </div>
 
-      <!-- Statistiques -->
-      <div class="stats-bar">
-        <div class="stat">
-          <strong>{{ localResources.length }}</strong>
-          <span>ressources</span>
-        </div>
-        <div class="stat">
-          <strong>{{ getSubjectCount('maths') }}</strong>
-          <span>maths</span>
-        </div>
-        <div class="stat">
-          <strong>{{ getSubjectCount('physics') }}</strong>
-          <span>physique</span>
-        </div>
-        <div class="stat">
-          <strong>{{ getSubjectCount('chemistry') }}</strong>
-          <span>chimie</span>
-        </div>
-        <div class="stat warning" v-if="hasChanges">
-          <i class="fas fa-exclamation-circle"></i>
-          <span>Modifications non sauvegardées</span>
+      <!-- Onglets -->
+      <div class="tabs">
+        <button
+          @click="activeTab = 'upload'"
+          :class="['tab-btn', { active: activeTab === 'upload' }]"
+        >
+          <i class="fas fa-upload"></i> Upload PDF automatique
+        </button>
+        <button
+          @click="activeTab = 'manage'"
+          :class="['tab-btn', { active: activeTab === 'manage' }]"
+        >
+          <i class="fas fa-edit"></i> Gérer les ressources
+        </button>
+      </div>
+
+      <!-- ONGLET 1: UPLOAD PDF -->
+      <div v-if="activeTab === 'upload'" class="tab-content">
+        <div class="upload-section">
+          <h2><i class="fas fa-file-pdf"></i> Traitement automatique de PDF</h2>
+          <p class="help-text">
+            Uploadez un PDF de colle et le système le découpera automatiquement en exercices individuels
+          </p>
+
+          <form @submit.prevent="handlePdfUpload" class="upload-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Fichier PDF *</label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  @change="handleFileChange"
+                  required
+                  :disabled="isUploading"
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Matière *</label>
+                <select v-model="uploadData.matiere" required :disabled="isUploading">
+                  <option value="">-- Choisir --</option>
+                  <option value="physique">Physique</option>
+                  <option value="chimie">Chimie</option>
+                  <option value="maths">Mathématiques</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Classe *</label>
+                <select v-model="uploadData.classe" required :disabled="isUploading">
+                  <option value="">-- Choisir --</option>
+                  <option value="MPSI">MPSI</option>
+                  <option value="PCSI">PCSI</option>
+                  <option value="MP">MP</option>
+                  <option value="PC">PC</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Semaine *</label>
+                <input
+                  type="number"
+                  v-model.number="uploadData.semaine"
+                  min="1"
+                  max="30"
+                  required
+                  :disabled="isUploading"
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Année scolaire *</label>
+                <input
+                  type="text"
+                  v-model="uploadData.year"
+                  placeholder="2024-2025"
+                  required
+                  :disabled="isUploading"
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Date de la semaine *</label>
+                <input
+                  type="date"
+                  v-model="uploadData.weekDate"
+                  required
+                  :disabled="isUploading"
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Professeur</label>
+                <input
+                  type="text"
+                  v-model="uploadData.teacher"
+                  placeholder="Nom du professeur"
+                  :disabled="isUploading"
+                />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary btn-large" :disabled="isUploading">
+                <i :class="isUploading ? 'fas fa-spinner fa-spin' : 'fas fa-magic'"></i>
+                {{ isUploading ? 'Traitement en cours...' : 'Traiter le PDF' }}
+              </button>
+            </div>
+          </form>
+
+          <!-- Résultats du traitement -->
+          <div v-if="processedResources.length > 0" class="processed-results">
+            <h3><i class="fas fa-check-circle"></i> Ressources générées ({{ processedResources.length }})</h3>
+
+            <div class="resources-preview">
+              <div v-for="(resource, idx) in processedResources" :key="idx" class="resource-card">
+                <div class="resource-header">
+                  <strong>{{ resource.title }}</strong>
+                  <span class="badge">{{ resource.subject }}</span>
+                </div>
+                <p class="resource-desc">{{ resource.description }}</p>
+                <div class="resource-meta">
+                  <span><i class="fas fa-file-pdf"></i> {{ resource.pdfStatement }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="results-actions">
+              <button @click="copyGeneratedCode" class="btn btn-success">
+                <i class="fas fa-copy"></i> Copier le code JavaScript
+              </button>
+              <button @click="addProcessedToResources" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Ajouter aux ressources locales
+              </button>
+              <button @click="processedResources = []" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Fermer
+              </button>
+            </div>
+
+            <!-- Code généré -->
+            <details class="code-details">
+              <summary>Voir le code JavaScript généré</summary>
+              <pre class="code-preview">{{ generatedCode }}</pre>
+            </details>
+          </div>
         </div>
       </div>
 
-      <!-- Liste des ressources -->
-      <ResourceList
-        :resources="localResources"
-        @edit="handleEdit"
-        @delete="handleDelete"
-      />
+      <!-- ONGLET 2: GESTION DES RESSOURCES -->
+      <div v-if="activeTab === 'manage'" class="tab-content">
+        <!-- Actions principales -->
+        <div class="editor-actions">
+          <button @click="showForm = true; editingResource = null" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Ajouter une ressource
+          </button>
+          <button @click="downloadIndexFile" class="btn btn-success" :disabled="!hasChanges">
+            <i class="fas fa-download"></i> Télécharger index.js
+          </button>
+          <button @click="resetChanges" class="btn btn-secondary" :disabled="!hasChanges">
+            <i class="fas fa-undo"></i> Annuler les modifications
+          </button>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats-bar">
+          <div class="stat">
+            <strong>{{ localResources.length }}</strong>
+            <span>ressources</span>
+          </div>
+          <div class="stat">
+            <strong>{{ getSubjectCount('maths') }}</strong>
+            <span>maths</span>
+          </div>
+          <div class="stat">
+            <strong>{{ getSubjectCount('physics') }}</strong>
+            <span>physique</span>
+          </div>
+          <div class="stat">
+            <strong>{{ getSubjectCount('chemistry') }}</strong>
+            <span>chimie</span>
+          </div>
+          <div class="stat warning" v-if="hasChanges">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>Modifications non sauvegardées</span>
+          </div>
+        </div>
+
+        <!-- Liste des ressources -->
+        <ResourceList
+          :resources="localResources"
+          @edit="handleEdit"
+          @delete="handleDelete"
+        />
+      </div>
 
       <!-- Formulaire d'édition (Modal) -->
       <div v-if="showForm" class="modal-overlay" @click.self="closeForm">
@@ -77,12 +232,30 @@ import { resources } from '@/data/resources'
 import ResourceList from '@/components/editor/ResourceList.vue'
 import ResourceForm from '@/components/editor/ResourceForm.vue'
 
+// Configuration de l'API backend
+const API_URL = 'https://colle-splitter-api.onrender.com'
+
 // État
+const activeTab = ref('upload')
 const localResources = ref([...resources])
 const originalResources = ref([...resources])
 const showForm = ref(false)
 const editingResource = ref(null)
 const notification = ref(null)
+
+// État pour l'upload PDF
+const uploadData = ref({
+  matiere: '',
+  classe: '',
+  semaine: '',
+  year: '',
+  weekDate: '',
+  teacher: ''
+})
+const selectedFile = ref(null)
+const isUploading = ref(false)
+const processedResources = ref([])
+const generatedCode = ref('')
 
 // Computed
 const hasChanges = computed(() => {
@@ -166,6 +339,127 @@ const downloadIndexFile = () => {
   // Marquer comme sauvegardé
   originalResources.value = [...localResources.value]
   showNotification('Fichier index.js téléchargé !', 'success')
+}
+
+// === FONCTIONS POUR L'UPLOAD PDF ===
+
+const handleFileChange = (event) => {
+  const file = event.target.files[0]
+  if (file && file.type === 'application/pdf') {
+    selectedFile.value = file
+  } else {
+    showNotification('Veuillez sélectionner un fichier PDF valide', 'error')
+    event.target.value = ''
+  }
+}
+
+const handlePdfUpload = async () => {
+  if (!selectedFile.value) {
+    showNotification('Veuillez sélectionner un fichier PDF', 'warning')
+    return
+  }
+
+  isUploading.value = true
+  processedResources.value = []
+
+  try {
+    const formData = new FormData()
+    formData.append('pdf', selectedFile.value)
+    formData.append('matiere', uploadData.value.matiere)
+    formData.append('classe', uploadData.value.classe)
+    formData.append('semaine', uploadData.value.semaine)
+    formData.append('year', uploadData.value.year)
+    formData.append('weekDate', uploadData.value.weekDate)
+    formData.append('teacher', uploadData.value.teacher || '')
+
+    const response = await fetch(`${API_URL}/api/split-colle`, {
+      method: 'POST',
+      body: formData
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Erreur lors du traitement du PDF')
+    }
+
+    const data = await response.json()
+    processedResources.value = data.resources || []
+    generatedCode.value = generateCodeFromResources(processedResources.value)
+
+    showNotification(
+      `✅ ${processedResources.value.length} ressources générées avec succès !`,
+      'success'
+    )
+  } catch (error) {
+    console.error('Erreur upload:', error)
+    showNotification(`❌ Erreur: ${error.message}`, 'error')
+  } finally {
+    isUploading.value = false
+  }
+}
+
+const generateCodeFromResources = (resources) => {
+  if (!resources || resources.length === 0) return ''
+
+  const formatResource = (r) => {
+    const lines = []
+    lines.push('  {')
+    lines.push(`    id: "${r.id}",`)
+    lines.push(`    subject: "${r.subject}",`)
+    lines.push(`    levelKey: "${r.levelKey}",`)
+    lines.push(`    typeKey: "${r.typeKey}",`)
+    lines.push(`    duration: "${r.duration || ''}",`)
+    lines.push(`    hasVideo: false,`)
+    lines.push(`    videoUrl: "",`)
+    lines.push(`    pdfStatement: "${r.pdfStatement}",`)
+    lines.push(`    pdfSolution: "${r.pdfSolution || ''}",`)
+    lines.push(`    tags: [${r.tags.map(t => `"${t}"`).join(', ')}],`)
+    lines.push(`    createdAt: "${r.createdAt}",`)
+    lines.push(`    title: "${r.title}",`)
+    lines.push(`    description: "${r.description}",`)
+    lines.push(`    isColle: true,`)
+    lines.push(`    colleAssignments: [`)
+    lines.push(`      {`)
+    lines.push(`        school: "${r.colleAssignments[0].school}",`)
+    lines.push(`        year: "${r.colleAssignments[0].year}",`)
+    lines.push(`        class: "${r.colleAssignments[0].class}",`)
+    lines.push(`        week: ${r.colleAssignments[0].week},`)
+    lines.push(`        weekDate: "${r.colleAssignments[0].weekDate}",`)
+    lines.push(`        planche: ${r.colleAssignments[0].planche},`)
+    lines.push(`        teacher: "${r.colleAssignments[0].teacher}",`)
+    lines.push(`        timeSlot: "",`)
+    lines.push(`        trinomes: []`)
+    lines.push(`      }`)
+    lines.push(`    ]`)
+    lines.push('  }')
+    return lines.join('\n')
+  }
+
+  return resources.map(r => formatResource(r)).join(',\n')
+}
+
+const copyGeneratedCode = async () => {
+  try {
+    await navigator.clipboard.writeText(generatedCode.value)
+    showNotification('Code copié dans le presse-papier !', 'success')
+  } catch (error) {
+    showNotification('Erreur lors de la copie', 'error')
+  }
+}
+
+const addProcessedToResources = () => {
+  processedResources.value.forEach(resource => {
+    localResources.value.push(resource)
+  })
+
+  showNotification(
+    `${processedResources.value.length} ressources ajoutées à la liste`,
+    'success'
+  )
+
+  // Basculer vers l'onglet de gestion
+  activeTab.value = 'manage'
+  processedResources.value = []
 }
 
 // À remplacer dans ResourceEditor.vue
@@ -662,5 +956,257 @@ export const getResourceStats = () => {
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+}
+
+/* === NOUVEAUX STYLES POUR L'UPLOAD === */
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.tab-btn {
+  padding: 15px 30px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #7f8c8d;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-btn:hover {
+  color: var(--primary-color);
+}
+
+.tab-btn.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--accent-color);
+}
+
+.tab-content {
+  animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.upload-section {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.upload-section h2 {
+  color: var(--primary-color);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.help-text {
+  color: #7f8c8d;
+  margin-bottom: 30px;
+}
+
+.upload-form {
+  margin-bottom: 30px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-dark);
+}
+
+.form-group input,
+.form-group select {
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.form-group input:disabled,
+.form-group select:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.form-group input[type="file"] {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.form-actions {
+  margin-top: 30px;
+}
+
+.btn-large {
+  padding: 15px 40px;
+  font-size: 1.1rem;
+}
+
+.processed-results {
+  margin-top: 40px;
+  padding: 30px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px solid #27ae60;
+}
+
+.processed-results h3 {
+  color: #27ae60;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.resources-preview {
+  display: grid;
+  gap: 15px;
+  margin-bottom: 20px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.resource-card {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid var(--accent-color);
+}
+
+.resource-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.resource-header strong {
+  color: var(--primary-color);
+}
+
+.badge {
+  padding: 4px 12px;
+  background: var(--accent-color);
+  color: white;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.resource-desc {
+  color: #555;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.resource-meta {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+}
+
+.resource-meta i {
+  margin-right: 5px;
+}
+
+.results-actions {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.code-details {
+  margin-top: 20px;
+}
+
+.code-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--primary-color);
+  padding: 10px;
+  background: white;
+  border-radius: 8px;
+  user-select: none;
+}
+
+.code-details summary:hover {
+  background: #f0f0f0;
+}
+
+.code-preview {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-top: 10px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .tabs {
+    flex-direction: column;
+  }
+
+  .tab-btn {
+    border-bottom: none;
+    border-left: 3px solid transparent;
+  }
+
+  .tab-btn.active {
+    border-left-color: var(--accent-color);
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .results-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 </style>
