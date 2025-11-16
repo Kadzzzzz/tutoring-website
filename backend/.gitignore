@@ -1,0 +1,21 @@
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# Fichiers uploadés (temporaires)
+uploads/*
+!uploads/.gitkeep
+
+# Fichiers générés (temporaires)
+output/*
+!output/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
