@@ -5,10 +5,17 @@ const path = require('path');
 const fs = require('fs').promises;
 const { spawn } = require('child_process');
 const archiver = require('archiver');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Initialiser Gemini AI (si clé API disponible)
+let genAI = null;
+if (process.env.GEMINI_API_KEY) {
+  genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+}
 
 // Configuration CORS - Autoriser plusieurs origines
 const allowedOrigins = [
@@ -56,6 +63,108 @@ const upload = multer({
     }
   }
 });
+
+// Fonction pour extraire le texte d'un PDF avec Python
+function extractTextFromPdf(pdfPath) {
+  return new Promise((resolve, reject) => {
+    const pythonProcess = spawn('python3', ['-c', `
+import sys
+import fitz  # PyMuPDF
+
+try:
+    doc = fitz.open(sys.argv[1])
+    text = ""
+    for page in doc:
+        text += page.get_text()
+    # Limiter à 1000 caractères pour l'IA
+    print(text[:1000])
+except Exception as e:
+    print(f"ERROR: {e}", file=sys.stderr)
+    sys.exit(1)
+`, pdfPath]);
+
+    let stdout = '';
+    let stderr = '';
+
+    pythonProcess.stdout.on('data', (data) => {
+      stdout += data.toString();
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+      stderr += data.toString();
+    });
+
+    pythonProcess.on('close', (code) => {
+      if (code === 0) {
+        resolve(stdout.trim());
+      } else {
+        reject(new Error(`Extraction texte échouée: ${stderr}`));
+      }
+    });
+  });
+}
+
+// Fonction pour générer titre et description avec Gemini AI
+async function generateMetadataWithAI(text, matiere, plancheNum, exerciceNum) {
+  if (!genAI) {
+    // Pas d'IA disponible, retourner des valeurs par défaut
+    const title = exerciceNum
+      ? `Exercice planche ${plancheNum} - Partie ${exerciceNum}`
+      : `Exercice planche ${plancheNum}`;
+    return {
+      title,
+      description: `Exercice de ${matiere}`
+    };
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+    const prompt = `Tu es un assistant qui génère des titres et descriptions d'exercices de physique/chimie pour des étudiants de prépa.
+
+Voici le début d'un exercice de ${matiere} (planche ${plancheNum}${exerciceNum ? `, partie ${exerciceNum}` : ''}) :
+
+"""
+${text}
+"""
+
+Génère :
+1. Un titre court et descriptif (max 60 caractères) qui résume le thème principal de l'exercice
+2. Une description courte (max 100 caractères) qui donne plus de détails
+
+Format de réponse (JSON strict) :
+{"title": "...", "description": "..."}
+
+Réponds UNIQUEMENT avec le JSON, sans autre texte.`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const responseText = response.text().trim();
+
+    // Essayer de parser le JSON
+    try {
+      const parsed = JSON.parse(responseText);
+      return {
+        title: parsed.title || `Exercice planche ${plancheNum}`,
+        description: parsed.description || `Exercice de ${matiere}`
+      };
+    } catch (parseError) {
+      console.error('Erreur parsing JSON de Gemini:', parseError);
+      // Retour par défaut
+      return {
+        title: `Exercice planche ${plancheNum}`,
+        description: `Exercice de ${matiere}`
+      };
+    }
+  } catch (error) {
+    console.error('Erreur Gemini:', error);
+    // Retour par défaut en cas d'erreur
+    return {
+      title: exerciceNum ? `Exercice planche ${plancheNum} - Partie ${exerciceNum}` : `Exercice planche ${plancheNum}`,
+      description: `Exercice de ${matiere}`
+    };
+  }
+}
 
 // Fonction pour lancer le script Python
 function runPythonScript(pdfPath, matiere, classe, semaine) {
@@ -236,10 +345,26 @@ app.post('/api/split-colle', upload.single('pdf'), async (req, res) => {
     });
 
     for (const [plancheNum, exercices] of Object.entries(planchesGrouped)) {
-      exercices.forEach((exercice, idx) => {
+      for (const exercice of exercices) {
         const exerciceId = exercices.length === 1
           ? `${matiere}-${classe.toLowerCase()}-s${semaine}-p${plancheNum}`
           : `${matiere}-${classe.toLowerCase()}-s${semaine}-p${plancheNum}-${exercice.exercice}`;
+
+        // Extraire le texte et générer titre/description avec IA
+        let aiMetadata = {
+          title: exercices.length === 1 ? `Exercice planche ${plancheNum}` : `Exercice planche ${plancheNum} - Partie ${exercice.exercice}`,
+          description: `Exercice de ${matiere} - ${classe} Semaine ${semaine}`
+        };
+
+        try {
+          console.log(`🤖 Génération IA pour ${exercice.filename}...`);
+          const pdfText = await extractTextFromPdf(exercice.path);
+          aiMetadata = await generateMetadataWithAI(pdfText, matiere, parseInt(plancheNum), exercice.exercice);
+          console.log(`   ✓ Titre: ${aiMetadata.title}`);
+        } catch (error) {
+          console.error(`   ✗ Erreur IA pour ${exercice.filename}:`, error.message);
+          // Utilise les valeurs par défaut déjà définies
+        }
 
         resources.push({
           id: exerciceId,
@@ -254,10 +379,8 @@ app.post('/api/split-colle', upload.single('pdf'), async (req, res) => {
           difficulty: "moyen",
           tags: [matiere, "colle", classe.toLowerCase(), `semaine ${semaine}`],
           createdAt: new Date().toISOString().split('T')[0],
-          title: exercices.length === 1
-            ? `Exercice planche ${plancheNum}`
-            : `Exercice planche ${plancheNum} - Partie ${exercice.exercice}`,
-          description: `Exercice de ${matiere} - ${classe} Semaine ${semaine}`,
+          title: aiMetadata.title,
+          description: aiMetadata.description,
           fullDescription: "",
           notes: `Planche ${plancheNum} - Semaine ${semaine}`,
           isColle: true,
@@ -316,7 +439,7 @@ app.get('/api/download/:matiere/:classe/:semaine/:filename', async (req, res) =>
 // Route POST pour télécharger un package ZIP avec métadonnées personnalisées
 app.post('/api/download-zip', async (req, res) => {
   try {
-    const { matiere, classe, semaine, resources } = req.body;
+    const { matiere, classe, semaine, resources, currentResources } = req.body;
 
     if (!matiere || !classe || !semaine || !resources) {
       return res.status(400).json({ error: 'Paramètres manquants' });
@@ -375,6 +498,14 @@ Bon courage ! 🚀
     // Générer le code JavaScript avec les métadonnées personnalisées
     const resourcesCode = generateResourcesCodeFromData(resources);
 
+    // Générer l'index.js complet si on a les ressources actuelles
+    let fullIndexJs = null;
+    if (currentResources && Array.isArray(currentResources)) {
+      console.log(`📝 Génération de l'index.js complet avec ${currentResources.length} + ${resources.length} ressources`);
+      const allResources = [...currentResources, ...resources];
+      fullIndexJs = generateFullIndexJs(allResources);
+    }
+
     // Créer le ZIP
     const archive = archiver('zip', { zlib: { level: 9 } });
 
@@ -390,6 +521,11 @@ Bon courage ! 🚀
     // Ajouter les fichiers d'instructions
     archive.append(instructions, { name: 'INSTRUCTIONS.txt' });
     archive.append(resourcesCode, { name: 'RESOURCES_TO_ADD.js' });
+
+    // Ajouter l'index.js complet si disponible
+    if (fullIndexJs) {
+      archive.append(fullIndexJs, { name: 'index.js' });
+    }
 
     await archive.finalize();
 
@@ -481,6 +617,256 @@ Bon courage ! 🚀
     res.status(500).json({ error: 'Erreur lors de la création du ZIP', details: error.message });
   }
 });
+
+// Fonction pour générer l'index.js COMPLET
+function generateFullIndexJs(allResources) {
+  const resourcesCode = allResources.map((r, idx) => {
+    let code = '  {\n';
+    code += `    id: "${r.id}",\n`;
+    code += `    subject: "${r.subject}",\n`;
+    code += `    levelKey: "${r.levelKey || 'prepa1'}",\n`;
+    code += `    typeKey: "${r.typeKey || 'exercise'}",\n`;
+    code += `    duration: "${r.duration || '45'}",\n`;
+    code += `    hasVideo: ${r.hasVideo || false},\n`;
+    code += `    videoUrl: "${r.videoUrl || ''}",\n`;
+    code += `    pdfStatement: "${r.pdfStatement}",\n`;
+    code += `    pdfSolution: "${r.pdfSolution || ''}",\n`;
+    if (r.difficulty) code += `    difficulty: "${r.difficulty}",\n`;
+    code += `    tags: [${r.tags ? r.tags.map(t => `"${t}"`).join(', ') : ''}],\n`;
+    code += `    createdAt: "${r.createdAt || new Date().toISOString().split('T')[0]}",\n`;
+    code += `    title: "${r.title || 'Exercice'}",\n`;
+    code += `    description: "${r.description || ''}",\n`;
+    if (r.fullDescription) code += `    fullDescription: "${r.fullDescription}",\n`;
+    if (r.notes) code += `    notes: "${r.notes}",\n`;
+    if (r.isColle) code += `    isColle: true,\n`;
+    if (r.showInResourcesPage === false) code += `    showInResourcesPage: false,\n`;
+
+    if (r.colleAssignments && r.colleAssignments.length > 0) {
+      code += `    colleAssignments: [\n`;
+      r.colleAssignments.forEach((assignment, aIdx) => {
+        code += `      {\n`;
+        code += `        school: "${assignment.school || 'jean-perrin'}",\n`;
+        code += `        year: "${assignment.year || '2025-2026'}",\n`;
+        code += `        class: "${assignment.class || ''}",\n`;
+        code += `        week: ${assignment.week || 0},\n`;
+        code += `        weekDate: "${assignment.weekDate || ''}",\n`;
+        code += `        planche: ${assignment.planche || 0},\n`;
+        code += `        teacher: "${assignment.teacher || 'Jeremy Luccioni'}",\n`;
+        code += `        timeSlot: "${assignment.timeSlot || ''}",\n`;
+        code += `        trinomes: ${assignment.trinomes ? JSON.stringify(assignment.trinomes) : '[]'}\n`;
+        code += `      }${aIdx < r.colleAssignments.length - 1 ? ',' : ''}\n`;
+      });
+      code += `    ]\n`;
+    } else if (r.colleData) {
+      // Backward compatibility
+      code += `    colleData: ${JSON.stringify(r.colleData, null, 2).replace(/\n/g, '\n    ')}\n`;
+    }
+
+    code += `  }${idx < allResources.length - 1 ? ',' : ''}`;
+    return code;
+  }).join('\n\n');
+
+  return `// src/data/resources/index.js
+// Données des ressources pédagogiques enrichies avec les textes intégrés
+
+export const resources = [
+${resourcesCode}
+]
+
+// === MÉTADONNÉES DES COLLES ===
+export const collesMetadata = {
+  schools: [
+    {
+      id: "jean-perrin",
+      name: "Lycée Jean Perrin",
+      city: "Lyon"
+    }
+  ],
+
+  academicYears: [
+    {
+      id: "2025-2026",
+      label: "2025-2026",
+      startDate: "2025-09-01",
+      endDate: "2026-06-30",
+      isCurrent: true
+    }
+  ],
+
+  classes: [
+    {
+      id: "mpsi",
+      name: "MPSI",
+      level: "prepa1",
+      subjects: ["physics", "chemistry", "maths"],
+      description: "Mathématiques, Physique et Sciences de l'Ingénieur"
+    },
+    {
+      id: "pcsi",
+      name: "PCSI",
+      level: "prepa1",
+      subjects: ["physics", "chemistry", "maths"],
+      description: "Physique, Chimie et Sciences de l'Ingénieur"
+    }
+  ],
+
+  collesCalendar: {
+    "2025-2026": {
+      weeks: [
+        { number: 1, date: "2025-09-15", label: "Semaine 1" },
+        { number: 2, date: "2025-09-22", label: "Semaine 2" },
+        { number: 3, date: "2025-09-29", label: "Semaine 3" },
+        { number: 4, date: "2025-10-06", label: "Semaine 4" },
+        { number: 5, date: "2025-10-13", label: "Semaine 5" },
+        { number: 6, date: "2025-11-03", label: "Semaine 6" },
+        { number: 7, date: "2025-11-10", label: "Semaine 7" },
+        { number: 8, date: "2025-11-14", label: "Semaine 8" },
+        { number: 9, date: "2025-11-24", label: "Semaine 9" },
+        { number: 10, date: "2025-12-01", label: "Semaine 10" },
+        { number: 11, date: "2025-12-08", label: "Semaine 11" },
+        { number: 12, date: "2025-12-15", label: "Semaine 12" },
+        { number: 13, date: "2026-01-05", label: "Semaine 13" },
+        { number: 14, date: "2026-01-12", label: "Semaine 14" },
+        { number: 15, date: "2026-01-19", label: "Semaine 15" },
+        { number: 16, date: "2026-01-26", label: "Semaine 16" }
+      ]
+    }
+  }
+}
+
+// === FONCTIONS UTILITAIRES ===
+
+export const getResourcesBySubject = (subject) => {
+  return resources.filter(resource => resource.subject === subject)
+}
+
+export const getResourcesByLevel = (levelKey) => {
+  return resources.filter(resource => resource.levelKey === levelKey)
+}
+
+export const getResourcesByType = (typeKey) => {
+  return resources.filter(resource => resource.typeKey === typeKey)
+}
+
+export const getResourcesByDifficulty = (difficulty) => {
+  return resources.filter(resource => resource.difficulty === difficulty)
+}
+
+export const searchResources = (query) => {
+  const searchTerm = query.toLowerCase()
+  return resources.filter(resource =>
+    resource.tags.some(tag => tag.toLowerCase().includes(searchTerm)) ||
+    resource.id.toLowerCase().includes(searchTerm) ||
+    resource.title.toLowerCase().includes(searchTerm) ||
+    resource.description.toLowerCase().includes(searchTerm)
+  )
+}
+
+export const getResourceById = (id) => {
+  return resources.find(resource => resource.id === id)
+}
+
+export const getColleResources = () => {
+  return resources.filter(resource => resource.isColle === true)
+}
+
+// Helper: Get all assignments for a resource (supports both colleData and colleAssignments)
+const getResourceAssignments = (resource) => {
+  if (resource.colleAssignments && Array.isArray(resource.colleAssignments)) {
+    return resource.colleAssignments
+  }
+  if (resource.colleData) {
+    return [resource.colleData]
+  }
+  return []
+}
+
+export const getCollesBySchoolAndYear = (school, year) => {
+  return getColleResources().filter(resource => {
+    const assignments = getResourceAssignments(resource)
+    return assignments.some(assignment =>
+      assignment.school === school && assignment.year === year
+    )
+  })
+}
+
+export const getCollesByWeek = (school, year, week) => {
+  return getColleResources().flatMap(resource => {
+    const assignments = getResourceAssignments(resource)
+    const matchingAssignments = assignments.filter(assignment =>
+      assignment.school === school &&
+      assignment.year === year &&
+      assignment.week === week
+    )
+
+    return matchingAssignments.map(assignment => ({
+      ...resource,
+      colleData: assignment
+    }))
+  })
+}
+
+export const getCollesByClass = (school, year, className) => {
+  return getColleResources().filter(resource => {
+    const assignments = getResourceAssignments(resource)
+    return assignments.some(assignment =>
+      assignment.school === school &&
+      assignment.year === year &&
+      assignment.class === className
+    )
+  })
+}
+
+export const getWeeksWithColles = (school, year, className = null) => {
+  const colles = getColleResources()
+
+  const allWeeks = new Set()
+  colles.forEach(resource => {
+    const assignments = getResourceAssignments(resource)
+    assignments.forEach(assignment => {
+      if (assignment.school === school && assignment.year === year) {
+        if (!className || assignment.class === className) {
+          allWeeks.add(assignment.week)
+        }
+      }
+    })
+  })
+
+  const weeks = [...allWeeks].sort((a, b) => a - b)
+  return weeks.map(week => {
+    const weekData = collesMetadata.collesCalendar[year]?.weeks.find(w => w.number === week)
+    return {
+      number: week,
+      date: weekData?.date,
+      label: weekData?.label,
+      hasColles: true
+    }
+  })
+}
+
+export const getResourceStats = () => {
+  const colles = getColleResources()
+  const regular = resources.filter(r => !r.isColle)
+
+  return {
+    total: resources.length,
+    regular: regular.length,
+    colles: colles.length,
+    bySubject: {
+      maths: getResourcesBySubject("maths").length,
+      physics: getResourcesBySubject("physics").length,
+      chemistry: getResourcesBySubject("chemistry").length
+    },
+    byDifficulty: {
+      facile: getResourcesByDifficulty("facile").length,
+      moyen: getResourcesByDifficulty("moyen").length,
+      difficile: getResourcesByDifficulty("difficile").length
+    },
+    withVideo: resources.filter(r => r.hasVideo).length
+  }
+}
+`;
+}
 
 // Fonction pour générer le code des ressources à partir de données personnalisées
 function generateResourcesCodeFromData(resources) {

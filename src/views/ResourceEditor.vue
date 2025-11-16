@@ -496,7 +496,7 @@ const downloadZipPackage = async () => {
 
     showNotification('Préparation du package ZIP...', 'info')
 
-    // Envoyer les ressources modifiées au backend
+    // Envoyer les ressources modifiées ET les ressources actuelles
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -506,7 +506,8 @@ const downloadZipPackage = async () => {
         matiere,
         classe,
         semaine,
-        resources: processedResources.value  // Avec titres et descriptions modifiés
+        resources: processedResources.value,  // Nouvelles ressources avec titres modifiés
+        currentResources: localResources.value  // Toutes les ressources actuelles
       })
     })
 
