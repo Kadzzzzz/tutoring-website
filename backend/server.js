@@ -396,7 +396,7 @@ app.post('/api/split-colle', upload.single('pdf'), async (req, res) => {
             trinomes: []
           }]
         });
-      });
+      }
     }
 
     // Nettoyer le fichier uploadé
