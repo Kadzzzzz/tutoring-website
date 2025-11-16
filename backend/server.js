@@ -14,6 +14,8 @@ const PORT = process.env.PORT || 3001;
 const allowedOrigins = [
   'http://localhost:5173',
   'https://physique-jeanluccioni.fr',
+  'https://jeremy-luccioni.fr',
+  'https://www.jeremy-luccioni.fr',
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
