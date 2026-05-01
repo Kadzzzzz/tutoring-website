@@ -1,235 +1,144 @@
 <template>
-  <div class="home">
-    <!-- Section Hero -->
-    <HeroSection/>
-
-    <!-- Section Navigation Cards -->
-    <section class="navigation-section">
+  <div>
+    <!-- Hero -->
+    <section class="hero">
       <div class="container">
-        <h2 class="section-title">Explorez mon univers pédagogique</h2>
-        <p class="section-subtitle">
-          Découvrez qui je suis, ma méthode d'enseignement, et accédez à toutes mes ressources pédagogiques
-        </p>
+        <div class="hero-content">
+          <p class="hero-tag">Professeur de classes préparatoires</p>
+          <h1>Mathématiques, Physique & Chimie</h1>
+          <p class="hero-sub">Exercices corrigés, colles, et sujets de concours pour réussir votre prépa.</p>
+          <div class="hero-actions">
+            <router-link to="/matieres/mathematiques" class="btn btn-primary">Accéder aux exercices</router-link>
+            <router-link to="/concours" class="btn btn-outline-white">Annales concours</router-link>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <div class="navigation-cards">
+    <!-- Matières -->
+    <section class="section">
+      <div class="container">
+        <h2 class="section-title">Choisir une matière</h2>
+        <p class="section-sub">Accédez directement aux exercices par chapitre</p>
+        <div class="subjects-grid" v-if="subjects.length">
           <router-link
-            v-for="card in navigationCards"
-            :key="card.id"
-            :to="card.link"
-            class="nav-card"
-            :style="{ '--card-color': card.color }"
+            v-for="s in subjects" :key="s.id"
+            :to="`/matieres/${s.slug}`"
+            class="subject-card"
+            :style="{ '--color': s.color }"
           >
-            <div class="card-icon">
-              <i :class="card.icon"></i>
+            <div class="subject-icon">{{ subjectIcon(s.slug) }}</div>
+            <h3>{{ s.name }}</h3>
+            <p>{{ s.chapter_count }} chapitre{{ s.chapter_count > 1 ? 's' : '' }}</p>
+            <span class="subject-arrow">→</span>
+          </router-link>
+        </div>
+        <div v-else-if="loading" class="loading">Chargement...</div>
+      </div>
+    </section>
+
+    <!-- Accès rapide -->
+    <section class="section section-dark">
+      <div class="container">
+        <h2 class="section-title light">Autres ressources</h2>
+        <div class="quick-links">
+          <router-link to="/colles" class="quick-card">
+            <span class="quick-icon">📋</span>
+            <div>
+              <h3>Colles</h3>
+              <p>Planning et planches par semaine</p>
             </div>
-            <h3 class="card-title">{{ card.title }}</h3>
-            <p class="card-description">{{ card.description }}</p>
-            <div class="card-arrow">
-              <i class="fas fa-arrow-right"></i>
+          </router-link>
+          <router-link to="/concours" class="quick-card">
+            <span class="quick-icon">🏆</span>
+            <div>
+              <h3>Concours</h3>
+              <p>Sujets écrits et oraux corrigés</p>
+            </div>
+          </router-link>
+          <router-link to="/parcours" class="quick-card">
+            <span class="quick-icon">🎓</span>
+            <div>
+              <h3>Mon parcours</h3>
+              <p>De la prépa à Centrale Lyon</p>
             </div>
           </router-link>
         </div>
       </div>
     </section>
-
-    <!-- Section Contact -->
-    <ContactSection/>
   </div>
 </template>
 
 <script setup>
-import HeroSection from '@/components/sections/HeroSection.vue'
-import ContactSection from '@/components/sections/ContactSection.vue'
+import { ref, onMounted } from 'vue'
+import { api } from '@/api.js'
 
-const navigationCards = [
-  {
-    id: 1,
-    title: "Ressources Pédagogiques",
-    description: "Accédez à tous mes cours, exercices corrigés et vidéos explicatives",
-    link: "/resources",
-    icon: "fas fa-book-open",
-    color: "#10b981"
-  },
-  {
-    id: 2,
-    title: "Colles & Exercices",
-    description: "Entraînez-vous avec mes exercices de colles en Physique-Chimie",
-    link: "/colles",
-    icon: "fas fa-flask",
-    color: "#f59e0b"
-  },
-  {
-    id: 3,
-    title: "Mon Parcours",
-    description: "Découvrez mon parcours académique et professionnel, de la prépa à Centrale Lyon",
-    link: "/parcours",
-    icon: "fas fa-graduation-cap",
-    color: "#3b82f6"
-  },
-  {
-    id: 4,
-    title: "Pédagogie & Méthode",
-    description: "Ma méthode d'enseignement et mes conseils pour réussir vos études scientifiques",
-    link: "/pedagogie",
-    icon: "fas fa-chalkboard-teacher",
-    color: "#8b5cf6"
-  }
-]
+const subjects = ref([])
+const loading = ref(true)
+
+const icons = { mathematiques: '∑', physique: '⚛', chimie: '🧪' }
+function subjectIcon(slug) { return icons[slug] || '📚' }
+
+onMounted(async () => {
+  try { subjects.value = await api.getSubjects() }
+  catch (e) { console.error(e) }
+  finally { loading.value = false }
+})
 </script>
 
 <style scoped>
-.home {
-  min-height: 100vh;
-}
-
-.navigation-section {
-  padding: 100px 0;
-  background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 25px;
-}
-
-.section-title {
-  text-align: center;
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 800;
-  color: #0f172a;
-  margin-bottom: 1rem;
-  letter-spacing: -0.5px;
-}
-
-.section-subtitle {
-  text-align: center;
-  max-width: 700px;
-  margin: 0 auto 60px auto;
-  color: #475569;
-  line-height: 1.8;
-  font-size: 1.125rem;
-}
-
-.navigation-cards {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 30px;
-  margin-top: 50px;
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.nav-card {
-  position: relative;
-  background: white;
-  padding: 40px 30px;
-  border-radius: 20px;
-  text-decoration: none;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 2px solid transparent;
-  overflow: hidden;
-}
-
-.nav-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 5px;
-  background: var(--card-color);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.nav-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
-  border-color: var(--card-color);
-}
-
-.nav-card:hover::before {
-  transform: scaleX(1);
-}
-
-.card-icon {
-  width: 70px;
-  height: 70px;
-  background: var(--card-color);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 25px;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.nav-card:hover .card-icon {
-  transform: scale(1.1) rotate(5deg);
-}
-
-.card-icon i {
-  font-size: 2rem;
+.hero {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+  padding: 100px 0 80px;
   color: white;
 }
+.hero-tag { font-size: 0.9rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 1rem; }
+.hero h1 { color: white; margin-bottom: 1.2rem; }
+.hero-sub { font-size: 1.2rem; color: rgba(255,255,255,0.75); max-width: 560px; margin-bottom: 2rem; }
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-outline-white { background: transparent; color: white; border: 2px solid rgba(255,255,255,0.5); padding: 8px 18px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; transition: all 0.2s; }
+.btn-outline-white:hover { background: rgba(255,255,255,0.1); border-color: white; color: white; }
 
-.card-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 15px;
-  transition: color 0.3s;
+.section { padding: 80px 0; }
+.section-dark { background: var(--primary); }
+.section-title { margin-bottom: 0.5rem; }
+.section-title.light { color: white; }
+.section-sub { color: var(--text-light); margin-bottom: 3rem; }
+
+.subjects-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+
+.subject-card {
+  background: white; border-radius: var(--radius);
+  padding: 36px 28px; text-decoration: none; color: var(--text);
+  border: 2px solid transparent; transition: all 0.25s;
+  position: relative; overflow: hidden;
+  box-shadow: var(--shadow);
 }
-
-.nav-card:hover .card-title {
-  color: var(--card-color);
+.subject-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: var(--color);
 }
+.subject-card:hover { border-color: var(--color); transform: translateY(-4px); box-shadow: var(--shadow-lg); color: var(--text); }
+.subject-icon { font-size: 2.5rem; margin-bottom: 16px; display: block; }
+.subject-card h3 { font-size: 1.4rem; color: var(--text); margin-bottom: 4px; }
+.subject-card p { color: var(--text-light); font-size: 0.9rem; margin: 0; }
+.subject-arrow { position: absolute; bottom: 20px; right: 24px; font-size: 1.3rem; color: var(--color); transition: transform 0.2s; }
+.subject-card:hover .subject-arrow { transform: translateX(4px); }
 
-.card-description {
-  color: #64748b;
-  line-height: 1.7;
-  font-size: 1rem;
-  margin-bottom: 20px;
+.quick-links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 2rem; }
+.quick-card {
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius); padding: 24px; display: flex; align-items: center; gap: 16px;
+  color: white; text-decoration: none; transition: all 0.2s;
 }
+.quick-card:hover { background: rgba(255,255,255,0.12); color: white; transform: translateY(-2px); }
+.quick-icon { font-size: 2rem; }
+.quick-card h3 { font-size: 1rem; color: white; margin-bottom: 4px; }
+.quick-card p { font-size: 0.85rem; color: rgba(255,255,255,0.6); margin: 0; }
 
-.card-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  margin-top: auto;
-}
-
-.card-arrow i {
-  font-size: 1.25rem;
-  color: var(--card-color);
-  transition: transform 0.3s;
-}
-
-.nav-card:hover .card-arrow i {
-  transform: translateX(5px);
-}
-
-/* Responsive */
 @media (max-width: 768px) {
-  .navigation-section {
-    padding: 60px 0;
-  }
-
-  .navigation-cards {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .nav-card {
-    padding: 30px 25px;
-  }
-
-  .section-title {
-    font-size: 2rem;
-  }
+  .subjects-grid { grid-template-columns: 1fr; }
+  .quick-links { grid-template-columns: 1fr; }
+  .hero { padding: 60px 0 50px; }
 }
 </style>

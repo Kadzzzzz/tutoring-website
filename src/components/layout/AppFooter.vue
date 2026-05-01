@@ -1,91 +1,63 @@
 <template>
   <footer class="footer">
     <div class="container">
-      <div class="footer-content">
-        <div class="footer-logo">Jeremy Luccioni</div>
-        <nav class="footer-nav">
-          <router-link to="/">Accueil</router-link>
-          <router-link to="/parcours">Parcours</router-link>
-          <router-link to="/pedagogie">Pédagogie</router-link>
-          <router-link to="/resources">Ressources</router-link>
-          <router-link to="/colles">Colles</router-link>
-        </nav>
+      <div class="footer-grid">
+        <div>
+          <div class="footer-logo">Jeremy Luccioni</div>
+          <p class="footer-desc">Cours particuliers de Mathématiques, Physique et Chimie pour classes préparatoires.</p>
+        </div>
+        <div>
+          <h4>Matières</h4>
+          <nav>
+            <router-link to="/matieres/mathematiques">Mathématiques</router-link>
+            <router-link to="/matieres/physique">Physique</router-link>
+            <router-link to="/matieres/chimie">Chimie</router-link>
+          </nav>
+        </div>
+        <div>
+          <h4>Ressources</h4>
+          <nav>
+            <router-link to="/colles">Colles</router-link>
+            <router-link to="/concours">Concours</router-link>
+            <router-link to="/parcours">Mon parcours</router-link>
+            <router-link to="/pedagogie">Pédagogie</router-link>
+          </nav>
+        </div>
       </div>
       <div class="footer-bottom">
-        <p>© {{ new Date().getFullYear() }} Jeremy Luccioni. Libre de droit</p>
+        <p>© {{ new Date().getFullYear() }} Jeremy Luccioni — Tous droits réservés</p>
       </div>
     </div>
   </footer>
 </template>
 
-<script setup>
-// Plus besoin d'imports complexes
-</script>
-
 <style scoped>
-.footer {
-  background-color: #1a1a1a;
-  color: rgba(255, 255, 255, 0.7);
-  padding: 40px 0 20px;
-  text-align: center;
+.footer { background: #0f172a; color: rgba(255,255,255,0.6); padding: 60px 0 24px; }
+
+.footer-grid {
+  display: grid; grid-template-columns: 2fr 1fr 1fr;
+  gap: 40px; margin-bottom: 40px;
 }
 
-.container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 25px;
-}
+.footer-logo { font-size: 1.4rem; font-weight: 800; color: white; margin-bottom: 12px; }
+.footer-desc { font-size: 0.9rem; line-height: 1.7; max-width: 280px; }
 
-.footer-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
+h4 { color: white; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
 
-.footer-logo {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-white, #ffffff);
-}
-
-.footer-nav {
-  display: flex;
-  gap: 30px;
-}
-
-.footer-nav a {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
-  text-decoration: none;
-  transition: color var(--transition-speed, 0.3s);
-}
-
-.footer-nav a:hover {
-  color: var(--accent-color, #3498db);
-}
+nav { display: flex; flex-direction: column; gap: 10px; }
+nav a { color: rgba(255,255,255,0.6); font-size: 0.9rem; transition: color 0.2s; }
+nav a:hover { color: white; }
 
 .footer-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 20px;
-  font-size: 0.9rem;
-}
-
-.footer-bottom p {
-  margin: 0;
-  line-height: 1.7;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 24px; font-size: 0.85rem; text-align: center;
 }
 
 @media (max-width: 768px) {
-  .footer-content {
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .footer-nav {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .footer-grid > div:first-child { grid-column: 1 / -1; }
+}
+@media (max-width: 480px) {
+  .footer-grid { grid-template-columns: 1fr; }
 }
 </style>

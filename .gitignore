@@ -115,6 +115,9 @@ dist
 *.sln
 *.sw?
 
+# Uploaded files
+uploads/
+
 # OS generated files
 .DS_Store
 .DS_Store?

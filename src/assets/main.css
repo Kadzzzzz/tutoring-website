@@ -1,35 +1,131 @@
-@import './base.css';
-
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+:root {
+  --primary:    #1a1a2e;
+  --accent:     #3b82f6;
+  --accent-dark:#2563eb;
+  --maths:      #3b82f6;
+  --physique:   #ef4444;
+  --chimie:     #10b981;
+  --bg:         #f8f9fa;
+  --white:      #ffffff;
+  --text:       #1e293b;
+  --text-light: #64748b;
+  --border:     #e2e8f0;
+  --radius:     12px;
+  --shadow:     0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  --shadow-lg:  0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+  --header-h:   68px;
+  --transition: 0.2s ease;
 }
 
-a,
-.green {
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+#app { min-height: 100vh; display: flex; flex-direction: column; }
+main { flex: 1; padding-top: var(--header-h); }
+
+.container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+a { text-decoration: none; color: var(--accent); transition: color var(--transition); }
+a:hover { color: var(--accent-dark); }
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+
+h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; line-height: 1.2; }
+h2 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; }
+h3 { font-size: 1.25rem; font-weight: 600; }
+
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-facile   { background: #dcfce7; color: #16a34a; }
+.badge-moyen    { background: #fef9c3; color: #ca8a04; }
+.badge-difficile{ background: #fee2e2; color: #dc2626; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all var(--transition);
+  cursor: pointer;
+  border: none;
   text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
+.btn-primary   { background: var(--accent); color: white; }
+.btn-primary:hover { background: var(--accent-dark); color: white; }
+.btn-outline   { background: transparent; color: var(--accent); border: 2px solid var(--accent); }
+.btn-outline:hover { background: var(--accent); color: white; }
+.btn-ghost     { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--border); }
+
+.card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: all var(--transition);
 }
 
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
+.card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
+.page-header {
+  background: var(--primary);
+  color: white;
+  padding: 60px 0 50px;
+}
+
+.page-header h1 { color: white; margin-bottom: 0.5rem; }
+.page-header p { color: rgba(255,255,255,0.7); font-size: 1.1rem; margin: 0; }
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 1rem;
+}
+
+.breadcrumb a { color: rgba(255,255,255,0.6); }
+.breadcrumb a:hover { color: white; }
+.breadcrumb span { color: rgba(255,255,255,0.4); }
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
+  color: var(--text-light);
+  font-size: 1.1rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 0;
+  color: var(--text-light);
+}
+
+.empty-state h3 { margin-bottom: 0.5rem; color: var(--text); }
+
+@media (max-width: 768px) {
+  .container { padding: 0 16px; }
+  .page-header { padding: 40px 0 30px; }
 }
