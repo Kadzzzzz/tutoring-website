@@ -30,6 +30,8 @@
             <option value="methode">Méthode</option>
             <option value="interro">Interrogation</option>
             <option value="colle">Colle</option>
+            <option value="ecrit_concours">Écrit concours</option>
+            <option value="oral_concours">Oral concours</option>
           </select>
         </div>
         <div class="field">

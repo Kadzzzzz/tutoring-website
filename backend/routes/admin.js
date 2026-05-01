@@ -329,11 +329,11 @@ router.get('/concours', auth, async (req, res, next) => {
 
 router.post('/concours', auth, async (req, res, next) => {
   try {
-    const { name, year, type, subject_id, class_target, pdf_url, pdf_solution_url } = req.body;
+    const { name, year, type, subject_id, class_target, pdf_url, pdf_solution_url, is_published } = req.body;
     const r = await db.query(
-      `INSERT INTO concours (name,year,type,subject_id,class_target,pdf_url,pdf_solution_url)
-       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-      [name, year, type, subject_id || null, class_target, pdf_url || null, pdf_solution_url || null]
+      `INSERT INTO concours (name,year,type,subject_id,class_target,pdf_url,pdf_solution_url,is_published)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      [name, year, type, subject_id || null, class_target, pdf_url || null, pdf_solution_url || null, is_published ?? true]
     );
     res.json(r.rows[0]);
   } catch (e) { next(e); }

@@ -71,12 +71,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { api } from '@/api.js'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 const concours = ref([])
-const subjects = ref([])
 const loading = ref(true)
 const activeType = ref('')
 const activeSubject = ref('')
@@ -89,6 +88,14 @@ function toggleVideos(id) {
 }
 
 function pdfUrl(url) { return url?.startsWith('http') ? url : `${BASE_URL}${url}` }
+
+const subjects = computed(() => {
+  const map = new Map()
+  for (const c of concours.value) {
+    if (c.subject_id && !map.has(c.subject_id)) map.set(c.subject_id, { id: c.subject_id, name: c.subject_name })
+  }
+  return [...map.values()]
+})
 
 const filtered = computed(() => concours.value.filter(c => {
   if (activeType.value && c.type !== activeType.value) return false
@@ -107,16 +114,13 @@ const groupedByName = computed(() => {
 
 async function load() {
   loading.value = true
-  const params = {}
-  if (activeType.value) params.type = activeType.value
   try {
-    [concours.value, subjects.value] = await Promise.all([api.getConcours(params), api.getSubjects()])
+    concours.value = await api.getConcours({})
   } catch (e) { console.error(e) }
   finally { loading.value = false }
 }
 
 onMounted(load)
-watch([activeType, activeSubject], load)
 </script>
 
 <style scoped>

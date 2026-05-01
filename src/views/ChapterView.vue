@@ -91,10 +91,12 @@ function toggleVideos(id) {
 }
 
 const typeFilters = [
-  { label: 'Exercices', value: 'exercice' },
-  { label: 'Cours',     value: 'cours' },
-  { label: 'Méthodes',  value: 'methode' },
-  { label: 'Interros',  value: 'interro' },
+  { label: 'Exercices',      value: 'exercice' },
+  { label: 'Cours',          value: 'cours' },
+  { label: 'Méthodes',       value: 'methode' },
+  { label: 'Interros',       value: 'interro' },
+  { label: 'Écrits concours', value: 'ecrit_concours' },
+  { label: 'Oraux concours',  value: 'oral_concours' },
 ]
 const diffFilters = [
   { label: 'Facile',    value: 'facile' },
@@ -102,7 +104,7 @@ const diffFilters = [
   { label: 'Difficile', value: 'difficile' },
 ]
 
-const typeLabels = { exercice: 'Exercice', cours: 'Cours', methode: 'Méthode', interro: 'Interrogation', colle: 'Colle' }
+const typeLabels = { exercice: 'Exercice', cours: 'Cours', methode: 'Méthode', interro: 'Interrogation', colle: 'Colle', ecrit_concours: 'Écrit concours', oral_concours: 'Oral concours' }
 function typeLabel(t) { return typeLabels[t] || t }
 function pdfUrl(url) { return url?.startsWith('http') ? url : `${BASE_URL}${url}` }
 function resetFilters() { activeType.value = ''; activeDiff.value = '' }
