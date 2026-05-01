@@ -6,7 +6,7 @@
       <nav class="nav desktop">
         <router-link to="/">Accueil</router-link>
         <div class="dropdown" @mouseenter="openDropdown" @mouseleave="scheduleClose">
-          <button class="dropdown-btn">Matières ▾</button>
+          <router-link to="/matieres" class="dropdown-btn">Matières ▾</router-link>
           <div class="dropdown-menu" v-show="dropdownOpen" @mouseenter="openDropdown" @mouseleave="scheduleClose">
             <router-link v-for="s in subjects" :key="s.id" :to="`/matieres/${s.slug}`">{{ s.name }}</router-link>
           </div>
@@ -14,7 +14,7 @@
         <router-link to="/colles">Colles</router-link>
         <router-link to="/concours">Concours</router-link>
         <router-link to="/pedagogie">Conseils</router-link>
-        <router-link to="/#contact" class="btn-contact">Me contacter</router-link>
+        <router-link to="/parcours">Parcours</router-link>
       </nav>
 
       <button class="hamburger" :class="{ open: menuOpen }" @click="menuOpen = !menuOpen">
@@ -24,12 +24,12 @@
 
     <nav class="mobile-nav" :class="{ open: menuOpen }" @click="menuOpen = false">
       <router-link to="/">Accueil</router-link>
-      <router-link v-for="s in subjects" :key="s.id" :to="`/matieres/${s.slug}`">{{ s.name }}</router-link>
+      <router-link to="/matieres" class="mobile-section-link">Matières</router-link>
+      <router-link v-for="s in subjects" :key="s.id" :to="`/matieres/${s.slug}`" class="mobile-sub">{{ s.name }}</router-link>
       <router-link to="/colles">Colles</router-link>
       <router-link to="/concours">Concours</router-link>
       <router-link to="/pedagogie">Conseils</router-link>
       <router-link to="/parcours">Parcours</router-link>
-      <router-link to="/#contact" class="mobile-contact">Me contacter</router-link>
     </nav>
     <div v-if="menuOpen" class="overlay" @click="menuOpen = false" />
   </header>
@@ -84,23 +84,6 @@ onUnmounted(() => { window.removeEventListener('scroll', onScroll); clearTimeout
 .nav > a:hover, .dropdown-btn:hover,
 .nav > a.router-link-active { color: white; background: rgba(255,255,255,0.1); }
 
-.btn-contact {
-  background: var(--accent) !important;
-  color: white !important;
-  padding: 8px 18px !important;
-  border-radius: 8px !important;
-  font-weight: 600 !important;
-  font-size: 0.9rem !important;
-  margin-left: 4px;
-  transition: background 0.2s !important;
-}
-.btn-contact:hover { background: var(--accent-dark) !important; color: white !important; }
-
-.mobile-contact {
-  color: var(--accent) !important;
-  font-weight: 700 !important;
-}
-
 .dropdown { position: relative; }
 .dropdown-menu {
   position: absolute; top: calc(100% + 8px); left: 0;
@@ -133,6 +116,8 @@ onUnmounted(() => { window.removeEventListener('scroll', onScroll); clearTimeout
   transition: all 0.2s;
 }
 .mobile-nav a:hover, .mobile-nav a.router-link-active { color: white; background: rgba(59,130,246,0.2); }
+.mobile-section-link { font-weight: 700 !important; color: white !important; }
+.mobile-sub { padding-left: 36px !important; font-size: 0.9rem !important; color: rgba(255,255,255,0.65) !important; }
 
 .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 998; }
 

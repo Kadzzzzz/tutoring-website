@@ -375,4 +375,26 @@ router.delete('/concours/:id', auth, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// App settings (filières, level_options, etc.)
+router.get('/settings/:key', auth, async (req, res, next) => {
+  try {
+    const r = await db.query('SELECT value FROM app_settings WHERE key=$1', [req.params.key]);
+    if (!r.rows.length) return res.status(404).json({ error: 'Setting not found' });
+    res.json(r.rows[0].value);
+  } catch (e) { next(e); }
+});
+
+router.put('/settings/:key', auth, async (req, res, next) => {
+  try {
+    const { value } = req.body;
+    await db.query(
+      `INSERT INTO app_settings (key, value, updated_at)
+       VALUES ($1, $2, NOW())
+       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [req.params.key, JSON.stringify(value)]
+    );
+    res.json({ key: req.params.key, value });
+  } catch (e) { next(e); }
+});
+
 module.exports = router;

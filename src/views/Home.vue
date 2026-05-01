@@ -15,7 +15,7 @@
         </div>
         <div v-else class="subjects-grid">
           <router-link
-            v-for="s in subjects" :key="s.id"
+            v-for="s in mainSubjects" :key="s.id"
             :to="`/matieres/${s.slug}`"
             class="subject-card"
             :style="{ '--color': s.color }"
@@ -26,6 +26,11 @@
             <h3>{{ s.name }}</h3>
             <p>{{ s.chapter_count }} chapitre{{ s.chapter_count > 1 ? 's' : '' }}</p>
             <span class="subject-arrow"><i class="fas fa-arrow-right"></i></span>
+          </router-link>
+        </div>
+        <div class="more-subjects">
+          <router-link to="/matieres" class="btn-more">
+            <i class="fas fa-th-large"></i> Voir toutes les matières
           </router-link>
         </div>
       </div>
@@ -76,13 +81,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { api } from '@/api.js'
 import HeroSection    from '@/components/sections/HeroSection.vue'
 import ContactSection from '@/components/sections/ContactSection.vue'
 
 const subjects = ref([])
 const loading  = ref(true)
+
+const MAIN_SLUGS = ['mathematiques', 'physique']
+const mainSubjects = computed(() =>
+  subjects.value.filter(s => MAIN_SLUGS.includes(s.slug))
+)
 
 const icons = {
   mathematiques: 'fas fa-square-root-alt',
@@ -190,6 +200,30 @@ onMounted(async () => {
   transition: transform 0.2s;
 }
 .subject-card:hover .subject-arrow { transform: translateX(4px); }
+
+.more-subjects {
+  text-align: center;
+  margin-top: 36px;
+}
+
+.btn-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: 10px;
+  background: white;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: 2px solid var(--accent);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.btn-more:hover {
+  background: var(--accent);
+  color: white;
+}
 
 /* Cartes accès rapide */
 .quick-grid {

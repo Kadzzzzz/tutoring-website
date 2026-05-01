@@ -76,11 +76,19 @@
 
         <!-- Niveaux multi-sélection -->
         <div class="field full">
-          <label>Niveau(x)</label>
+          <div class="level-header">
+            <label>Niveau(x)</label>
+            <div class="add-level-inline">
+              <input v-model="newLevelName" placeholder="Ex: L3, M1..." class="level-new-input"
+                @keyup.enter="addLevelOption" maxlength="12" />
+              <button type="button" class="btn-add-level" @click="addLevelOption" :disabled="!newLevelName.trim()">+ Ajouter</button>
+            </div>
+          </div>
           <div class="level-checks">
             <label v-for="l in levelOptions" :key="l.value" class="check-label">
               <input type="checkbox" :checked="levelArray.includes(l.value)" @change="toggleLevel(l.value)" />
               {{ l.label }}
+              <button v-if="!DEFAULT_LEVELS.includes(l.value)" type="button" class="level-del" @click="removeLevelOption(l.value)" title="Supprimer">×</button>
             </label>
           </div>
         </div>
@@ -176,13 +184,37 @@ const formError = ref('')
 const showNewChapter = ref(false)
 const newChapter = ref({ subject_id: '', name: '', slug: '' })
 
-const levelOptions = [
+const DEFAULT_LEVELS = ['terminale', 'mpsi', 'pcsi', 'mp', 'pc']
+const DEFAULT_LEVEL_OPTIONS = [
   { value: 'terminale', label: 'Terminale' },
   { value: 'mpsi',      label: 'MPSI' },
   { value: 'pcsi',      label: 'PCSI' },
   { value: 'mp',        label: 'MP' },
   { value: 'pc',        label: 'PC' },
 ]
+const levelOptions = ref([...DEFAULT_LEVEL_OPTIONS])
+const newLevelName = ref('')
+
+async function saveLevelOptions() {
+  try { await api.updateSetting('level_options', levelOptions.value) }
+  catch (e) { console.error('Erreur sauvegarde niveaux', e) }
+}
+async function addLevelOption() {
+  const raw = newLevelName.value.trim()
+  if (!raw) return
+  const value = raw.toLowerCase().replace(/\s+/g, '_')
+  const label = raw.toUpperCase()
+  if (levelOptions.value.find(l => l.value === value)) return
+  levelOptions.value.push({ value, label })
+  newLevelName.value = ''
+  await saveLevelOptions()
+}
+async function removeLevelOption(value) {
+  levelOptions.value = levelOptions.value.filter(l => l.value !== value)
+  const arr = levelArray.value.filter(v => v !== value)
+  levelArray.value = arr
+  await saveLevelOptions()
+}
 
 const typeLabels = {
   exercice: 'Exercice', cours: 'Cours', methode: 'Méthode',
@@ -245,9 +277,16 @@ async function createChapterInline() {
 async function load() {
   loading.value = true
   try {
-    [documents.value, chapters.value, subjectsList.value] = await Promise.all([
-      api.getAdminDocuments(), api.getAdminChapters(), api.getAdminSubjects()
+    const [docs, chaps, subs, levels] = await Promise.all([
+      api.getAdminDocuments(),
+      api.getAdminChapters(),
+      api.getAdminSubjects(),
+      api.getSetting('level_options').catch(() => null)
     ])
+    documents.value  = docs
+    chapters.value   = chaps
+    subjectsList.value = subs
+    if (levels && Array.isArray(levels)) levelOptions.value = levels
   } catch (e) { console.error(e) }
   finally { loading.value = false }
 }
@@ -317,7 +356,29 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
 .new-chapter-box input, .new-chapter-box select { padding: 6px 10px; font-size: 0.9rem; }
 .btn-sm { padding: 6px 14px; font-size: 0.85rem; }
 
-.level-checks { display: flex; flex-wrap: wrap; gap: 12px; }
+.level-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.level-header label { margin-bottom: 0; }
+.add-level-inline { display: flex; align-items: center; gap: 6px; }
+.level-new-input {
+  padding: 4px 10px; border: 2px dashed var(--border); border-radius: 6px;
+  font-size: 0.85rem; font-family: inherit; width: 110px; transition: border-color 0.2s;
+}
+.level-new-input:focus { outline: none; border-color: var(--accent); border-style: solid; }
+.btn-add-level {
+  padding: 4px 12px; background: var(--accent); color: white;
+  border: none; border-radius: 6px; font-size: 0.82rem; font-weight: 700;
+  cursor: pointer; transition: background 0.2s; white-space: nowrap;
+}
+.btn-add-level:hover:not(:disabled) { background: var(--accent-dark); }
+.btn-add-level:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.level-checks { display: flex; flex-wrap: wrap; gap: 10px; }
+.level-del {
+  background: none; border: none; color: #94a3b8; font-size: 0.95rem;
+  cursor: pointer; padding: 0 2px; margin-left: 2px; line-height: 1; vertical-align: middle;
+  transition: color 0.15s;
+}
+.level-del:hover { color: #ef4444; }
 .check-label { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; font-weight: 500; cursor: pointer; }
 .check-label input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); padding: 0; border: none; }
 

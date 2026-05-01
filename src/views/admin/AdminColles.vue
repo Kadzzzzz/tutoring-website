@@ -164,9 +164,10 @@ const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 function pdfUrl(url) { return url?.startsWith('http') ? url : `${BASE_URL}${url}` }
 
 const DEFAULT_CLASSES = ['MPSI', 'PCSI', 'MP', 'PC']
-const classes = ref(JSON.parse(localStorage.getItem('colles_filieres') || 'null') || [...DEFAULT_CLASSES])
-const activeClass = ref(classes.value[0] || 'MPSI')
+const classes = ref([...DEFAULT_CLASSES])
+const activeClass = ref(DEFAULT_CLASSES[0])
 const newFiliereName = ref('')
+const savingFilieres = ref(false)
 
 function getCurrentAcademicYear() {
   const now = new Date()
@@ -181,22 +182,27 @@ const academicYears = Array.from({ length: 5 }, (_, i) => {
 })
 const activeYear = ref(currentYear)
 
-function saveFilieresLocally() {
-  localStorage.setItem('colles_filieres', JSON.stringify(classes.value))
+async function saveFilieres() {
+  savingFilieres.value = true
+  try { await api.updateSetting('filieres', classes.value) }
+  catch (e) { console.error('Erreur sauvegarde filières', e) }
+  finally { savingFilieres.value = false }
 }
-function addFiliere() {
+
+async function addFiliere() {
   const name = newFiliereName.value.trim().toUpperCase()
   if (!name || classes.value.includes(name)) return
   classes.value.push(name)
-  saveFilieresLocally()
   newFiliereName.value = ''
+  await saveFilieres()
 }
-function removeFiliere(c) {
+
+async function removeFiliere(c) {
   if (classes.value.length <= 1) return
   if (!confirm(`Supprimer la filière "${c}" de la liste ?`)) return
   classes.value = classes.value.filter(x => x !== c)
-  saveFilieresLocally()
   if (activeClass.value === c) activeClass.value = classes.value[0]
+  await saveFilieres()
 }
 
 const colles = ref([])
@@ -233,7 +239,19 @@ function weekStatus(week) {
 
 async function load() {
   loading.value = true
-  try { colles.value = await api.getColles({}) }
+  try {
+    const [collesList, filieres] = await Promise.all([
+      api.getColles({}),
+      api.getSetting('filieres').catch(() => null)
+    ])
+    colles.value = collesList
+    if (filieres && Array.isArray(filieres)) {
+      classes.value = filieres
+      if (!classes.value.includes(activeClass.value)) {
+        activeClass.value = classes.value[0]
+      }
+    }
+  }
   catch (e) { console.error(e) }
   finally { loading.value = false }
 }

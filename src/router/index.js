@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
 import Parcours from '@/views/Parcours.vue'
 import Pedagogie from '@/views/Pedagogie.vue'
+import MatieresView from '@/views/MatieresView.vue'
 import SubjectView from '@/views/SubjectView.vue'
 import ChapterView from '@/views/ChapterView.vue'
 import CollesView from '@/views/CollesView.vue'
@@ -20,6 +21,7 @@ const router = createRouter({
     { path: '/',           name: 'Home',      component: Home,        meta: { title: 'Jeremy Luccioni - Cours Prépa' } },
     { path: '/parcours',   name: 'Parcours',  component: Parcours,    meta: { title: 'Mon Parcours - Jeremy Luccioni' } },
     { path: '/pedagogie',  name: 'Pedagogie', component: Pedagogie,   meta: { title: 'Pédagogie - Jeremy Luccioni' } },
+    { path: '/matieres',   name: 'Matieres',  component: MatieresView, meta: { title: 'Matières - Jeremy Luccioni' } },
     { path: '/matieres/:slug', name: 'Subject',  component: SubjectView },
     { path: '/chapitres/:id',  name: 'Chapter',  component: ChapterView },
     { path: '/colles',     name: 'Colles',    component: CollesView,  meta: { title: 'Colles - Jeremy Luccioni' } },

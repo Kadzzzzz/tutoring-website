@@ -72,6 +72,9 @@ export const api = {
   addContentVideo:   (d)       => request('/api/admin/content-videos',    { method: 'POST',   body: JSON.stringify(d) }),
   deleteContentVideo:(id)      => request(`/api/admin/content-videos/${id}`, { method: 'DELETE' }),
 
+  getSetting:        (key)     => request(`/api/admin/settings/${key}`),
+  updateSetting:     (key, v)  => request(`/api/admin/settings/${key}`, { method: 'PUT', body: JSON.stringify({ value: v }) }),
+
   getAdminConcours:  ()        => request('/api/admin/concours'),
   createConcours:    (d)       => request('/api/admin/concours',        { method: 'POST',   body: JSON.stringify(d) }),
   updateConcours:    (id, d)   => request(`/api/admin/concours/${id}`,  { method: 'PUT',    body: JSON.stringify(d) }),
