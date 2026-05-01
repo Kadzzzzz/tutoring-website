@@ -1,14 +1,21 @@
 <template>
   <div>
+    <!-- Hero plein écran avec image Unsplash -->
     <div class="hero-wrapper">
       <HeroSection />
     </div>
 
-    <!-- Matières -->
+    <!-- Mon Parcours (bio + timeline) -->
+    <AboutSection />
+
+    <!-- Méthode Pédagogique (fond sombre, 3 cartes) -->
+    <MethodologySection />
+
+    <!-- Matières (connecté à la base de données) -->
     <section id="about" class="content-section subjects-section">
       <div class="container">
-        <h2>Choisir une matière</h2>
-        <p class="section-description">Accédez directement aux exercices par chapitre</p>
+        <h2>Accéder aux Ressources</h2>
+        <p class="section-description">Exercices corrigés, méthodes et cours classés par matière et chapitre</p>
         <div class="subjects-grid" v-if="subjects.length">
           <router-link
             v-for="s in subjects" :key="s.id"
@@ -24,40 +31,42 @@
             <span class="subject-arrow"><i class="fas fa-arrow-right"></i></span>
           </router-link>
         </div>
-        <div v-else-if="loading" class="loading">Chargement...</div>
+        <div v-else-if="loading" class="loading-spin">
+          <i class="fas fa-spinner fa-spin"></i> Chargement...
+        </div>
       </div>
     </section>
 
-    <!-- Accès rapide -->
+    <!-- Autres ressources (Colles + Concours) -->
     <section class="content-section quick-section">
       <div class="container">
-        <h2>Autres ressources</h2>
+        <h2>Autres Ressources</h2>
         <div class="quick-grid">
           <router-link to="/colles" class="quick-card">
-            <i class="fas fa-clipboard-list quick-icon"></i>
+            <div class="quick-icon-wrap" style="background:#3498db">
+              <i class="fas fa-clipboard-list"></i>
+            </div>
             <div>
               <h3>Colles</h3>
-              <p>Planning et planches par semaine</p>
+              <p>Planning et planches par semaine pour MPSI, PCSI, MP, PC</p>
             </div>
+            <i class="fas fa-chevron-right quick-chevron"></i>
           </router-link>
           <router-link to="/concours" class="quick-card">
-            <i class="fas fa-trophy quick-icon"></i>
+            <div class="quick-icon-wrap" style="background:#e74c3c">
+              <i class="fas fa-trophy"></i>
+            </div>
             <div>
               <h3>Concours</h3>
-              <p>Sujets écrits et oraux corrigés</p>
+              <p>Sujets écrits et oraux avec corrections détaillées</p>
             </div>
-          </router-link>
-          <router-link to="/parcours" class="quick-card">
-            <i class="fas fa-graduation-cap quick-icon"></i>
-            <div>
-              <h3>Mon parcours</h3>
-              <p>De la prépa à Centrale Lyon</p>
-            </div>
+            <i class="fas fa-chevron-right quick-chevron"></i>
           </router-link>
         </div>
       </div>
     </section>
 
+    <!-- Contact + réseaux sociaux -->
     <ContactSection />
   </div>
 </template>
@@ -66,6 +75,8 @@
 import { ref, onMounted } from 'vue'
 import { api } from '@/api.js'
 import HeroSection from '@/components/sections/HeroSection.vue'
+import AboutSection from '@/components/sections/AboutSection.vue'
+import MethodologySection from '@/components/sections/MethodologySection.vue'
 import ContactSection from '@/components/sections/ContactSection.vue'
 
 const subjects = ref([])
@@ -73,8 +84,8 @@ const loading = ref(true)
 
 const icons = {
   mathematiques: 'fas fa-square-root-alt',
-  physique:       'fas fa-atom',
-  chimie:         'fas fa-flask'
+  physique:      'fas fa-atom',
+  chimie:        'fas fa-flask'
 }
 function subjectIcon(slug) { return icons[slug] || 'fas fa-book' }
 
@@ -86,13 +97,17 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Annule le padding-top du <main> pour que le héros parte du haut */
+.hero-wrapper { margin-top: calc(-1 * var(--header-h)); }
+
+/* ---- Sections communes ---- */
 .content-section {
   padding: 80px 0;
   border-bottom: 1px solid var(--border-color, #ddd);
 }
 
 .subjects-section { background: white; }
-.quick-section { background: var(--secondary-color, #f8f9fa); }
+.quick-section    { background: var(--secondary-color, #f8f9fa); }
 
 .content-section h2 {
   text-align: center;
@@ -108,7 +123,7 @@ onMounted(async () => {
   width: 70px;
   height: 4px;
   background-color: var(--accent-color, #3498db);
-  margin: 15px auto 25px auto;
+  margin: 15px auto 30px auto;
 }
 
 .section-description {
@@ -121,12 +136,11 @@ onMounted(async () => {
   margin-right: auto;
 }
 
-/* Subject cards */
+/* ---- Cartes matières ---- */
 .subjects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 30px;
-  margin-top: 10px;
 }
 
 .subject-card {
@@ -135,9 +149,9 @@ onMounted(async () => {
   padding: 36px 28px;
   text-decoration: none;
   color: var(--primary-color, #2c3e50);
-  border: 2px solid transparent;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-  transition: all 0.25s;
+  border: 2px solid var(--border-color, #eee);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
   display: block;
@@ -148,20 +162,20 @@ onMounted(async () => {
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 4px;
-  background: var(--color, #3b82f6);
+  background: var(--color, #3498db);
 }
 
 .subject-card:hover {
-  border-color: var(--color, #3b82f6);
-  transform: translateY(-4px);
-  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+  border-color: var(--color, #3498db);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
   color: var(--primary-color, #2c3e50);
 }
 
 .subject-icon-wrap {
   font-size: 2.5rem;
-  color: var(--color, #3b82f6);
-  margin-bottom: 16px;
+  color: var(--color, #3498db);
+  margin-bottom: 18px;
 }
 
 .subject-card h3 {
@@ -171,28 +185,26 @@ onMounted(async () => {
 }
 
 .subject-card p {
-  color: var(--text-light, #666);
+  color: #666;
   font-size: 0.9rem;
   margin: 0;
 }
 
 .subject-arrow {
   position: absolute;
-  bottom: 20px;
-  right: 24px;
-  font-size: 1.2rem;
-  color: var(--color, #3b82f6);
+  bottom: 22px;
+  right: 26px;
+  font-size: 1.1rem;
+  color: var(--color, #3498db);
   transition: transform 0.2s;
 }
+.subject-card:hover .subject-arrow { transform: translateX(5px); }
 
-.subject-card:hover .subject-arrow { transform: translateX(4px); }
-
-/* Quick cards */
+/* ---- Cartes accès rapide ---- */
 .quick-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 24px;
-  margin-top: 10px;
 }
 
 .quick-card {
@@ -204,41 +216,66 @@ onMounted(async () => {
   gap: 20px;
   text-decoration: none;
   color: var(--primary-color, #2c3e50);
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
   border: 2px solid transparent;
-  transition: all 0.25s;
+  transition: all 0.3s ease;
 }
 
 .quick-card:hover {
   border-color: var(--accent-color, #3498db);
-  transform: translateY(-3px);
-  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
   color: var(--primary-color, #2c3e50);
 }
 
-.quick-icon {
-  font-size: 2.2rem;
-  color: var(--accent-color, #3498db);
+.quick-icon-wrap {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  color: white;
+  font-size: 1.5rem;
 }
+
+.quick-card div { flex: 1; }
 
 .quick-card h3 {
   font-size: 1.1rem;
   font-weight: 700;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 
 .quick-card p {
   font-size: 0.9rem;
-  color: var(--text-light, #666);
+  color: #666;
   margin: 0;
+  line-height: 1.5;
 }
 
-.hero-wrapper { margin-top: calc(-1 * var(--header-h)); }
+.quick-chevron {
+  color: #ccc;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+.quick-card:hover .quick-chevron {
+  color: var(--accent-color, #3498db);
+  transform: translateX(3px);
+}
+
+/* ---- Divers ---- */
+.loading-spin {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+  font-size: 1rem;
+}
 
 @media (max-width: 768px) {
   .subjects-grid { grid-template-columns: 1fr; gap: 20px; }
-  .quick-grid { grid-template-columns: 1fr; }
+  .quick-grid    { grid-template-columns: 1fr; }
   .content-section { padding: 60px 0; }
 }
 </style>
