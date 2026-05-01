@@ -38,7 +38,7 @@
             <div class="doc-meta">
               <span class="type-tag">{{ typeLabel(doc.type) }}</span>
               <span v-if="doc.difficulty" :class="`badge badge-${doc.difficulty}`">{{ doc.difficulty }}</span>
-              <span v-if="doc.level" class="level-tag">{{ doc.level }}</span>
+              <span v-if="doc.level" class="level-tag">{{ doc.level.split(',').map(l => l.toUpperCase()).join(', ') }}</span>
             </div>
             <h3>{{ doc.title }}</h3>
             <p v-if="doc.description">{{ doc.description }}</p>

@@ -8,51 +8,58 @@
     </div>
 
     <div class="container" style="padding-top: 48px; padding-bottom: 80px;">
-      <!-- Filtres -->
       <div class="filters">
         <div class="filter-group">
           <label>Type</label>
           <div class="btn-group">
             <button :class="['filter-btn', { active: activeType === '' }]" @click="activeType = ''">Tous</button>
-            <button :class="['filter-btn', { active: activeType === 'ecrit' }]" @click="activeType = 'ecrit'">Écrits</button>
-            <button :class="['filter-btn', { active: activeType === 'oral' }]" @click="activeType = 'oral'">Oraux</button>
+            <button :class="['filter-btn', { active: activeType === 'ecrit_concours' }]" @click="activeType = 'ecrit_concours'">Écrits</button>
+            <button :class="['filter-btn', { active: activeType === 'oral_concours' }]" @click="activeType = 'oral_concours'">Oraux</button>
           </div>
         </div>
-        <div class="filter-group">
+        <div class="filter-group" v-if="availableSubjects.length">
           <label>Matière</label>
           <div class="btn-group">
             <button :class="['filter-btn', { active: activeSubject === '' }]" @click="activeSubject = ''">Toutes</button>
-            <button v-for="s in subjects" :key="s.id" :class="['filter-btn', { active: activeSubject === String(s.id) }]" @click="activeSubject = String(s.id)">{{ s.name }}</button>
+            <button v-for="s in availableSubjects" :key="s.id"
+              :class="['filter-btn', { active: activeSubject === String(s.id) }]"
+              @click="activeSubject = String(s.id)">{{ s.name }}</button>
           </div>
         </div>
       </div>
 
       <div v-if="loading" class="loading">Chargement...</div>
 
-      <div v-else-if="filtered.length">
-        <!-- Groupé par nom de concours -->
-        <div v-for="group in groupedByName" :key="group.name" class="concours-section">
+      <div v-else-if="grouped.length">
+        <div v-for="group in grouped" :key="group.name" class="concours-section">
           <h2 class="concours-name">{{ group.name }}</h2>
           <div class="concours-grid">
-            <div v-for="c in group.items" :key="c.id" class="concours-card" :style="{ '--color': c.subject_color || '#3b82f6' }">
+            <div v-for="doc in group.items" :key="doc.id" class="concours-card"
+              :style="{ '--color': doc.subject_color || '#3b82f6' }">
               <div class="concours-card-header">
                 <div class="concours-tags">
-                  <span class="type-badge" :class="c.type">{{ c.type === 'ecrit' ? 'Écrit' : 'Oral' }}</span>
-                  <span v-if="c.subject_name" class="subject-badge" :style="{ background: c.subject_color + '20', color: c.subject_color }">{{ c.subject_name }}</span>
+                  <span class="type-badge" :class="doc.type">
+                    {{ doc.type === 'ecrit_concours' ? 'Écrit' : 'Oral' }}
+                  </span>
+                  <span v-if="doc.subject_name" class="subject-badge"
+                    :style="{ background: (doc.subject_color || '#3b82f6') + '20', color: doc.subject_color || '#3b82f6' }">
+                    {{ doc.subject_name }}
+                  </span>
+                  <span v-if="doc.level" class="level-badge">{{ doc.level.toUpperCase() }}</span>
                 </div>
-                <span class="year-badge">{{ c.year }}</span>
+                <span class="year-badge">{{ doc.concours_year }}</span>
               </div>
-              <p v-if="c.class_target" class="target">{{ c.class_target }}</p>
+              <p class="doc-title-text">{{ doc.title }}</p>
               <div class="concours-actions">
-                <a v-if="c.pdf_url" :href="pdfUrl(c.pdf_url)" target="_blank" class="btn btn-outline">📄 Sujet</a>
-                <a v-if="c.pdf_solution_url" :href="pdfUrl(c.pdf_solution_url)" target="_blank" class="btn btn-primary">✅ Corrigé</a>
-                <span v-else class="soon">Corrigé bientôt</span>
-                <button v-if="c.videos?.length" class="btn btn-video" @click="toggleVideos(c.id)">
-                  ▶ Vidéo{{ c.videos.length > 1 ? 's' : '' }} ({{ c.videos.length }})
+                <a v-if="doc.pdf_statement_url" :href="pdfUrl(doc.pdf_statement_url)" target="_blank" class="btn btn-outline">📄 Sujet</a>
+                <a v-if="doc.pdf_solution_url" :href="pdfUrl(doc.pdf_solution_url)" target="_blank" class="btn btn-primary">✅ Corrigé</a>
+                <span v-else-if="!doc.pdf_solution_url" class="soon">Corrigé bientôt</span>
+                <button v-if="doc.videos?.length" class="btn-video" @click="toggleVideos(doc.id)">
+                  ▶ Vidéo{{ doc.videos.length > 1 ? 's' : '' }} ({{ doc.videos.length }})
                 </button>
               </div>
-              <div v-if="openVideos.has(c.id)" class="video-list">
-                <a v-for="v in c.videos" :key="v.id" :href="v.url" target="_blank" class="video-item">
+              <div v-if="openVideos[doc.id]" class="video-list">
+                <a v-for="v in doc.videos" :key="v.id" :href="v.url" target="_blank" class="video-item">
                   <span class="video-icon">▶</span>
                   <span>{{ v.title || 'Vidéo corrigée' }}</span>
                 </a>
@@ -71,43 +78,43 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import { api } from '@/api.js'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
-const concours = ref([])
+const docs = ref([])
 const loading = ref(true)
 const activeType = ref('')
 const activeSubject = ref('')
-const openVideos = ref(new Set())
+const openVideos = reactive({})
 
 function toggleVideos(id) {
-  const s = new Set(openVideos.value)
-  s.has(id) ? s.delete(id) : s.add(id)
-  openVideos.value = s
+  openVideos[id] = !openVideos[id]
 }
 
 function pdfUrl(url) { return url?.startsWith('http') ? url : `${BASE_URL}${url}` }
 
-const subjects = computed(() => {
+const availableSubjects = computed(() => {
   const map = new Map()
-  for (const c of concours.value) {
-    if (c.subject_id && !map.has(c.subject_id)) map.set(c.subject_id, { id: c.subject_id, name: c.subject_name })
+  for (const d of docs.value) {
+    if (d.subject_id && !map.has(d.subject_id))
+      map.set(d.subject_id, { id: d.subject_id, name: d.subject_name })
   }
   return [...map.values()]
 })
 
-const filtered = computed(() => concours.value.filter(c => {
-  if (activeType.value && c.type !== activeType.value) return false
-  if (activeSubject.value && String(c.subject_id) !== activeSubject.value) return false
+const filtered = computed(() => docs.value.filter(d => {
+  if (activeType.value && d.type !== activeType.value) return false
+  if (activeSubject.value && String(d.subject_id) !== activeSubject.value) return false
   return true
 }))
 
-const groupedByName = computed(() => {
+const grouped = computed(() => {
   const map = new Map()
-  for (const c of filtered.value) {
-    if (!map.has(c.name)) map.set(c.name, { name: c.name, items: [] })
-    map.get(c.name).items.push(c)
+  for (const d of filtered.value) {
+    const key = d.concours_name || 'Autres'
+    if (!map.has(key)) map.set(key, { name: key, items: [] })
+    map.get(key).items.push(d)
   }
   return [...map.values()]
 })
@@ -115,7 +122,7 @@ const groupedByName = computed(() => {
 async function load() {
   loading.value = true
   try {
-    concours.value = await api.getConcours({})
+    docs.value = await api.getDocuments({ type: 'ecrit_concours,oral_concours' })
   } catch (e) { console.error(e) }
   finally { loading.value = false }
 }
@@ -136,14 +143,15 @@ onMounted(load)
 
 .concours-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
 .concours-card { background: white; border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); border-top: 4px solid var(--color); }
-.concours-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.concours-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
 .concours-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .type-badge { font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 6px; text-transform: uppercase; }
-.type-badge.ecrit { background: #dbeafe; color: #1d4ed8; }
-.type-badge.oral  { background: #fce7f3; color: #be185d; }
+.type-badge.ecrit_concours { background: #dbeafe; color: #1d4ed8; }
+.type-badge.oral_concours  { background: #fce7f3; color: #be185d; }
 .subject-badge { font-size: 0.75rem; font-weight: 600; padding: 3px 10px; border-radius: 6px; }
-.year-badge { font-size: 1rem; font-weight: 800; color: var(--text-light); }
-.target { font-size: 0.85rem; color: var(--text-light); margin-bottom: 16px; }
+.level-badge { font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: #f1f5f9; color: var(--text-light); }
+.year-badge { font-size: 1rem; font-weight: 800; color: var(--text-light); white-space: nowrap; }
+.doc-title-text { font-size: 0.9rem; font-weight: 500; color: var(--text); margin: 8px 0 14px; }
 .concours-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .soon { font-size: 0.8rem; color: var(--text-light); font-style: italic; align-self: center; }
 .btn-video { background: #7c3aed; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }

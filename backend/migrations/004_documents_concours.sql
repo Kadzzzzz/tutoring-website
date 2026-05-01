@@ -1,0 +1,2 @@
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS concours_name VARCHAR(255);
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS concours_year INTEGER;
