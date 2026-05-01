@@ -1,25 +1,14 @@
 <template>
   <div>
-    <!-- Hero -->
-    <section class="hero">
-      <div class="container">
-        <div class="hero-content">
-          <p class="hero-tag">Professeur de classes préparatoires</p>
-          <h1>Mathématiques, Physique & Chimie</h1>
-          <p class="hero-sub">Exercices corrigés, colles, et sujets de concours pour réussir votre prépa.</p>
-          <div class="hero-actions">
-            <router-link to="/matieres/mathematiques" class="btn btn-primary">Accéder aux exercices</router-link>
-            <router-link to="/concours" class="btn btn-outline-white">Annales concours</router-link>
-          </div>
-        </div>
-      </div>
-    </section>
+    <div class="hero-wrapper">
+      <HeroSection />
+    </div>
 
     <!-- Matières -->
-    <section class="section">
+    <section id="about" class="content-section subjects-section">
       <div class="container">
-        <h2 class="section-title">Choisir une matière</h2>
-        <p class="section-sub">Accédez directement aux exercices par chapitre</p>
+        <h2>Choisir une matière</h2>
+        <p class="section-description">Accédez directement aux exercices par chapitre</p>
         <div class="subjects-grid" v-if="subjects.length">
           <router-link
             v-for="s in subjects" :key="s.id"
@@ -27,10 +16,12 @@
             class="subject-card"
             :style="{ '--color': s.color }"
           >
-            <div class="subject-icon">{{ subjectIcon(s.slug) }}</div>
+            <div class="subject-icon-wrap">
+              <i :class="subjectIcon(s.slug)"></i>
+            </div>
             <h3>{{ s.name }}</h3>
             <p>{{ s.chapter_count }} chapitre{{ s.chapter_count > 1 ? 's' : '' }}</p>
-            <span class="subject-arrow">→</span>
+            <span class="subject-arrow"><i class="fas fa-arrow-right"></i></span>
           </router-link>
         </div>
         <div v-else-if="loading" class="loading">Chargement...</div>
@@ -38,26 +29,26 @@
     </section>
 
     <!-- Accès rapide -->
-    <section class="section section-dark">
+    <section class="content-section quick-section">
       <div class="container">
-        <h2 class="section-title light">Autres ressources</h2>
-        <div class="quick-links">
+        <h2>Autres ressources</h2>
+        <div class="quick-grid">
           <router-link to="/colles" class="quick-card">
-            <span class="quick-icon">📋</span>
+            <i class="fas fa-clipboard-list quick-icon"></i>
             <div>
               <h3>Colles</h3>
               <p>Planning et planches par semaine</p>
             </div>
           </router-link>
           <router-link to="/concours" class="quick-card">
-            <span class="quick-icon">🏆</span>
+            <i class="fas fa-trophy quick-icon"></i>
             <div>
               <h3>Concours</h3>
               <p>Sujets écrits et oraux corrigés</p>
             </div>
           </router-link>
           <router-link to="/parcours" class="quick-card">
-            <span class="quick-icon">🎓</span>
+            <i class="fas fa-graduation-cap quick-icon"></i>
             <div>
               <h3>Mon parcours</h3>
               <p>De la prépa à Centrale Lyon</p>
@@ -66,18 +57,26 @@
         </div>
       </div>
     </section>
+
+    <ContactSection />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { api } from '@/api.js'
+import HeroSection from '@/components/sections/HeroSection.vue'
+import ContactSection from '@/components/sections/ContactSection.vue'
 
 const subjects = ref([])
 const loading = ref(true)
 
-const icons = { mathematiques: '∑', physique: '⚛', chimie: '🧪' }
-function subjectIcon(slug) { return icons[slug] || '📚' }
+const icons = {
+  mathematiques: 'fas fa-square-root-alt',
+  physique:       'fas fa-atom',
+  chimie:         'fas fa-flask'
+}
+function subjectIcon(slug) { return icons[slug] || 'fas fa-book' }
 
 onMounted(async () => {
   try { subjects.value = await api.getSubjects() }
@@ -87,58 +86,159 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.hero {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
-  padding: 100px 0 80px;
-  color: white;
+.content-section {
+  padding: 80px 0;
+  border-bottom: 1px solid var(--border-color, #ddd);
 }
-.hero-tag { font-size: 0.9rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 1rem; }
-.hero h1 { color: white; margin-bottom: 1.2rem; }
-.hero-sub { font-size: 1.2rem; color: rgba(255,255,255,0.75); max-width: 560px; margin-bottom: 2rem; }
-.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
-.btn-outline-white { background: transparent; color: white; border: 2px solid rgba(255,255,255,0.5); padding: 8px 18px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; transition: all 0.2s; }
-.btn-outline-white:hover { background: rgba(255,255,255,0.1); border-color: white; color: white; }
 
-.section { padding: 80px 0; }
-.section-dark { background: var(--primary); }
-.section-title { margin-bottom: 0.5rem; }
-.section-title.light { color: white; }
-.section-sub { color: var(--text-light); margin-bottom: 3rem; }
+.subjects-section { background: white; }
+.quick-section { background: var(--secondary-color, #f8f9fa); }
 
-.subjects-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.content-section h2 {
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--primary-color, #2c3e50);
+  margin-bottom: 0;
+}
+
+.content-section h2::after {
+  content: '';
+  display: block;
+  width: 70px;
+  height: 4px;
+  background-color: var(--accent-color, #3498db);
+  margin: 15px auto 25px auto;
+}
+
+.section-description {
+  text-align: center;
+  color: var(--text-light, #666);
+  font-size: 1.1rem;
+  margin-bottom: 50px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Subject cards */
+.subjects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-top: 10px;
+}
 
 .subject-card {
-  background: white; border-radius: var(--radius);
-  padding: 36px 28px; text-decoration: none; color: var(--text);
-  border: 2px solid transparent; transition: all 0.25s;
-  position: relative; overflow: hidden;
-  box-shadow: var(--shadow);
+  background: white;
+  border-radius: 12px;
+  padding: 36px 28px;
+  text-decoration: none;
+  color: var(--primary-color, #2c3e50);
+  border: 2px solid transparent;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+  display: block;
 }
+
 .subject-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-  background: var(--color);
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--color, #3b82f6);
 }
-.subject-card:hover { border-color: var(--color); transform: translateY(-4px); box-shadow: var(--shadow-lg); color: var(--text); }
-.subject-icon { font-size: 2.5rem; margin-bottom: 16px; display: block; }
-.subject-card h3 { font-size: 1.4rem; color: var(--text); margin-bottom: 4px; }
-.subject-card p { color: var(--text-light); font-size: 0.9rem; margin: 0; }
-.subject-arrow { position: absolute; bottom: 20px; right: 24px; font-size: 1.3rem; color: var(--color); transition: transform 0.2s; }
+
+.subject-card:hover {
+  border-color: var(--color, #3b82f6);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+  color: var(--primary-color, #2c3e50);
+}
+
+.subject-icon-wrap {
+  font-size: 2.5rem;
+  color: var(--color, #3b82f6);
+  margin-bottom: 16px;
+}
+
+.subject-card h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.subject-card p {
+  color: var(--text-light, #666);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.subject-arrow {
+  position: absolute;
+  bottom: 20px;
+  right: 24px;
+  font-size: 1.2rem;
+  color: var(--color, #3b82f6);
+  transition: transform 0.2s;
+}
+
 .subject-card:hover .subject-arrow { transform: translateX(4px); }
 
-.quick-links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 2rem; }
-.quick-card {
-  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: var(--radius); padding: 24px; display: flex; align-items: center; gap: 16px;
-  color: white; text-decoration: none; transition: all 0.2s;
+/* Quick cards */
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 10px;
 }
-.quick-card:hover { background: rgba(255,255,255,0.12); color: white; transform: translateY(-2px); }
-.quick-icon { font-size: 2rem; }
-.quick-card h3 { font-size: 1rem; color: white; margin-bottom: 4px; }
-.quick-card p { font-size: 0.85rem; color: rgba(255,255,255,0.6); margin: 0; }
+
+.quick-card {
+  background: white;
+  border-radius: 12px;
+  padding: 28px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  text-decoration: none;
+  color: var(--primary-color, #2c3e50);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  border: 2px solid transparent;
+  transition: all 0.25s;
+}
+
+.quick-card:hover {
+  border-color: var(--accent-color, #3498db);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+  color: var(--primary-color, #2c3e50);
+}
+
+.quick-icon {
+  font-size: 2.2rem;
+  color: var(--accent-color, #3498db);
+  flex-shrink: 0;
+}
+
+.quick-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.quick-card p {
+  font-size: 0.9rem;
+  color: var(--text-light, #666);
+  margin: 0;
+}
+
+.hero-wrapper { margin-top: calc(-1 * var(--header-h)); }
 
 @media (max-width: 768px) {
-  .subjects-grid { grid-template-columns: 1fr; }
-  .quick-links { grid-template-columns: 1fr; }
-  .hero { padding: 60px 0 50px; }
+  .subjects-grid { grid-template-columns: 1fr; gap: 20px; }
+  .quick-grid { grid-template-columns: 1fr; }
+  .content-section { padding: 60px 0; }
 }
 </style>
