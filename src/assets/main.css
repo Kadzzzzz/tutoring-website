@@ -16,12 +16,12 @@
   --header-h:   68px;
   --transition: 0.2s ease;
 
-  /* Aliases for legacy components */
-  --primary-color:   #2c3e50;
-  --accent-color:    #3498db;
-  --secondary-color: #f8f9fa;
-  --border-color:    #ddd;
-  --transition-speed: 0.3s;
+  /* Aliases — pointent vers les vars modernes */
+  --primary-color:   var(--primary);
+  --accent-color:    var(--accent);
+  --secondary-color: var(--bg);
+  --border-color:    var(--border);
+  --transition-speed: var(--transition);
 }
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }

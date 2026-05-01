@@ -8,7 +8,7 @@
           <span>{{ subject?.name }}</span>
         </div>
         <h1>{{ subject?.name || 'Chargement...' }}</h1>
-        <p v-if="subject">{{ subject.chapters?.length || 0 }} chapitre{{ (subject.chapters?.length || 0) > 1 ? 's' : '' }} disponibles</p>
+        <p v-if="subject">{{ subject.chapters?.length || 0 }} chapitre{{ (subject.chapters?.length || 0) > 1 ? 's' : '' }}</p>
       </div>
     </div>
 
@@ -24,7 +24,7 @@
         >
           <div class="chapter-header">
             <h3>{{ chapter.name }}</h3>
-            <span class="chapter-count">{{ chapter.document_count }} exercice{{ chapter.document_count > 1 ? 's' : '' }}</span>
+            <span class="chapter-count">{{ chapter.document_count }} document{{ chapter.document_count > 1 ? 's' : '' }}</span>
           </div>
           <div class="chapter-footer">
             <span class="chapter-link">Voir les exercices →</span>

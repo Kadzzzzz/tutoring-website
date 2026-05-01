@@ -20,7 +20,7 @@
             <router-link to="/colles">Colles</router-link>
             <router-link to="/concours">Concours</router-link>
             <router-link to="/parcours">Mon parcours</router-link>
-            <router-link to="/pedagogie">Pédagogie</router-link>
+            <router-link to="/pedagogie">Conseils</router-link>
           </nav>
         </div>
       </div>

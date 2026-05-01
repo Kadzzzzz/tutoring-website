@@ -8,9 +8,7 @@
         <div class="dropdown" @mouseenter="openDropdown" @mouseleave="scheduleClose">
           <button class="dropdown-btn">Matières ▾</button>
           <div class="dropdown-menu" v-show="dropdownOpen" @mouseenter="openDropdown" @mouseleave="scheduleClose">
-            <router-link to="/matieres/mathematiques">Mathématiques</router-link>
-            <router-link to="/matieres/physique">Physique</router-link>
-            <router-link to="/matieres/chimie">Chimie</router-link>
+            <router-link v-for="s in subjects" :key="s.id" :to="`/matieres/${s.slug}`">{{ s.name }}</router-link>
           </div>
         </div>
         <router-link to="/colles">Colles</router-link>
@@ -26,9 +24,7 @@
 
     <nav class="mobile-nav" :class="{ open: menuOpen }" @click="menuOpen = false">
       <router-link to="/">Accueil</router-link>
-      <router-link to="/matieres/mathematiques">Mathématiques</router-link>
-      <router-link to="/matieres/physique">Physique</router-link>
-      <router-link to="/matieres/chimie">Chimie</router-link>
+      <router-link v-for="s in subjects" :key="s.id" :to="`/matieres/${s.slug}`">{{ s.name }}</router-link>
       <router-link to="/colles">Colles</router-link>
       <router-link to="/concours">Concours</router-link>
       <router-link to="/pedagogie">Conseils</router-link>
@@ -41,20 +37,25 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { api } from '@/api.js'
 
-const scrolled = ref(false)
-const menuOpen = ref(false)
+const scrolled     = ref(false)
+const menuOpen     = ref(false)
 const dropdownOpen = ref(false)
-let closeTimer = null
-const route = useRoute()
+const subjects     = ref([])
+let closeTimer     = null
+const route        = useRoute()
 
 watch(() => route.path, () => { menuOpen.value = false; dropdownOpen.value = false })
 
-function openDropdown() { clearTimeout(closeTimer); dropdownOpen.value = true }
+function openDropdown()  { clearTimeout(closeTimer); dropdownOpen.value = true }
 function scheduleClose() { closeTimer = setTimeout(() => { dropdownOpen.value = false }, 120) }
+function onScroll()      { scrolled.value = window.scrollY > 20 }
 
-function onScroll() { scrolled.value = window.scrollY > 20 }
-onMounted(() => window.addEventListener('scroll', onScroll))
+onMounted(async () => {
+  window.addEventListener('scroll', onScroll)
+  try { subjects.value = await api.getSubjects() } catch (e) { console.error(e) }
+})
 onUnmounted(() => { window.removeEventListener('scroll', onScroll); clearTimeout(closeTimer) })
 </script>
 
@@ -67,7 +68,6 @@ onUnmounted(() => { window.removeEventListener('scroll', onScroll); clearTimeout
   display: flex; align-items: center;
 }
 .header.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,0.3); }
-
 .header-inner { display: flex; align-items: center; justify-content: space-between; }
 
 .logo { font-size: 1.4rem; font-weight: 800; color: white; letter-spacing: -0.5px; }
@@ -87,7 +87,7 @@ onUnmounted(() => { window.removeEventListener('scroll', onScroll); clearTimeout
 .dropdown-menu {
   position: absolute; top: calc(100% + 8px); left: 0;
   background: white; border-radius: 10px; box-shadow: var(--shadow-lg);
-  min-width: 200px; padding: 8px; overflow: hidden;
+  min-width: 200px; padding: 8px;
 }
 .dropdown-menu a {
   display: block; padding: 10px 14px; color: var(--text);
@@ -114,13 +114,9 @@ onUnmounted(() => { window.removeEventListener('scroll', onScroll); clearTimeout
   border-bottom: 1px solid rgba(255,255,255,0.07);
   transition: all 0.2s;
 }
-.mobile-nav a:hover, .mobile-nav a.router-link-active {
-  color: white; background: rgba(59,130,246,0.2);
-}
+.mobile-nav a:hover, .mobile-nav a.router-link-active { color: white; background: rgba(59,130,246,0.2); }
 
-.overlay {
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 998;
-}
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 998; }
 
 @media (max-width: 768px) {
   .desktop { display: none; }
