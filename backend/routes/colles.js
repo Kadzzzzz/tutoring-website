@@ -15,24 +15,27 @@ router.get('/', async (req, res, next) => {
 
     const result = await db.query(`
       SELECT c.*, s.name AS subject_name, s.color AS subject_color,
-             COUNT(p.id)::int AS planche_count,
-             COALESCE(
-               json_agg(
-                 json_build_object(
-                   'id', p.id,
-                   'planche_number', p.planche_number,
-                   'title', p.title,
-                   'pdf_statement_url', p.pdf_statement_url,
-                   'pdf_solution_url', p.pdf_solution_url
-                 ) ORDER BY p.planche_number
-               ) FILTER (WHERE p.id IS NOT NULL),
-               '[]'::json
-             ) AS planches
+        (SELECT COUNT(*)::int FROM colle_planches WHERE colle_id = c.id) AS planche_count,
+        COALESCE((
+          SELECT json_agg(
+            json_build_object(
+              'id', p.id,
+              'planche_number', p.planche_number,
+              'title', p.title,
+              'pdf_statement_url', p.pdf_statement_url,
+              'pdf_solution_url', p.pdf_solution_url,
+              'videos', COALESCE((
+                SELECT json_agg(
+                  json_build_object('id', v.id, 'title', v.title, 'url', v.url)
+                  ORDER BY v.order_index, v.id
+                ) FROM colle_planche_videos v WHERE v.planche_id = p.id
+              ), '[]'::json)
+            ) ORDER BY p.planche_number
+          ) FROM colle_planches p WHERE p.colle_id = c.id
+        ), '[]'::json) AS planches
       FROM colles c
       LEFT JOIN subjects s ON s.id = c.subject_id
-      LEFT JOIN colle_planches p ON p.colle_id = c.id
       ${whereStr}
-      GROUP BY c.id, s.name, s.color
       ORDER BY c.week_number
     `, params);
     res.json(result.rows);
@@ -52,7 +55,16 @@ router.get('/:id', async (req, res, next) => {
       'SELECT * FROM colle_planches WHERE colle_id = $1 ORDER BY planche_number',
       [req.params.id]
     );
-    res.json({ ...colle.rows[0], planches: planches.rows });
+
+    const planchesWithVideos = await Promise.all(planches.rows.map(async p => {
+      const videos = await db.query(
+        'SELECT * FROM colle_planche_videos WHERE planche_id = $1 ORDER BY order_index, id',
+        [p.id]
+      );
+      return { ...p, videos: videos.rows };
+    }));
+
+    res.json({ ...colle.rows[0], planches: planchesWithVideos });
   } catch (e) { next(e); }
 });
 

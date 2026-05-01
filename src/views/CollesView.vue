@@ -51,6 +51,15 @@
                 </a>
                 <span v-else class="soon">Corrigé bientôt</span>
               </div>
+              <!-- Vidéos corrigées -->
+              <div v-if="p.videos && p.videos.length" class="video-links">
+                <a v-for="v in p.videos" :key="v.id"
+                  :href="v.url" target="_blank"
+                  class="video-btn">
+                  <i class="fas fa-play-circle"></i>
+                  {{ v.title || 'Vidéo corrigée' }}
+                </a>
+              </div>
             </div>
           </div>
 
@@ -180,6 +189,7 @@ onMounted(load)
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
+  align-content: flex-start;
 }
 
 .planches-grid:not(.multi) .planche-card {
@@ -206,6 +216,32 @@ onMounted(load)
   color: var(--text-light);
   font-style: italic;
 }
+
+.video-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  width: 100%;
+}
+
+.video-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #f5f3ff;
+  color: #7c3aed;
+  border: 1px solid #ddd6fe;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.video-btn:hover { background: #ede9fe; color: #6d28d9; }
 
 .no-planches {
   font-size: 0.9rem;

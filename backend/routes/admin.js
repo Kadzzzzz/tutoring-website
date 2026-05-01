@@ -226,6 +226,35 @@ router.delete('/planches/:id', auth, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// Vidéos de planches
+router.get('/planches/:id/videos', auth, async (req, res, next) => {
+  try {
+    const r = await db.query(
+      'SELECT * FROM colle_planche_videos WHERE planche_id=$1 ORDER BY order_index, id',
+      [req.params.id]
+    );
+    res.json(r.rows);
+  } catch (e) { next(e); }
+});
+
+router.post('/planches/:id/videos', auth, async (req, res, next) => {
+  try {
+    const { title, url, order_index } = req.body;
+    const r = await db.query(
+      'INSERT INTO colle_planche_videos (planche_id,title,url,order_index) VALUES ($1,$2,$3,$4) RETURNING *',
+      [req.params.id, title || null, url, order_index || 0]
+    );
+    res.json(r.rows[0]);
+  } catch (e) { next(e); }
+});
+
+router.delete('/videos/:id', auth, async (req, res, next) => {
+  try {
+    await db.query('DELETE FROM colle_planche_videos WHERE id=$1', [req.params.id]);
+    res.json({ message: 'Supprimé' });
+  } catch (e) { next(e); }
+});
+
 // Saisie rapide : crée ou retrouve une colle et y ajoute les planches d'un coup
 router.post('/colles/quick', auth, async (req, res, next) => {
   try {

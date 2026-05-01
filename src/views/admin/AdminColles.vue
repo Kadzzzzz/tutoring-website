@@ -33,13 +33,34 @@
       <!-- Planches existantes -->
       <div v-if="existingPlanches.length" class="existing-planches">
         <h3>Planches existantes</h3>
-        <div v-for="p in existingPlanches" :key="p.id" class="existing-planche-row">
-          <span class="p-label">P{{ p.planche_number }}{{ p.title ? ` — ${p.title}` : '' }}</span>
-          <div class="p-links">
-            <a v-if="p.pdf_statement_url" :href="pdfUrl(p.pdf_statement_url)" target="_blank" class="p-link">Énoncé</a>
-            <a v-if="p.pdf_solution_url" :href="pdfUrl(p.pdf_solution_url)" target="_blank" class="p-link">Corrigé</a>
+        <div v-for="p in existingPlanches" :key="p.id" class="existing-planche-block">
+          <div class="existing-planche-row">
+            <span class="p-label">P{{ p.planche_number }}{{ p.title ? ` — ${p.title}` : '' }}</span>
+            <div class="p-links">
+              <a v-if="p.pdf_statement_url" :href="pdfUrl(p.pdf_statement_url)" target="_blank" class="p-link">Énoncé</a>
+              <a v-if="p.pdf_solution_url" :href="pdfUrl(p.pdf_solution_url)" target="_blank" class="p-link">Corrigé</a>
+            </div>
+            <button class="video-toggle-btn" @click="toggleVideos(p.id)">
+              ▶ Vidéos {{ p.videos?.length ? `(${p.videos.length})` : '' }}
+            </button>
+            <button class="del-btn" @click="deletePlanche(p.id)">✕</button>
           </div>
-          <button class="del-btn" @click="deletePlanche(p.id)">✕</button>
+
+          <!-- Gestion des vidéos -->
+          <div v-if="openVideoPanel === p.id" class="video-panel">
+            <div v-for="v in p.videos" :key="v.id" class="video-row">
+              <i class="fas fa-play-circle video-icon"></i>
+              <span class="video-title">{{ v.title || 'Vidéo corrigée' }}</span>
+              <a :href="v.url" target="_blank" class="p-link">Voir</a>
+              <button class="del-btn" @click="removeVideo(p, v.id)">✕</button>
+            </div>
+            <div v-if="!p.videos?.length" class="no-videos">Aucune vidéo pour cette planche.</div>
+            <div class="add-video-row">
+              <input v-model="newVideo.title" placeholder="Titre (ex: Exercice 1)" class="video-input" />
+              <input v-model="newVideo.url" placeholder="URL YouTube / Vimeo..." class="video-input video-url" />
+              <button class="btn btn-primary" style="font-size:0.85rem;padding:6px 14px" @click="addVideo(p)">Ajouter</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -129,6 +150,8 @@ const newPlanches = ref([])
 const saving = ref(false)
 const formError = ref('')
 const uploadingField = ref('')
+const openVideoPanel = ref(null)
+const newVideo = ref({ title: '', url: '' })
 
 const filteredColles = computed(() =>
   colles.value.filter(c => c.class_name === activeClass.value)
@@ -161,6 +184,8 @@ async function load() {
 async function openWeek(week) {
   editingWeek.value = week
   formError.value = ''
+  openVideoPanel.value = null
+  newVideo.value = { title: '', url: '' }
   newPlanches.value = [{ title: '', pdf_statement_url: '', pdf_solution_url: '' }]
   const existing = getColle(week)
   if (existing) {
@@ -219,6 +244,33 @@ async function save(goNext) {
   } finally {
     saving.value = false
   }
+}
+
+function toggleVideos(plancheId) {
+  openVideoPanel.value = openVideoPanel.value === plancheId ? null : plancheId
+  newVideo.value = { title: '', url: '' }
+}
+
+async function addVideo(planche) {
+  if (!newVideo.value.url.trim()) { alert('Entrez une URL de vidéo.'); return }
+  try {
+    const v = await api.addPlancheVideo(planche.id, {
+      title: newVideo.value.title,
+      url: newVideo.value.url,
+      order_index: (planche.videos?.length || 0)
+    })
+    if (!planche.videos) planche.videos = []
+    planche.videos.push(v)
+    newVideo.value = { title: '', url: '' }
+  } catch (e) { alert(e.message) }
+}
+
+async function removeVideo(planche, videoId) {
+  if (!confirm('Supprimer cette vidéo ?')) return
+  try {
+    await api.deleteVideo(videoId)
+    planche.videos = planche.videos.filter(v => v.id !== videoId)
+  } catch (e) { alert(e.message) }
 }
 
 async function deletePlanche(id) {
@@ -291,10 +343,31 @@ onMounted(load)
 
 .existing-planches { margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--border); }
 .existing-planches h3 { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-light); margin-bottom: 10px; }
-.existing-planche-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--bg); font-size: 0.9rem; }
+.existing-planche-block { border-bottom: 1px solid var(--bg); }
+.existing-planche-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; font-size: 0.9rem; }
 .p-label { font-weight: 600; flex: 1; }
 .p-links { display: flex; gap: 8px; }
 .p-link { font-size: 0.8rem; color: var(--accent); font-weight: 600; }
+
+.video-toggle-btn {
+  font-size: 0.8rem; font-weight: 600; color: #7c3aed;
+  background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 6px;
+  padding: 4px 10px; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.video-toggle-btn:hover { background: #ede9fe; }
+
+.video-panel {
+  background: #fafafa; border-radius: 8px; padding: 12px 14px;
+  margin: 0 0 8px 0; border: 1px solid var(--border);
+}
+.video-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; }
+.video-icon { color: #7c3aed; font-size: 1rem; }
+.video-title { flex: 1; font-weight: 500; }
+.no-videos { font-size: 0.85rem; color: var(--text-light); padding: 6px 0; font-style: italic; }
+.add-video-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.video-input { padding: 6px 10px; border: 2px solid var(--border); border-radius: 6px; font-size: 0.85rem; font-family: inherit; }
+.video-input:focus { outline: none; border-color: #7c3aed; }
+.video-url { flex: 1; min-width: 200px; }
 
 h3 { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; color: var(--text); }
 
