@@ -13,7 +13,7 @@
 
     <!-- Grille des semaines -->
     <div class="weeks-grid">
-      <div v-for="w in 25" :key="w"
+      <div v-for="w in totalWeeks" :key="w"
         :class="['week-cell', weekStatus(w)]"
         @click="openWeek(w)">
         <span class="week-num">S{{ w }}</span>
@@ -134,6 +134,11 @@ const filteredColles = computed(() =>
   colles.value.filter(c => c.class_name === activeClass.value)
     .sort((a, b) => a.week_number - b.week_number)
 )
+
+const totalWeeks = computed(() => {
+  const max = filteredColles.value.reduce((m, c) => Math.max(m, c.week_number), 0)
+  return Math.max(25, max + 3)
+})
 
 function getColle(week) {
   return filteredColles.value.find(c => c.week_number === week)
