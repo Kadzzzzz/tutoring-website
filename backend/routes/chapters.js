@@ -15,7 +15,22 @@ router.get('/:id', async (req, res, next) => {
       ORDER BY type, title
     `, [req.params.id]);
 
-    res.json({ ...chapter.rows[0], documents: documents.rows });
+    // Charger les vidéos pour tous les documents en une seule requête
+    const docIds = documents.rows.map(d => d.id);
+    const videosMap = {};
+    if (docIds.length) {
+      const vids = await db.query(
+        `SELECT * FROM content_videos WHERE entity_type='document' AND entity_id = ANY($1) ORDER BY order_index, id`,
+        [docIds]
+      );
+      for (const v of vids.rows) {
+        if (!videosMap[v.entity_id]) videosMap[v.entity_id] = [];
+        videosMap[v.entity_id].push(v);
+      }
+    }
+
+    const docsWithVideos = documents.rows.map(d => ({ ...d, videos: videosMap[d.id] || [] }));
+    res.json({ ...chapter.rows[0], documents: docsWithVideos });
   } catch (e) { next(e); }
 });
 

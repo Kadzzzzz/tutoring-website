@@ -68,6 +68,10 @@ export const api = {
   deleteVideo:       (id)      => request(`/api/admin/videos/${id}`,           { method: 'DELETE' }),
   quickSaveColle:    (d)       => request('/api/admin/colles/quick',           { method: 'POST',   body: JSON.stringify(d) }),
 
+  getContentVideos:  (type, id) => request(`/api/admin/content-videos?entity_type=${type}&entity_id=${id}`),
+  addContentVideo:   (d)       => request('/api/admin/content-videos',    { method: 'POST',   body: JSON.stringify(d) }),
+  deleteContentVideo:(id)      => request(`/api/admin/content-videos/${id}`, { method: 'DELETE' }),
+
   getAdminConcours:  ()        => request('/api/admin/concours'),
   createConcours:    (d)       => request('/api/admin/concours',        { method: 'POST',   body: JSON.stringify(d) }),
   updateConcours:    (id, d)   => request(`/api/admin/concours/${id}`,  { method: 'PUT',    body: JSON.stringify(d) }),

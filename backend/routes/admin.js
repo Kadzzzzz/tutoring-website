@@ -255,6 +255,36 @@ router.delete('/videos/:id', auth, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// Vidéos génériques (concours, documents, etc.)
+router.get('/content-videos', auth, async (req, res, next) => {
+  try {
+    const { entity_type, entity_id } = req.query;
+    const r = await db.query(
+      'SELECT * FROM content_videos WHERE entity_type=$1 AND entity_id=$2 ORDER BY order_index, id',
+      [entity_type, entity_id]
+    );
+    res.json(r.rows);
+  } catch (e) { next(e); }
+});
+
+router.post('/content-videos', auth, async (req, res, next) => {
+  try {
+    const { entity_type, entity_id, title, url, order_index } = req.body;
+    const r = await db.query(
+      'INSERT INTO content_videos (entity_type,entity_id,title,url,order_index) VALUES ($1,$2,$3,$4,$5) RETURNING *',
+      [entity_type, entity_id, title || null, url, order_index || 0]
+    );
+    res.json(r.rows[0]);
+  } catch (e) { next(e); }
+});
+
+router.delete('/content-videos/:id', auth, async (req, res, next) => {
+  try {
+    await db.query('DELETE FROM content_videos WHERE id=$1', [req.params.id]);
+    res.json({ message: 'Supprimé' });
+  } catch (e) { next(e); }
+});
+
 // Saisie rapide : crée ou retrouve une colle et y ajoute les planches d'un coup
 router.post('/colles/quick', auth, async (req, res, next) => {
   try {

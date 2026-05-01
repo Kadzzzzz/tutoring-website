@@ -15,6 +15,7 @@
         </div>
         <router-link to="/colles">Colles</router-link>
         <router-link to="/concours">Concours</router-link>
+        <router-link to="/pedagogie">Conseils</router-link>
         <router-link to="/parcours">Parcours</router-link>
       </nav>
 
@@ -30,6 +31,7 @@
       <router-link to="/matieres/chimie">Chimie</router-link>
       <router-link to="/colles">Colles</router-link>
       <router-link to="/concours">Concours</router-link>
+      <router-link to="/pedagogie">Conseils</router-link>
       <router-link to="/parcours">Parcours</router-link>
     </nav>
     <div v-if="menuOpen" class="overlay" @click="menuOpen = false" />

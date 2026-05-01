@@ -78,16 +78,6 @@
         </div>
         <div class="field">
           <label class="checkbox-label">
-            <input type="checkbox" v-model="form.has_video" />
-            Vidéo disponible
-          </label>
-        </div>
-        <div class="field" v-if="form.has_video">
-          <label>URL Vidéo (YouTube)</label>
-          <input v-model="form.video_url" placeholder="https://youtube.com/..." />
-        </div>
-        <div class="field">
-          <label class="checkbox-label">
             <input type="checkbox" v-model="form.is_published" />
             Publié (visible sur le site)
           </label>
@@ -98,6 +88,15 @@
           <button type="submit" class="btn btn-primary" :disabled="saving">{{ saving ? 'Enregistrement...' : 'Enregistrer' }}</button>
         </div>
       </form>
+
+      <!-- Vidéos (seulement si modification) -->
+      <VideoManager
+        v-if="editing"
+        entity-type="document"
+        :entity-id="editing.id"
+        :videos="editingVideos"
+        @update="editingVideos = $event"
+      />
     </div>
 
     <!-- Liste -->
@@ -127,12 +126,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { api } from '@/api.js'
+import VideoManager from '@/components/admin/VideoManager.vue'
 
 const documents = ref([])
 const chapters = ref([])
 const loading = ref(true)
 const showForm = ref(false)
 const editing = ref(null)
+const editingVideos = ref([])
 const saving = ref(false)
 const formError = ref('')
 
@@ -161,11 +162,16 @@ async function load() {
   finally { loading.value = false }
 }
 
-function openForm(doc) {
+async function openForm(doc) {
   editing.value = doc
   form.value = doc ? { ...doc } : emptyForm()
   showForm.value = true
   formError.value = ''
+  editingVideos.value = []
+  if (doc) {
+    try { editingVideos.value = await api.getContentVideos('document', doc.id) }
+    catch (e) { console.error(e) }
+  }
 }
 
 async function upload(event, field) {

@@ -47,6 +47,15 @@
                 <a v-if="c.pdf_url" :href="pdfUrl(c.pdf_url)" target="_blank" class="btn btn-outline">📄 Sujet</a>
                 <a v-if="c.pdf_solution_url" :href="pdfUrl(c.pdf_solution_url)" target="_blank" class="btn btn-primary">✅ Corrigé</a>
                 <span v-else class="soon">Corrigé bientôt</span>
+                <button v-if="c.videos?.length" class="btn btn-video" @click="toggleVideos(c.id)">
+                  ▶ Vidéo{{ c.videos.length > 1 ? 's' : '' }} ({{ c.videos.length }})
+                </button>
+              </div>
+              <div v-if="openVideos.has(c.id)" class="video-list">
+                <a v-for="v in c.videos" :key="v.id" :href="v.url" target="_blank" class="video-item">
+                  <span class="video-icon">▶</span>
+                  <span>{{ v.title || 'Vidéo corrigée' }}</span>
+                </a>
               </div>
             </div>
           </div>
@@ -71,6 +80,13 @@ const subjects = ref([])
 const loading = ref(true)
 const activeType = ref('')
 const activeSubject = ref('')
+const openVideos = ref(new Set())
+
+function toggleVideos(id) {
+  const s = new Set(openVideos.value)
+  s.has(id) ? s.delete(id) : s.add(id)
+  openVideos.value = s
+}
 
 function pdfUrl(url) { return url?.startsWith('http') ? url : `${BASE_URL}${url}` }
 
@@ -126,4 +142,10 @@ watch([activeType, activeSubject], load)
 .target { font-size: 0.85rem; color: var(--text-light); margin-bottom: 16px; }
 .concours-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .soon { font-size: 0.8rem; color: var(--text-light); font-style: italic; align-self: center; }
+.btn-video { background: #7c3aed; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+.btn-video:hover { background: #6d28d9; }
+.video-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--border); padding-top: 12px; }
+.video-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #7c3aed; font-weight: 600; text-decoration: none; padding: 4px 0; }
+.video-item:hover { text-decoration: underline; }
+.video-icon { font-size: 0.75rem; }
 </style>

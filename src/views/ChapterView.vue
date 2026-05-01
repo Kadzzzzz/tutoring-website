@@ -50,8 +50,14 @@
             <a v-if="doc.pdf_solution_url" :href="pdfUrl(doc.pdf_solution_url)" target="_blank" class="btn btn-primary">
               ✅ Corrigé
             </a>
-            <a v-if="doc.has_video && doc.video_url" :href="doc.video_url" target="_blank" class="btn btn-ghost">
-              ▶ Vidéo
+            <button v-if="doc.videos?.length" class="btn-video" @click="toggleVideos(doc.id)">
+              ▶ Vidéo{{ doc.videos.length > 1 ? 's' : '' }} ({{ doc.videos.length }})
+            </button>
+          </div>
+          <div v-if="openVideos.has(doc.id)" class="video-list">
+            <a v-for="v in doc.videos" :key="v.id" :href="v.url" target="_blank" class="video-item">
+              <span class="video-icon">▶</span>
+              <span>{{ v.title || 'Vidéo corrigée' }}</span>
             </a>
           </div>
         </div>
@@ -76,6 +82,13 @@ const chapter = ref(null)
 const loading = ref(true)
 const activeType = ref('')
 const activeDiff = ref('')
+const openVideos = ref(new Set())
+
+function toggleVideos(id) {
+  const s = new Set(openVideos.value)
+  s.has(id) ? s.delete(id) : s.add(id)
+  openVideos.value = s
+}
 
 const typeFilters = [
   { label: 'Exercices', value: 'exercice' },
@@ -145,6 +158,12 @@ watch(() => route.params.id, load)
 .doc-card h3 { font-size: 1rem; margin-bottom: 4px; }
 .doc-card p { font-size: 0.9rem; color: var(--text-light); margin: 0; }
 .doc-actions { display: flex; flex-direction: column; gap: 8px; min-width: 120px; }
+.btn-video { background: #7c3aed; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
+.btn-video:hover { background: #6d28d9; }
+.video-list { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; padding-top: 10px; border-top: 1px solid var(--border); }
+.video-item { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #7c3aed; font-weight: 600; text-decoration: none; padding: 4px 10px; background: #faf5ff; border-radius: 6px; border: 1px solid #e9d5ff; }
+.video-item:hover { background: #ede9fe; }
+.video-icon { font-size: 0.75rem; }
 
 @media (max-width: 600px) {
   .doc-card { flex-direction: column; }

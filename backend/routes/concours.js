@@ -17,7 +17,22 @@ router.get('/', async (req, res, next) => {
       WHERE ${where.join(' AND ')}
       ORDER BY co.year DESC, co.name
     `, params);
-    res.json(result.rows);
+
+    // Charger les vidéos en une seule requête
+    const ids = result.rows.map(c => c.id);
+    const videosMap = {};
+    if (ids.length) {
+      const vids = await db.query(
+        `SELECT * FROM content_videos WHERE entity_type='concours' AND entity_id = ANY($1) ORDER BY order_index, id`,
+        [ids]
+      );
+      for (const v of vids.rows) {
+        if (!videosMap[v.entity_id]) videosMap[v.entity_id] = [];
+        videosMap[v.entity_id].push(v);
+      }
+    }
+
+    res.json(result.rows.map(c => ({ ...c, videos: videosMap[c.id] || [] })));
   } catch (e) { next(e); }
 });
 
@@ -29,7 +44,11 @@ router.get('/:id', async (req, res, next) => {
       WHERE co.id = $1
     `, [req.params.id]);
     if (!result.rows.length) return res.status(404).json({ error: 'Concours introuvable' });
-    res.json(result.rows[0]);
+    const vids = await db.query(
+      `SELECT * FROM content_videos WHERE entity_type='concours' AND entity_id=$1 ORDER BY order_index, id`,
+      [req.params.id]
+    );
+    res.json({ ...result.rows[0], videos: vids.rows });
   } catch (e) { next(e); }
 });
 

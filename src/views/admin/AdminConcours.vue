@@ -60,6 +60,15 @@
           <button type="submit" class="btn btn-primary" :disabled="saving">{{ saving ? 'Enregistrement...' : 'Enregistrer' }}</button>
         </div>
       </form>
+
+      <!-- Vidéos (seulement si modification) -->
+      <VideoManager
+        v-if="editing"
+        entity-type="concours"
+        :entity-id="editing.id"
+        :videos="editingVideos"
+        @update="editingVideos = $event"
+      />
     </div>
 
     <div v-if="loading" class="loading">Chargement...</div>
@@ -84,12 +93,14 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { api } from '@/api.js'
+import VideoManager from '@/components/admin/VideoManager.vue'
 
 const concours = ref([])
 const subjects = ref([])
 const loading = ref(true)
 const showForm = ref(false)
 const editing = ref(null)
+const editingVideos = ref([])
 const saving = ref(false)
 const formError = ref('')
 
@@ -104,11 +115,16 @@ async function load() {
   finally { loading.value = false }
 }
 
-function openForm(c) {
+async function openForm(c) {
   editing.value = c
   form.value = c ? { ...c } : emptyForm()
   showForm.value = true
   formError.value = ''
+  editingVideos.value = []
+  if (c) {
+    try { editingVideos.value = await api.getContentVideos('concours', c.id) }
+    catch (e) { console.error(e) }
+  }
 }
 
 async function upload(event, field) {
