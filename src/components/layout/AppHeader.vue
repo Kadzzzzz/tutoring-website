@@ -5,9 +5,9 @@
 
       <nav class="nav desktop">
         <router-link to="/">Accueil</router-link>
-        <div class="dropdown">
+        <div class="dropdown" @mouseenter="openDropdown" @mouseleave="scheduleClose">
           <button class="dropdown-btn">Matières ▾</button>
-          <div class="dropdown-menu">
+          <div class="dropdown-menu" v-show="dropdownOpen" @mouseenter="openDropdown" @mouseleave="scheduleClose">
             <router-link to="/matieres/mathematiques">Mathématiques</router-link>
             <router-link to="/matieres/physique">Physique</router-link>
             <router-link to="/matieres/chimie">Chimie</router-link>
@@ -42,13 +42,18 @@ import { useRoute } from 'vue-router'
 
 const scrolled = ref(false)
 const menuOpen = ref(false)
+const dropdownOpen = ref(false)
+let closeTimer = null
 const route = useRoute()
 
-watch(() => route.path, () => { menuOpen.value = false })
+watch(() => route.path, () => { menuOpen.value = false; dropdownOpen.value = false })
+
+function openDropdown() { clearTimeout(closeTimer); dropdownOpen.value = true }
+function scheduleClose() { closeTimer = setTimeout(() => { dropdownOpen.value = false }, 120) }
 
 function onScroll() { scrolled.value = window.scrollY > 20 }
 onMounted(() => window.addEventListener('scroll', onScroll))
-onUnmounted(() => window.removeEventListener('scroll', onScroll))
+onUnmounted(() => { window.removeEventListener('scroll', onScroll); clearTimeout(closeTimer) })
 </script>
 
 <style scoped>
@@ -78,11 +83,10 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
 .dropdown { position: relative; }
 .dropdown-menu {
-  display: none; position: absolute; top: calc(100% + 8px); left: 0;
+  position: absolute; top: calc(100% + 8px); left: 0;
   background: white; border-radius: 10px; box-shadow: var(--shadow-lg);
   min-width: 200px; padding: 8px; overflow: hidden;
 }
-.dropdown:hover .dropdown-menu { display: block; }
 .dropdown-menu a {
   display: block; padding: 10px 14px; color: var(--text);
   font-weight: 500; border-radius: 6px; transition: background 0.15s;
