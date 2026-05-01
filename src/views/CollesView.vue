@@ -11,7 +11,7 @@
       <!-- Sélecteur de classe -->
       <div class="class-selector">
         <button
-          v-for="c in classes" :key="c"
+          v-for="c in availableClasses" :key="c"
           :class="['class-btn', { active: activeClass === c }]"
           @click="activeClass = c">{{ c }}</button>
       </div>
@@ -85,10 +85,21 @@ function formatDate(d) {
   return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-const classes = ['MPSI', 'PCSI', 'MP', 'PC']
-const activeClass = ref('MPSI')
+const CLASS_ORDER = ['MPSI', 'PCSI', 'MP', 'PC', 'MP*', 'PSI', 'PSI*', 'PT', 'PT*', 'BCPST']
+const activeClass = ref('')
 const colles = ref([])
 const loading = ref(true)
+
+const availableClasses = computed(() => {
+  const names = [...new Set(colles.value.map(c => c.class_name))]
+  names.sort((a, b) => {
+    const ai = CLASS_ORDER.indexOf(a), bi = CLASS_ORDER.indexOf(b)
+    if (ai === -1 && bi === -1) return a.localeCompare(b)
+    if (ai === -1) return 1; if (bi === -1) return -1
+    return ai - bi
+  })
+  return names
+})
 
 const filteredColles = computed(() =>
   colles.value
@@ -98,7 +109,12 @@ const filteredColles = computed(() =>
 
 async function load() {
   loading.value = true
-  try { colles.value = await api.getColles({}) }
+  try {
+    colles.value = await api.getColles({})
+    if (!activeClass.value && availableClasses.value.length) {
+      activeClass.value = availableClasses.value[0]
+    }
+  }
   catch (e) { console.error(e) }
   finally { loading.value = false }
 }
@@ -107,6 +123,28 @@ onMounted(load)
 </script>
 
 <style scoped>
+/* Bannière */
+.page-header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+  position: relative; overflow: hidden;
+}
+.page-header::before {
+  content: '';
+  position: absolute; top: -40px; right: -60px;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(59,130,246,0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+.page-header::after {
+  content: '';
+  position: absolute; bottom: -20px; left: 10%;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
 /* Sélecteur de classe */
 .class-selector {
   display: flex;

@@ -4,14 +4,31 @@ const jwt = require('jsonwebtoken');
 const db = require('../db');
 const auth = require('../middleware/auth');
 
+// In-memory rate limiter for login (10 attempts per 15 min per IP)
+const loginAttempts = new Map();
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const attempts = (loginAttempts.get(ip) || []).filter(t => now - t < 15 * 60 * 1000);
+  if (attempts.length >= 10) return false;
+  attempts.push(now);
+  loginAttempts.set(ip, attempts);
+  return true;
+}
+
 // Auth
 router.post('/login', async (req, res, next) => {
   try {
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    if (!checkRateLimit(ip)) {
+      return res.status(429).json({ error: 'Trop de tentatives. Réessayez dans 15 minutes.' });
+    }
     const { email, password } = req.body;
     const result = await db.query('SELECT * FROM admin_users WHERE email = $1', [email]);
     if (!result.rows.length) return res.status(401).json({ error: 'Identifiants incorrects' });
     const valid = await bcrypt.compare(password, result.rows[0].password_hash);
     if (!valid) return res.status(401).json({ error: 'Identifiants incorrects' });
+    // Clear attempts on successful login
+    loginAttempts.delete(ip);
     const token = jwt.sign({ id: result.rows[0].id, email }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.json({ token });
   } catch (e) { next(e); }
@@ -290,8 +307,8 @@ router.post('/colles/quick', auth, async (req, res, next) => {
   try {
     const { class_name, week_number, academic_year, planches } = req.body;
     let existing = await db.query(
-      'SELECT id FROM colles WHERE class_name=$1 AND week_number=$2',
-      [class_name, week_number]
+      'SELECT id FROM colles WHERE class_name=$1 AND week_number=$2 AND (academic_year=$3 OR ($3::varchar IS NULL AND academic_year IS NULL))',
+      [class_name, week_number, academic_year || null]
     );
     let colleId;
     if (existing.rows.length) {

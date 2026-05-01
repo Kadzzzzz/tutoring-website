@@ -17,16 +17,23 @@
     <div class="container" style="padding-top: 40px; padding-bottom: 80px;">
       <!-- Filtres -->
       <div class="filters" v-if="chapter">
-        <button
-          v-for="f in typeFilters" :key="f.value"
-          class="filter-btn" :class="{ active: activeType === f.value }"
-          @click="activeType = activeType === f.value ? '' : f.value"
-        >{{ f.label }}</button>
-        <button
-          v-for="f in diffFilters" :key="f.value"
-          class="filter-btn diff" :class="['diff-' + f.value, { active: activeDiff === f.value }]"
-          @click="activeDiff = activeDiff === f.value ? '' : f.value"
-        >{{ f.label }}</button>
+        <div class="filter-group">
+          <span class="filter-group-label">Type</span>
+          <button
+            v-for="f in typeFilters" :key="f.value"
+            class="filter-btn" :class="{ active: activeType === f.value }"
+            @click="activeType = activeType === f.value ? '' : f.value"
+          >{{ f.label }}</button>
+        </div>
+        <div class="filter-separator"></div>
+        <div class="filter-group">
+          <span class="filter-group-label">Difficulté</span>
+          <button
+            v-for="f in diffFilters" :key="f.value"
+            class="filter-btn" :class="['diff-' + f.value, { active: activeDiff === f.value }]"
+            @click="activeDiff = activeDiff === f.value ? '' : f.value"
+          >{{ f.label }}</button>
+        </div>
         <button v-if="activeType || activeDiff" class="filter-btn reset" @click="resetFilters">✕ Réinitialiser</button>
       </div>
 
@@ -54,7 +61,7 @@
               ▶ Vidéo{{ doc.videos.length > 1 ? 's' : '' }} ({{ doc.videos.length }})
             </button>
           </div>
-          <div v-if="openVideos.has(doc.id)" class="video-list">
+          <div v-if="openVideos[doc.id]" class="video-list">
             <a v-for="v in doc.videos" :key="v.id" :href="v.url" target="_blank" class="video-item">
               <span class="video-icon">▶</span>
               <span>{{ v.title || 'Vidéo corrigée' }}</span>
@@ -72,7 +79,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, reactive } from 'vue'
 import { useRoute } from 'vue-router'
 import { api } from '@/api.js'
 
@@ -82,12 +89,10 @@ const chapter = ref(null)
 const loading = ref(true)
 const activeType = ref('')
 const activeDiff = ref('')
-const openVideos = ref(new Set())
+const openVideos = reactive({})
 
 function toggleVideos(id) {
-  const s = new Set(openVideos.value)
-  s.has(id) ? s.delete(id) : s.add(id)
-  openVideos.value = s
+  openVideos[id] = !openVideos[id]
 }
 
 const typeFilters = [
@@ -133,7 +138,13 @@ watch(() => route.params.id, load)
 <style scoped>
 .page-header { background: linear-gradient(135deg, var(--primary) 0%, color-mix(in srgb, var(--color) 25%, var(--primary)) 100%); }
 
-.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+.filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 32px; }
+.filter-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.filter-group-label {
+  font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-light); padding-right: 4px;
+}
+.filter-separator { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
 .filter-btn {
   padding: 6px 16px; border-radius: 999px; font-size: 0.85rem; font-weight: 600;
   border: 2px solid var(--border); background: white; color: var(--text-light); cursor: pointer; transition: all 0.2s;

@@ -15,9 +15,6 @@
         <router-link to="/admin/colles">
           <span class="nav-icon">📋</span> Colles
         </router-link>
-        <router-link to="/admin/concours">
-          <span class="nav-icon">🏆</span> Concours
-        </router-link>
         <router-link to="/admin/matieres">
           <span class="nav-icon">📚</span> Matières & Chapitres
         </router-link>

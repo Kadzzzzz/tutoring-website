@@ -4,6 +4,29 @@
       <h1 class="page-title">Colles</h1>
     </div>
 
+    <!-- Gestion des filières et année -->
+    <div class="toolbar">
+      <div class="year-selector">
+        <label>Année :</label>
+        <select v-model="activeYear" class="year-select">
+          <option v-for="y in academicYears" :key="y" :value="y">{{ y }}</option>
+        </select>
+      </div>
+      <div class="filieres-manager">
+        <span class="filieres-label">Filières :</span>
+        <div class="filieres-tags">
+          <span v-for="c in classes" :key="c" class="filiere-tag">
+            {{ c }}
+            <button class="filiere-del" @click="removeFiliere(c)" title="Supprimer">×</button>
+          </span>
+          <div class="add-filiere-inline">
+            <input v-model="newFiliereName" placeholder="Ex: PSI" class="filiere-input" @keyup.enter="addFiliere" maxlength="10" />
+            <button class="btn-add-filiere" @click="addFiliere" :disabled="!newFiliereName.trim()">+ Ajouter</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Sélecteur de classe -->
     <div class="class-tabs">
       <button v-for="c in classes" :key="c"
@@ -26,7 +49,7 @@
     <!-- Formulaire de saisie rapide -->
     <div v-if="editingWeek !== null" class="quick-form-card">
       <div class="quick-form-header">
-        <h2>{{ activeClass }} — Semaine {{ editingWeek }}</h2>
+        <h2>{{ activeClass }} {{ activeYear }} — Semaine {{ editingWeek }}</h2>
         <button class="close-btn" @click="editingWeek = null">✕</button>
       </div>
 
@@ -116,7 +139,7 @@
 
     <!-- Liste complète -->
     <div class="colles-list-section">
-      <h2>Toutes les colles — {{ activeClass }}</h2>
+      <h2>Toutes les colles — {{ activeClass }} {{ activeYear }}</h2>
       <div v-if="loading" class="loading">Chargement...</div>
       <div v-else-if="!filteredColles.length" class="empty-msg">Aucune colle pour {{ activeClass }}.</div>
       <div v-else class="colles-table">
@@ -140,8 +163,42 @@ import { api } from '@/api.js'
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 function pdfUrl(url) { return url?.startsWith('http') ? url : `${BASE_URL}${url}` }
 
-const classes = ['MPSI', 'PCSI', 'MP', 'PC']
-const activeClass = ref('MPSI')
+const DEFAULT_CLASSES = ['MPSI', 'PCSI', 'MP', 'PC']
+const classes = ref(JSON.parse(localStorage.getItem('colles_filieres') || 'null') || [...DEFAULT_CLASSES])
+const activeClass = ref(classes.value[0] || 'MPSI')
+const newFiliereName = ref('')
+
+function getCurrentAcademicYear() {
+  const now = new Date()
+  const y = now.getFullYear()
+  return now.getMonth() >= 8 ? `${y}-${y + 1}` : `${y - 1}-${y}`
+}
+const currentYear = getCurrentAcademicYear()
+const academicYears = Array.from({ length: 5 }, (_, i) => {
+  const base = parseInt(currentYear.split('-')[0])
+  const y = base - 2 + i
+  return `${y}-${y + 1}`
+})
+const activeYear = ref(currentYear)
+
+function saveFilieresLocally() {
+  localStorage.setItem('colles_filieres', JSON.stringify(classes.value))
+}
+function addFiliere() {
+  const name = newFiliereName.value.trim().toUpperCase()
+  if (!name || classes.value.includes(name)) return
+  classes.value.push(name)
+  saveFilieresLocally()
+  newFiliereName.value = ''
+}
+function removeFiliere(c) {
+  if (classes.value.length <= 1) return
+  if (!confirm(`Supprimer la filière "${c}" de la liste ?`)) return
+  classes.value = classes.value.filter(x => x !== c)
+  saveFilieresLocally()
+  if (activeClass.value === c) activeClass.value = classes.value[0]
+}
+
 const colles = ref([])
 const loading = ref(true)
 const editingWeek = ref(null)
@@ -154,7 +211,7 @@ const openVideoPanel = ref(null)
 const newVideo = ref({ title: '', url: '' })
 
 const filteredColles = computed(() =>
-  colles.value.filter(c => c.class_name === activeClass.value)
+  colles.value.filter(c => c.class_name === activeClass.value && (!c.academic_year || c.academic_year === activeYear.value || !activeYear.value))
     .sort((a, b) => a.week_number - b.week_number)
 )
 
@@ -230,7 +287,7 @@ async function save(goNext) {
       pdf_statement_url: p.pdf_statement_url,
       pdf_solution_url: p.pdf_solution_url
     }))
-    await api.quickSaveColle({ class_name: activeClass.value, week_number: editingWeek.value, planches })
+    await api.quickSaveColle({ class_name: activeClass.value, week_number: editingWeek.value, academic_year: activeYear.value, planches })
     await load()
     if (goNext) {
       const next = editingWeek.value + 1
@@ -293,12 +350,52 @@ async function deleteColle(id) {
 }
 
 watch(activeClass, () => { editingWeek.value = null })
+watch(activeYear, () => { editingWeek.value = null })
 onMounted(load)
 </script>
 
 <style scoped>
 .admin-header { margin-bottom: 1.5rem; }
 .page-title { font-size: 1.8rem; color: var(--text); margin: 0; }
+
+/* Toolbar */
+.toolbar {
+  display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start;
+  background: white; border-radius: var(--radius); padding: 16px 20px;
+  margin-bottom: 1.5rem; border: 1px solid var(--border); box-shadow: var(--shadow);
+}
+.year-selector { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600; color: var(--text); }
+.year-select { padding: 6px 10px; border: 2px solid var(--border); border-radius: 8px; font-size: 0.9rem; font-family: inherit; cursor: pointer; }
+.year-select:focus { outline: none; border-color: var(--accent); }
+
+.filieres-manager { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; flex: 1; }
+.filieres-label { font-size: 0.9rem; font-weight: 600; color: var(--text); white-space: nowrap; padding-top: 4px; }
+.filieres-tags { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.filiere-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #f1f5f9; border: 1px solid var(--border);
+  border-radius: 999px; padding: 4px 10px;
+  font-size: 0.85rem; font-weight: 700; color: var(--text);
+}
+.filiere-del {
+  background: none; border: none; color: #94a3b8; font-size: 1rem;
+  cursor: pointer; padding: 0 2px; line-height: 1; transition: color 0.15s;
+}
+.filiere-del:hover { color: #ef4444; }
+.add-filiere-inline { display: flex; align-items: center; gap: 6px; }
+.filiere-input {
+  padding: 4px 10px; border: 2px dashed var(--border); border-radius: 999px;
+  font-size: 0.85rem; font-family: inherit; width: 80px;
+  transition: border-color 0.2s;
+}
+.filiere-input:focus { outline: none; border-color: var(--accent); border-style: solid; }
+.btn-add-filiere {
+  padding: 4px 12px; background: var(--accent); color: white;
+  border: none; border-radius: 999px; font-size: 0.85rem; font-weight: 700;
+  cursor: pointer; transition: background 0.2s; white-space: nowrap;
+}
+.btn-add-filiere:hover:not(:disabled) { background: var(--accent-dark); }
+.btn-add-filiere:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .class-tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; }
 .class-tab {

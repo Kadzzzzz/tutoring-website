@@ -131,6 +131,27 @@ onMounted(load)
 </script>
 
 <style scoped>
+.page-header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #1e1b4b 60%, #312e81 100%);
+  position: relative; overflow: hidden;
+}
+.page-header::before {
+  content: '';
+  position: absolute; top: -30px; right: 5%;
+  width: 250px; height: 250px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(167,139,250,0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+.page-header::after {
+  content: '';
+  position: absolute; bottom: -30px; left: 20%;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+
 .filters { background: white; border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); margin-bottom: 40px; display: flex; flex-wrap: wrap; gap: 24px; }
 .filter-group label { display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-light); margin-bottom: 8px; }
 .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }

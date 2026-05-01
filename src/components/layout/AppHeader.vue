@@ -14,7 +14,7 @@
         <router-link to="/colles">Colles</router-link>
         <router-link to="/concours">Concours</router-link>
         <router-link to="/pedagogie">Conseils</router-link>
-        <router-link to="/parcours">Parcours</router-link>
+        <router-link to="/#contact" class="btn-contact">Me contacter</router-link>
       </nav>
 
       <button class="hamburger" :class="{ open: menuOpen }" @click="menuOpen = !menuOpen">
@@ -29,6 +29,7 @@
       <router-link to="/concours">Concours</router-link>
       <router-link to="/pedagogie">Conseils</router-link>
       <router-link to="/parcours">Parcours</router-link>
+      <router-link to="/#contact" class="mobile-contact">Me contacter</router-link>
     </nav>
     <div v-if="menuOpen" class="overlay" @click="menuOpen = false" />
   </header>
@@ -82,6 +83,23 @@ onUnmounted(() => { window.removeEventListener('scroll', onScroll); clearTimeout
 }
 .nav > a:hover, .dropdown-btn:hover,
 .nav > a.router-link-active { color: white; background: rgba(255,255,255,0.1); }
+
+.btn-contact {
+  background: var(--accent) !important;
+  color: white !important;
+  padding: 8px 18px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  margin-left: 4px;
+  transition: background 0.2s !important;
+}
+.btn-contact:hover { background: var(--accent-dark) !important; color: white !important; }
+
+.mobile-contact {
+  color: var(--accent) !important;
+  font-weight: 700 !important;
+}
 
 .dropdown { position: relative; }
 .dropdown-menu {
