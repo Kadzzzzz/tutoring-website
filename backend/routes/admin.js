@@ -208,10 +208,52 @@ router.post('/colles/:id/planches', auth, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+router.put('/planches/:id', auth, async (req, res, next) => {
+  try {
+    const { planche_number, title, pdf_statement_url, pdf_solution_url } = req.body;
+    const r = await db.query(
+      `UPDATE colle_planches SET planche_number=$1,title=$2,pdf_statement_url=$3,pdf_solution_url=$4 WHERE id=$5 RETURNING *`,
+      [planche_number, title || null, pdf_statement_url || null, pdf_solution_url || null, req.params.id]
+    );
+    res.json(r.rows[0]);
+  } catch (e) { next(e); }
+});
+
 router.delete('/planches/:id', auth, async (req, res, next) => {
   try {
     await db.query('DELETE FROM colle_planches WHERE id=$1', [req.params.id]);
     res.json({ message: 'Supprimé' });
+  } catch (e) { next(e); }
+});
+
+// Saisie rapide : crée ou retrouve une colle et y ajoute les planches d'un coup
+router.post('/colles/quick', auth, async (req, res, next) => {
+  try {
+    const { class_name, week_number, academic_year, planches } = req.body;
+    let existing = await db.query(
+      'SELECT id FROM colles WHERE class_name=$1 AND week_number=$2',
+      [class_name, week_number]
+    );
+    let colleId;
+    if (existing.rows.length) {
+      colleId = existing.rows[0].id;
+    } else {
+      const created = await db.query(
+        'INSERT INTO colles (class_name, week_number, academic_year) VALUES ($1,$2,$3) RETURNING id',
+        [class_name, week_number, academic_year || null]
+      );
+      colleId = created.rows[0].id;
+    }
+    const added = [];
+    for (const p of (planches || [])) {
+      const r = await db.query(
+        `INSERT INTO colle_planches (colle_id,planche_number,title,pdf_statement_url,pdf_solution_url)
+         VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+        [colleId, p.planche_number, p.title || null, p.pdf_statement_url || null, p.pdf_solution_url || null]
+      );
+      added.push(r.rows[0]);
+    }
+    res.json({ colle_id: colleId, planches: added });
   } catch (e) { next(e); }
 });
 

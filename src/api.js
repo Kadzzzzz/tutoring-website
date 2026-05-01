@@ -61,7 +61,9 @@ export const api = {
   updateColle:       (id, d)   => request(`/api/admin/colles/${id}`,    { method: 'PUT',    body: JSON.stringify(d) }),
   deleteColle:       (id)      => request(`/api/admin/colles/${id}`,    { method: 'DELETE' }),
   createPlanche:     (cid, d)  => request(`/api/admin/colles/${cid}/planches`, { method: 'POST', body: JSON.stringify(d) }),
+  updatePlanche:     (id, d)   => request(`/api/admin/planches/${id}`,  { method: 'PUT',    body: JSON.stringify(d) }),
   deletePlanche:     (id)      => request(`/api/admin/planches/${id}`,  { method: 'DELETE' }),
+  quickSaveColle:    (d)       => request('/api/admin/colles/quick',    { method: 'POST',   body: JSON.stringify(d) }),
 
   getAdminConcours:  ()        => request('/api/admin/concours'),
   createConcours:    (d)       => request('/api/admin/concours',        { method: 'POST',   body: JSON.stringify(d) }),

@@ -25,7 +25,7 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <p>© {{ new Date().getFullYear() }} Jeremy Luccioni — Tous droits réservés</p>
+        <p>© {{ new Date().getFullYear() }} Jeremy Luccioni</p>
       </div>
     </div>
   </footer>
