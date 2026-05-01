@@ -76,7 +76,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { api } from '@/api.js'
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 
 const colles = ref([])
 const subjects = ref([])

@@ -65,7 +65,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { api } from '@/api.js'
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 const concours = ref([])
 const subjects = ref([])
 const loading = ref(true)
