@@ -64,12 +64,31 @@
               </div>
               <p class="doc-title-text">{{ doc.title }}</p>
               <div class="concours-actions">
-                <a v-if="doc.pdf_statement_url" :href="pdfUrl(doc.pdf_statement_url)" target="_blank" class="btn btn-outline">📄 Sujet</a>
-                <a v-if="doc.pdf_solution_url" :href="pdfUrl(doc.pdf_solution_url)" target="_blank" class="btn btn-primary">✅ Corrigé</a>
-                <span v-else-if="!doc.pdf_solution_url" class="soon">Corrigé bientôt</span>
+                <template v-if="doc.content_type === 'latex'">
+                  <button v-if="doc.latex_statement" class="btn btn-outline" @click="toggleLatex(doc.id + '_s')">
+                    {{ openLatex[doc.id + '_s'] ? '▲ Énoncé' : '📄 Énoncé' }}
+                  </button>
+                  <button v-if="doc.latex_solution" class="btn btn-primary" @click="toggleLatex(doc.id + '_c')">
+                    {{ openLatex[doc.id + '_c'] ? '▲ Corrigé' : '✅ Corrigé' }}
+                  </button>
+                  <span v-else-if="!doc.latex_solution" class="soon">Corrigé bientôt</span>
+                </template>
+                <template v-else>
+                  <a v-if="doc.pdf_statement_url" :href="pdfUrl(doc.pdf_statement_url)" target="_blank" class="btn btn-outline">📄 Sujet</a>
+                  <a v-if="doc.pdf_solution_url" :href="pdfUrl(doc.pdf_solution_url)" target="_blank" class="btn btn-primary">✅ Corrigé</a>
+                  <span v-else-if="!doc.pdf_solution_url" class="soon">Corrigé bientôt</span>
+                </template>
                 <button v-if="doc.videos?.length" class="btn-video" @click="toggleVideos(doc.id)">
                   ▶ Vidéo{{ doc.videos.length > 1 ? 's' : '' }} ({{ doc.videos.length }})
                 </button>
+              </div>
+              <div v-if="doc.content_type === 'latex' && openLatex[doc.id + '_s']" class="latex-panel">
+                <div class="latex-panel-label">Énoncé</div>
+                <LatexRenderer :content="doc.latex_statement" />
+              </div>
+              <div v-if="doc.content_type === 'latex' && openLatex[doc.id + '_c']" class="latex-panel latex-solution">
+                <div class="latex-panel-label">Corrigé</div>
+                <LatexRenderer :content="doc.latex_solution" />
               </div>
               <div v-if="openVideos[doc.id]" class="video-list">
                 <a v-for="v in doc.videos" :key="v.id" :href="v.url" target="_blank" class="video-item">
@@ -93,6 +112,7 @@
 <script setup>
 import { ref, computed, onMounted, reactive } from 'vue'
 import { api } from '@/api.js'
+import LatexRenderer from '@/components/LatexRenderer.vue'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 const docs = ref([])
@@ -101,10 +121,10 @@ const activeType    = ref('')
 const activeSubject = ref('')
 const activeBank    = ref('')
 const openVideos = reactive({})
+const openLatex = reactive({})
 
-function toggleVideos(id) {
-  openVideos[id] = !openVideos[id]
-}
+function toggleVideos(id) { openVideos[id] = !openVideos[id] }
+function toggleLatex(id) { openLatex[id] = !openLatex[id] }
 
 function pdfUrl(url) { return url?.startsWith('http') ? url : `${BASE_URL}${url}` }
 
@@ -201,6 +221,15 @@ onMounted(load)
 .soon { font-size: 0.8rem; color: var(--text-light); font-style: italic; align-self: center; }
 .btn-video { background: #7c3aed; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
 .btn-video:hover { background: #6d28d9; }
+.latex-panel {
+  margin-top: 12px; padding: 16px 20px;
+  background: #f8fafc; border-radius: 8px; border: 1px solid var(--border);
+}
+.latex-solution { background: #f0fdf4; border-color: #bbf7d0; }
+.latex-panel-label {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--text-light); margin-bottom: 10px;
+}
 .video-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--border); padding-top: 12px; }
 .video-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #7c3aed; font-weight: 600; text-decoration: none; padding: 4px 0; }
 .video-item:hover { text-decoration: underline; }
