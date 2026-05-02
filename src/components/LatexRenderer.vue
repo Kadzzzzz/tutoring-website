@@ -15,12 +15,7 @@ const el = ref(null)
 
 function applyContent() {
   if (!el.value) return
-  // Set as text (preserving newlines as <br>) without HTML escaping math delimiters
-  el.value.innerHTML = props.content
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/\n/g, '<br>')
+  el.value.textContent = props.content
   renderMathInElement(el.value, {
     delimiters: [
       { left: '$$', right: '$$', display: true },
@@ -41,6 +36,7 @@ watch(() => props.content, () => nextTick(applyContent))
   font-size: 0.95rem;
   line-height: 1.7;
   color: var(--text, #1e293b);
+  white-space: pre-wrap;
 }
 .latex-content :deep(.katex-display) {
   margin: 0.8em 0;
