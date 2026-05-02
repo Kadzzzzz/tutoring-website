@@ -17,6 +17,15 @@
             <button :class="['filter-btn', { active: activeType === 'oral_concours' }]" @click="activeType = 'oral_concours'">Oraux</button>
           </div>
         </div>
+        <div class="filter-group" v-if="availableBanks.length">
+          <label>Concours</label>
+          <div class="btn-group">
+            <button :class="['filter-btn', { active: activeBank === '' }]" @click="activeBank = ''">Tous</button>
+            <button v-for="b in availableBanks" :key="b"
+              :class="['filter-btn', { active: activeBank === b }]"
+              @click="activeBank = b">{{ b }}</button>
+          </div>
+        </div>
         <div class="filter-group" v-if="availableSubjects.length">
           <label>Matière</label>
           <div class="btn-group">
@@ -26,6 +35,10 @@
               @click="activeSubject = String(s.id)">{{ s.name }}</button>
           </div>
         </div>
+        <button v-if="activeType || activeSubject || activeBank"
+          class="filter-btn filter-reset" @click="activeType = ''; activeSubject = ''; activeBank = ''">
+          ✕ Réinitialiser
+        </button>
       </div>
 
       <div v-if="loading" class="loading">Chargement...</div>
@@ -84,8 +97,9 @@ import { api } from '@/api.js'
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 const docs = ref([])
 const loading = ref(true)
-const activeType = ref('')
+const activeType    = ref('')
 const activeSubject = ref('')
+const activeBank    = ref('')
 const openVideos = reactive({})
 
 function toggleVideos(id) {
@@ -103,9 +117,18 @@ const availableSubjects = computed(() => {
   return [...map.values()]
 })
 
+const availableBanks = computed(() => {
+  const set = new Set()
+  for (const d of docs.value) {
+    if (d.concours_name) set.add(d.concours_name)
+  }
+  return [...set].sort()
+})
+
 const filtered = computed(() => docs.value.filter(d => {
-  if (activeType.value && d.type !== activeType.value) return false
+  if (activeType.value    && d.type !== activeType.value) return false
   if (activeSubject.value && String(d.subject_id) !== activeSubject.value) return false
+  if (activeBank.value    && d.concours_name !== activeBank.value) return false
   return true
 }))
 
@@ -158,6 +181,7 @@ onMounted(load)
 .filter-btn { padding: 6px 16px; border-radius: 999px; font-size: 0.85rem; font-weight: 600; border: 2px solid var(--border); background: white; color: var(--text-light); cursor: pointer; transition: all 0.2s; }
 .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
 .filter-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+.filter-reset { border-color: transparent; color: var(--text-light); align-self: flex-end; }
 
 .concours-section { margin-bottom: 48px; }
 .concours-name { font-size: 1.3rem; border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-bottom: 20px; }

@@ -65,8 +65,19 @@
         <!-- Champs concours (conditionnels) -->
         <template v-if="form.type === 'ecrit_concours' || form.type === 'oral_concours'">
           <div class="field">
-            <label>Nom du concours</label>
-            <input v-model="form.concours_name" placeholder="Ex: Mines-Ponts, CentraleSupélec…" />
+            <label>Banque de concours</label>
+            <div class="bank-select-row">
+              <select v-model="form.concours_name" class="bank-select">
+                <option value="">— Sélectionner —</option>
+                <option v-for="b in concoursBanks" :key="b" :value="b">{{ b }}</option>
+              </select>
+              <button type="button" class="btn-new-bank" @click="showAddBank = !showAddBank">+ Nouveau</button>
+            </div>
+            <div v-if="showAddBank" class="add-bank-inline">
+              <input v-model="newBankName" placeholder="Ex: Agro-Véto, Polytechnique…"
+                class="bank-new-input" @keyup.enter="addBank" maxlength="40" />
+              <button type="button" class="btn-confirm-bank" @click="addBank" :disabled="!newBankName.trim()">Ajouter</button>
+            </div>
           </div>
           <div class="field">
             <label>Année</label>
@@ -184,6 +195,22 @@ const formError = ref('')
 const showNewChapter = ref(false)
 const newChapter = ref({ subject_id: '', name: '', slug: '' })
 
+const DEFAULT_CONCOURS_BANKS = ['CentraleSupélec', 'Mines-Ponts', 'ENS', 'X-ESPCI', 'CCINP', 'e3a-Polytech']
+const concoursBanks = ref([...DEFAULT_CONCOURS_BANKS])
+const showAddBank   = ref(false)
+const newBankName   = ref('')
+
+async function addBank() {
+  const name = newBankName.value.trim()
+  if (!name || concoursBanks.value.includes(name)) return
+  concoursBanks.value.push(name)
+  form.value.concours_name = name
+  newBankName.value = ''
+  showAddBank.value = false
+  try { await api.updateSetting('concours_banks', concoursBanks.value) }
+  catch (e) { console.error('Erreur sauvegarde banques', e) }
+}
+
 const DEFAULT_LEVELS = ['terminale', 'mpsi', 'pcsi', 'mp', 'pc']
 const DEFAULT_LEVEL_OPTIONS = [
   { value: 'terminale', label: 'Terminale' },
@@ -277,16 +304,18 @@ async function createChapterInline() {
 async function load() {
   loading.value = true
   try {
-    const [docs, chaps, subs, levels] = await Promise.all([
+    const [docs, chaps, subs, levels, banks] = await Promise.all([
       api.getAdminDocuments(),
       api.getAdminChapters(),
       api.getAdminSubjects(),
-      api.getSetting('level_options').catch(() => null)
+      api.getSetting('level_options').catch(() => null),
+      api.getSetting('concours_banks').catch(() => null)
     ])
-    documents.value  = docs
-    chapters.value   = chaps
+    documents.value    = docs
+    chapters.value     = chaps
     subjectsList.value = subs
-    if (levels && Array.isArray(levels)) levelOptions.value = levels
+    if (levels && Array.isArray(levels)) levelOptions.value  = levels
+    if (banks  && Array.isArray(banks))  concoursBanks.value = banks
   } catch (e) { console.error(e) }
   finally { loading.value = false }
 }
@@ -355,6 +384,28 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
 .new-ch-label { font-size: 0.8rem; font-weight: 700; color: var(--accent); width: 100%; }
 .new-chapter-box input, .new-chapter-box select { padding: 6px 10px; font-size: 0.9rem; }
 .btn-sm { padding: 6px 14px; font-size: 0.85rem; }
+
+.bank-select-row { display: flex; gap: 8px; align-items: center; }
+.bank-select { flex: 1; }
+.btn-new-bank {
+  padding: 7px 14px; background: white; border: 2px dashed var(--border);
+  border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: var(--accent);
+  cursor: pointer; white-space: nowrap; transition: all 0.2s;
+}
+.btn-new-bank:hover { border-color: var(--accent); background: #eff6ff; }
+.add-bank-inline { display: flex; gap: 8px; margin-top: 8px; }
+.bank-new-input {
+  flex: 1; padding: 7px 12px; border: 2px solid var(--border);
+  border-radius: 8px; font-size: 0.9rem; font-family: inherit;
+}
+.bank-new-input:focus { outline: none; border-color: var(--accent); }
+.btn-confirm-bank {
+  padding: 7px 16px; background: var(--accent); color: white;
+  border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 700;
+  cursor: pointer; transition: background 0.2s; white-space: nowrap;
+}
+.btn-confirm-bank:hover:not(:disabled) { background: var(--accent-dark); }
+.btn-confirm-bank:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .level-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .level-header label { margin-bottom: 0; }
