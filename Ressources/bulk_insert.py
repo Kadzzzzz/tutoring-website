@@ -56,7 +56,7 @@ def main():
     parser.add_argument("--delay", type=float, default=0.2, help="Delay between requests in seconds (default 0.2)")
     args = parser.parse_args()
 
-    with open(args.file, encoding="utf-8") as f:
+    with open(args.file, encoding="utf-8-sig") as f:
         exercises = json.load(f)
 
     if not isinstance(exercises, list):
