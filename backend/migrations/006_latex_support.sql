@@ -1,0 +1,3 @@
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS content_type VARCHAR(10) NOT NULL DEFAULT 'pdf';
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS latex_statement TEXT;
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS latex_solution TEXT;

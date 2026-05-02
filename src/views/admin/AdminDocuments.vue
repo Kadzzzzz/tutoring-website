@@ -109,27 +109,62 @@
           <textarea v-model="form.description" rows="2" placeholder="Courte description (optionnel)" />
         </div>
 
-        <div class="field">
-          <label>PDF Énoncé</label>
-          <div class="upload-row">
-            <input v-model="form.pdf_statement_url" placeholder="/uploads/pdfs/fichier.pdf" />
-            <label class="upload-btn">
-              📎 Upload
-              <input type="file" accept=".pdf" @change="upload($event, 'pdf_statement_url')" hidden />
-            </label>
+        <!-- Toggle PDF / LaTeX -->
+        <div class="field full">
+          <label>Format du contenu</label>
+          <div class="content-type-toggle">
+            <button type="button" :class="['toggle-btn', { active: form.content_type === 'pdf' }]" @click="form.content_type = 'pdf'">
+              📄 PDF
+            </button>
+            <button type="button" :class="['toggle-btn', { active: form.content_type === 'latex' }]" @click="form.content_type = 'latex'">
+              ∑ LaTeX
+            </button>
           </div>
         </div>
 
-        <div class="field">
-          <label>PDF Corrigé</label>
-          <div class="upload-row">
-            <input v-model="form.pdf_solution_url" placeholder="/uploads/pdfs/fichier.pdf" />
-            <label class="upload-btn">
-              📎 Upload
-              <input type="file" accept=".pdf" @change="upload($event, 'pdf_solution_url')" hidden />
-            </label>
+        <template v-if="form.content_type === 'pdf'">
+          <div class="field">
+            <label>PDF Énoncé</label>
+            <div class="upload-row">
+              <input v-model="form.pdf_statement_url" placeholder="/uploads/pdfs/fichier.pdf" />
+              <label class="upload-btn">
+                📎 Upload
+                <input type="file" accept=".pdf" @change="upload($event, 'pdf_statement_url')" hidden />
+              </label>
+            </div>
           </div>
-        </div>
+
+          <div class="field">
+            <label>PDF Corrigé</label>
+            <div class="upload-row">
+              <input v-model="form.pdf_solution_url" placeholder="/uploads/pdfs/fichier.pdf" />
+              <label class="upload-btn">
+                📎 Upload
+                <input type="file" accept=".pdf" @change="upload($event, 'pdf_solution_url')" hidden />
+              </label>
+            </div>
+          </div>
+        </template>
+
+        <template v-else>
+          <div class="field full">
+            <label>Énoncé (LaTeX)</label>
+            <textarea v-model="form.latex_statement" rows="6" placeholder="Soit $E$ un espace vectoriel...&#10;$$\sum_{n=0}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}$$" class="latex-input" />
+            <div v-if="form.latex_statement" class="latex-preview">
+              <span class="preview-label">Aperçu énoncé</span>
+              <LatexRenderer :content="form.latex_statement" />
+            </div>
+          </div>
+
+          <div class="field full">
+            <label>Corrigé (LaTeX)</label>
+            <textarea v-model="form.latex_solution" rows="6" placeholder="On montre que..." class="latex-input" />
+            <div v-if="form.latex_solution" class="latex-preview">
+              <span class="preview-label">Aperçu corrigé</span>
+              <LatexRenderer :content="form.latex_solution" />
+            </div>
+          </div>
+        </template>
 
         <div class="field">
           <label class="checkbox-label">
@@ -181,6 +216,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { api } from '@/api.js'
 import VideoManager from '@/components/admin/VideoManager.vue'
+import LatexRenderer from '@/components/LatexRenderer.vue'
 
 const documents = ref([])
 const chapters = ref([])
@@ -253,7 +289,8 @@ function typeLabel(t) { return typeLabels[t] || t }
 const emptyForm = () => ({
   title: '', chapter_id: '', type: 'exercice', level: '', difficulty: '',
   description: '', pdf_statement_url: '', pdf_solution_url: '',
-  is_published: true, concours_name: '', concours_year: new Date().getFullYear()
+  is_published: true, concours_name: '', concours_year: new Date().getFullYear(),
+  content_type: 'pdf', latex_statement: '', latex_solution: ''
 })
 
 const form = ref(emptyForm())
@@ -454,4 +491,13 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
 .action-delete { font-size: 0.85rem; font-weight: 600; color: #ef4444; background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.15s; }
 .action-delete:hover { background: #fee2e2; }
 .empty-row { padding: 40px; text-align: center; color: var(--text-light); }
+
+.content-type-toggle { display: flex; gap: 0; border: 2px solid var(--border); border-radius: 8px; overflow: hidden; width: fit-content; }
+.toggle-btn { padding: 8px 24px; background: white; border: none; font-size: 0.9rem; font-weight: 600; color: var(--text-light); cursor: pointer; transition: all 0.15s; }
+.toggle-btn.active { background: var(--accent); color: white; }
+.toggle-btn:hover:not(.active) { background: #f1f5f9; color: var(--text); }
+
+.latex-input { font-family: 'Courier New', Courier, monospace; font-size: 0.88rem; resize: vertical; }
+.latex-preview { margin-top: 10px; border: 1px solid var(--border); border-radius: 8px; padding: 16px; background: #fafafa; }
+.preview-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-light); display: block; margin-bottom: 10px; }
 </style>

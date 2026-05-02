@@ -118,6 +118,9 @@ dist
 # Uploaded files
 uploads/
 
+# Ressources pédagogiques (usage interne — ne pas publier)
+Ressources/
+
 # OS generated files
 .DS_Store
 .DS_Store?

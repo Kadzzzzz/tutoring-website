@@ -152,11 +152,11 @@ router.get('/documents', auth, async (req, res, next) => {
 
 router.post('/documents', auth, async (req, res, next) => {
   try {
-    const { chapter_id, title, description, type, level, difficulty, pdf_statement_url, pdf_solution_url, has_video, video_url, is_published, concours_name, concours_year } = req.body;
+    const { chapter_id, title, description, type, level, difficulty, pdf_statement_url, pdf_solution_url, has_video, video_url, is_published, concours_name, concours_year, content_type, latex_statement, latex_solution } = req.body;
     const r = await db.query(
-      `INSERT INTO documents (chapter_id,title,description,type,level,difficulty,pdf_statement_url,pdf_solution_url,has_video,video_url,is_published,concours_name,concours_year)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
-      [chapter_id, title, description, type, level, difficulty, pdf_statement_url, pdf_solution_url, has_video || false, video_url || null, is_published ?? true, concours_name || null, concours_year || null]
+      `INSERT INTO documents (chapter_id,title,description,type,level,difficulty,pdf_statement_url,pdf_solution_url,has_video,video_url,is_published,concours_name,concours_year,content_type,latex_statement,latex_solution)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
+      [chapter_id, title, description, type, level, difficulty, pdf_statement_url || null, pdf_solution_url || null, has_video || false, video_url || null, is_published ?? true, concours_name || null, concours_year || null, content_type || 'pdf', latex_statement || null, latex_solution || null]
     );
     res.json(r.rows[0]);
   } catch (e) { next(e); }
@@ -164,11 +164,12 @@ router.post('/documents', auth, async (req, res, next) => {
 
 router.put('/documents/:id', auth, async (req, res, next) => {
   try {
-    const { chapter_id, title, description, type, level, difficulty, pdf_statement_url, pdf_solution_url, has_video, video_url, is_published, concours_name, concours_year } = req.body;
+    const { chapter_id, title, description, type, level, difficulty, pdf_statement_url, pdf_solution_url, has_video, video_url, is_published, concours_name, concours_year, content_type, latex_statement, latex_solution } = req.body;
     const r = await db.query(
       `UPDATE documents SET chapter_id=$1,title=$2,description=$3,type=$4,level=$5,difficulty=$6,
-       pdf_statement_url=$7,pdf_solution_url=$8,has_video=$9,video_url=$10,is_published=$11,concours_name=$12,concours_year=$13 WHERE id=$14 RETURNING *`,
-      [chapter_id, title, description, type, level, difficulty, pdf_statement_url, pdf_solution_url, has_video, video_url, is_published, concours_name || null, concours_year || null, req.params.id]
+       pdf_statement_url=$7,pdf_solution_url=$8,has_video=$9,video_url=$10,is_published=$11,concours_name=$12,concours_year=$13,
+       content_type=$14,latex_statement=$15,latex_solution=$16 WHERE id=$17 RETURNING *`,
+      [chapter_id, title, description, type, level, difficulty, pdf_statement_url || null, pdf_solution_url || null, has_video, video_url, is_published, concours_name || null, concours_year || null, content_type || 'pdf', latex_statement || null, latex_solution || null, req.params.id]
     );
     res.json(r.rows[0]);
   } catch (e) { next(e); }
