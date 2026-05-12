@@ -11,7 +11,7 @@
           <button class="ph-back" @click="goLanding">← Retour</button>
           <div>
             <h1>{{ activeView === 'modalites' ? 'Modalités des épreuves' : 'Exercices de type concours' }}</h1>
-            <p>{{ activeView === 'modalites' ? 'Épreuves, coefficients et écoles par filière et banque' : 'Sujets écrits et oraux avec corrections' }}</p>
+            <p>{{ activeView === 'modalites' ? 'Épreuves écrites et orales par filière et banque' : 'Sujets écrits et oraux avec corrections' }}</p>
           </div>
         </div>
       </div>
@@ -77,6 +77,9 @@
 
         <!-- Étape 3 : détail banque -->
         <div v-if="currentModalite" class="detail">
+          <div class="redaction-banner">
+            ✏️ Cette section est en cours de rédaction — les informations seront complétées prochainement.
+          </div>
           <div class="detail-header">
             <div>
               <h2 class="detail-title">
@@ -94,7 +97,7 @@
               <h4 class="box-title">✏️ Épreuves écrites</h4>
               <table class="ep-table">
                 <thead>
-                  <tr><th>Matière</th><th>Durée</th><th>Coeff.</th></tr>
+                  <tr><th>Matière</th><th>Durée</th></tr>
                 </thead>
                 <tbody>
                   <tr v-for="(e, i) in currentModalite.ecrits" :key="i">
@@ -103,7 +106,6 @@
                       <span v-if="e.note" class="ep-note">({{ e.note }})</span>
                     </td>
                     <td class="td-c">{{ e.duree }}</td>
-                    <td class="td-c coeff">{{ e.coefficient }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -125,7 +127,7 @@
             <h4 class="box-title">🏫 Écoles accessibles</h4>
             <div class="ecoles-wrap">
               <a v-for="e in currentModalite.ecoles" :key="e.nom"
-                :href="e.url" target="_blank" rel="noopener noreferrer"
+                href="https://www.jeremy-luccioni.fr" target="_blank" rel="noopener noreferrer"
                 class="ecole-chip">
                 <span class="ec-nom">{{ e.nom }}</span>
                 <span class="ec-ville">{{ e.ville }} ↗</span>
@@ -137,8 +139,8 @@
           <div class="detail-links">
             <h4 class="box-title">🔗 Sites officiels</h4>
             <div class="links-row">
-              <a v-for="l in currentModalite.siteInfos" :key="l.url"
-                :href="l.url" target="_blank" rel="noopener noreferrer"
+              <a v-for="l in currentModalite.siteInfos" :key="l.label"
+                href="https://www.jeremy-luccioni.fr" target="_blank" rel="noopener noreferrer"
                 class="official-link">
                 {{ l.label }} ↗
               </a>
@@ -531,7 +533,21 @@ const MODALITES = {
   },
 
   PSI: {
-    'X-ENS-ESPCI': null, // Polytechnique et ESPCI n'acceptent pas la filière PSI
+    'X-ENS-ESPCI': {
+      description: 'En rédaction.',
+      ecrits: [
+        { matiere: 'En rédaction', duree: '—' },
+      ],
+      oraux: [
+        { matiere: 'En rédaction', format: '—' },
+      ],
+      ecoles: [
+        { nom: 'En rédaction', ville: '—', url: 'https://www.jeremy-luccioni.fr' },
+      ],
+      siteInfos: [
+        { label: 'Site officiel (bientôt disponible)', url: 'https://www.jeremy-luccioni.fr' },
+      ],
+    },
     'Centrale': {
       description: 'La banque Centrale-Supélec est tout à fait accessible en filière PSI. Les épreuves accordent une place centrale aux Sciences de l\'Ingénieur, qui remplacent les épreuves de mathématiques avancées de MP/PC. Les mêmes grandes écoles du réseau Centrale sont accessibles.',
       ecrits: [
@@ -815,6 +831,13 @@ async function loadExercices() {
 .bb-na-tag {
   font-size: .7rem; background: #fee2e2; color: #dc2626;
   padding: 2px 8px; border-radius: 4px; font-weight: 600;
+}
+
+/* Bannière en rédaction */
+.redaction-banner {
+  background: #fef9c3; border: 1px solid #fde047; border-radius: 10px;
+  padding: 12px 18px; font-size: .88rem; font-weight: 600; color: #854d0e;
+  margin-bottom: 20px;
 }
 
 /* Detail card */
