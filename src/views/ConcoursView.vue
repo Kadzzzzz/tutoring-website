@@ -86,7 +86,6 @@
                 {{ currentBanque?.label }}
                 <span class="detail-filiere-tag">Filière {{ selectedFiliere }}</span>
               </h2>
-              <p class="detail-desc">{{ currentModalite.description }}</p>
             </div>
             <button class="btn btn-outline detail-close" @click="selectedBanque = ''">✕</button>
           </div>
