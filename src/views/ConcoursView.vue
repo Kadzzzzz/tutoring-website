@@ -96,16 +96,9 @@
             <div class="detail-box">
               <h4 class="box-title">✏️ Épreuves écrites</h4>
               <table class="ep-table">
-                <thead>
-                  <tr><th>Matière</th><th>Durée</th></tr>
-                </thead>
                 <tbody>
                   <tr v-for="(e, i) in currentModalite.ecrits" :key="i">
-                    <td>
-                      {{ e.matiere }}
-                      <span v-if="e.note" class="ep-note">({{ e.note }})</span>
-                    </td>
-                    <td class="td-c">{{ e.duree }}</td>
+                    <td>{{ e.matiere }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -116,7 +109,6 @@
               <div class="oral-list">
                 <div v-for="(o, i) in currentModalite.oraux" :key="i" class="oral-row">
                   <span class="oral-mat">{{ o.matiere }}</span>
-                  <span class="oral-fmt">{{ o.format }}</span>
                 </div>
               </div>
             </div>
