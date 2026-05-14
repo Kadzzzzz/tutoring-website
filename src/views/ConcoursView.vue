@@ -66,7 +66,7 @@
           <div class="banque-row">
             <button v-for="b in BANQUES" :key="b.id"
               :class="['banque-btn', { active: selectedBanque === b.id, 'banque-na': !hasData(b.id) }]"
-              @click="hasData(b.id) && (selectedBanque = b.id)">
+              @click="hasData(b.id) && selectBanque(b.id)">
               <span class="bb-emoji">{{ b.emoji }}</span>
               <span class="bb-label">{{ b.label }}</span>
               <span class="bb-schools">{{ b.shortDesc }}</span>
@@ -75,19 +75,36 @@
           </div>
         </div>
 
-        <!-- Étape 3 : détail banque -->
+        <!-- Étape 3 : sous-option -->
+        <div v-if="selectedBanque && hasSousOptions" class="step">
+          <div class="step-hd">
+            <span class="step-num">3</span>
+            <h3 class="step-label">Sélectionnez votre option</h3>
+          </div>
+          <div class="sous-option-row">
+            <button v-for="s in sousOptionsForBanque" :key="s.id"
+              :class="['so-btn', { active: selectedSousOption === s.id }]"
+              @click="selectedSousOption = s.id">
+              <span class="so-tag">{{ s.tag }}</span>
+              <span class="so-label">{{ s.label }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Détail -->
         <div v-if="currentModalite" class="detail">
-          <div class="redaction-banner">
-            ✏️ Cette section est en cours de rédaction — les informations seront complétées prochainement.
+          <div v-if="currentModalite.note" class="note-banner">
+            ℹ️ {{ currentModalite.note }}
           </div>
           <div class="detail-header">
             <div>
               <h2 class="detail-title">
-                {{ currentBanque?.label }}
+                {{ hasSousOptions ? currentModalite.label : currentBanque?.label }}
                 <span class="detail-filiere-tag">Filière {{ selectedFiliere }}</span>
               </h2>
             </div>
-            <button class="btn btn-outline detail-close" @click="selectedBanque = ''">✕</button>
+            <button class="btn btn-outline detail-close"
+              @click="hasSousOptions ? (selectedSousOption = '') : (selectedBanque = '')">✕</button>
           </div>
 
           <div class="detail-cols">
@@ -95,9 +112,21 @@
             <div class="detail-box">
               <h4 class="box-title">✏️ Épreuves écrites</h4>
               <table class="ep-table">
+                <thead>
+                  <tr>
+                    <th>Matière</th>
+                    <th class="td-c">Durée</th>
+                    <th class="td-c">Coeff.</th>
+                  </tr>
+                </thead>
                 <tbody>
                   <tr v-for="(e, i) in currentModalite.ecrits" :key="i">
-                    <td>{{ e.matiere }}</td>
+                    <td>
+                      {{ e.matiere }}
+                      <div v-if="e.note" class="ep-note">{{ e.note }}</div>
+                    </td>
+                    <td class="td-c">{{ e.duree }}</td>
+                    <td class="td-c coeff">{{ e.coefficient ?? '—' }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -108,6 +137,7 @@
               <div class="oral-list">
                 <div v-for="(o, i) in currentModalite.oraux" :key="i" class="oral-row">
                   <span class="oral-mat">{{ o.matiere }}</span>
+                  <span class="oral-coeff">Coeff.&nbsp;{{ o.coefficient ?? '—' }}</span>
                 </div>
               </div>
             </div>
@@ -118,7 +148,7 @@
             <h4 class="box-title">🏫 Écoles accessibles</h4>
             <div class="ecoles-wrap">
               <a v-for="e in currentModalite.ecoles" :key="e.nom"
-                href="https://www.jeremy-luccioni.fr" target="_blank" rel="noopener noreferrer"
+                :href="e.url" target="_blank" rel="noopener noreferrer"
                 class="ecole-chip">
                 <span class="ec-nom">{{ e.nom }}</span>
                 <span class="ec-ville">{{ e.ville }} ↗</span>
@@ -131,7 +161,7 @@
             <h4 class="box-title">🔗 Sites officiels</h4>
             <div class="links-row">
               <a v-for="l in currentModalite.siteInfos" :key="l.label"
-                href="https://www.jeremy-luccioni.fr" target="_blank" rel="noopener noreferrer"
+                :href="l.url" target="_blank" rel="noopener noreferrer"
                 class="official-link">
                 {{ l.label }} ↗
               </a>
@@ -249,420 +279,60 @@
 import { ref, computed, reactive } from 'vue'
 import { api } from '@/api.js'
 import LatexRenderer from '@/components/LatexRenderer.vue'
-
-// ── Static data ───────────────────────────────────────────────────────────────
-
-const FILIERES = [
-  { id: 'MP',  label: 'Mathématiques-Physique' },
-  { id: 'PC',  label: 'Physique-Chimie' },
-  { id: 'PSI', label: 'Physique et Sciences de l\'Ingénieur' },
-]
-
-const BANQUES = [
-  { id: 'X-ENS-ESPCI', label: 'X – ENS – ESPCI',   emoji: '⭐', shortDesc: 'Polytechnique, ENS, ESPCI' },
-  { id: 'Centrale',    label: 'Centrale-Supélec',   emoji: '🔧', shortDesc: 'CentraleSupélec, Centrale Lyon…' },
-  { id: 'Mines',       label: 'Mines-Ponts',        emoji: '⚙️', shortDesc: 'Mines Paris, Ponts, ISAE…' },
-  { id: 'CCINP',       label: 'CCINP',              emoji: '🏭', shortDesc: 'INSA, IMT, INP, CPE…' },
-]
-
-const MODALITES = {
-  MP: {
-    'X-ENS-ESPCI': {
-      description: 'La banque X-ENS-ESPCI regroupe les concours des grandes écoles scientifiques les plus prestigieuses. Pour la filière MP, cette banque constitue le sommet de la préparation, avec des épreuves exigeant une maîtrise avancée des mathématiques et de la physique. Les concours de Polytechnique, des ENS et de l\'ESPCI sont distincts mais font appel aux mêmes épreuves communes.',
-      ecrits: [
-        { matiere: 'Mathématiques 1', duree: '4h', coefficient: 4 },
-        { matiere: 'Mathématiques 2', duree: '4h', coefficient: 4 },
-        { matiere: 'Physique 1', duree: '4h', coefficient: 3 },
-        { matiere: 'Physique 2', duree: '4h', coefficient: 3 },
-        { matiere: 'Informatique', duree: '4h', coefficient: 2, note: 'option informatique' },
-        { matiere: 'Français-Philosophie', duree: '4h', coefficient: 2 },
-        { matiere: 'Langue vivante 1', duree: '3h', coefficient: 2 },
-      ],
-      oraux: [
-        { matiere: 'Mathématiques 1', format: 'Oral + préparation (30 min + 30 min)' },
-        { matiere: 'Mathématiques 2', format: 'Oral + préparation (30 min + 30 min)' },
-        { matiere: 'Physique', format: 'Oral + TP (variable selon l\'école)' },
-        { matiere: 'Langue vivante', format: 'Entretien (20 min)' },
-        { matiere: 'Entretien de personnalité', format: 'Spécifique à chaque école' },
-      ],
-      ecoles: [
-        { nom: 'École Polytechnique (l\'X)', ville: 'Palaiseau', url: 'https://www.polytechnique.edu/admissions' },
-        { nom: 'ENS Paris (Ulm)', ville: 'Paris', url: 'https://www.ens.psl.eu/admission' },
-        { nom: 'ENS Lyon', ville: 'Lyon', url: 'https://www.ens-lyon.fr/admission' },
-        { nom: 'ENS Paris-Saclay', ville: 'Gif-sur-Yvette', url: 'https://ens-paris-saclay.fr/admission' },
-        { nom: 'ESPCI Paris', ville: 'Paris', url: 'https://www.espci.psl.eu/admission' },
-      ],
-      siteInfos: [
-        { label: 'Concours Polytechnique', url: 'https://www.polytechnique.edu/admissions' },
-        { label: 'Concours ENS', url: 'https://www.ens.psl.eu/admission' },
-        { label: 'Concours ESPCI', url: 'https://www.espci.psl.eu/admission' },
-      ],
-    },
-    'Centrale': {
-      description: 'La banque Centrale-Supélec est l\'une des plus importantes de la filière MP. Elle donne accès aux grandes écoles du réseau Centrale ainsi qu\'à plusieurs écoles partenaires. Les épreuves couvrent mathématiques, physique-chimie, sciences de l\'ingénieur (option) et les matières générales.',
-      ecrits: [
-        { matiere: 'Mathématiques 1', duree: '4h', coefficient: 3 },
-        { matiere: 'Mathématiques 2', duree: '4h', coefficient: 3 },
-        { matiere: 'Physique-Chimie 1', duree: '4h', coefficient: 3 },
-        { matiere: 'Physique-Chimie 2', duree: '4h', coefficient: 3 },
-        { matiere: 'Sciences de l\'Ingénieur', duree: '4h', coefficient: 2, note: 'option SI' },
-        { matiere: 'Français-Philosophie', duree: '4h', coefficient: 2 },
-        { matiere: 'Langue vivante 1', duree: '2h30', coefficient: 2 },
-      ],
-      oraux: [
-        { matiere: 'Mathématiques', format: 'Oral (30 min)' },
-        { matiere: 'Physique-Chimie', format: 'Oral + TP (variable)' },
-        { matiere: 'Langue vivante', format: 'Entretien (20 min)' },
-        { matiere: 'Entretien de motivation', format: 'Spécifique à chaque école' },
-      ],
-      ecoles: [
-        { nom: 'CentraleSupélec', ville: 'Gif-sur-Yvette', url: 'https://www.centralesupelec.fr' },
-        { nom: 'Centrale Lyon', ville: 'Écully', url: 'https://www.ec-lyon.fr' },
-        { nom: 'Centrale Nantes', ville: 'Nantes', url: 'https://www.ec-nantes.fr' },
-        { nom: 'Centrale Lille', ville: 'Lille', url: 'https://centralelille.fr' },
-        { nom: 'Centrale Méditerranée', ville: 'Marseille', url: 'https://www.centrale-marseille.fr' },
-        { nom: 'Institut d\'Optique (SupOptique)', ville: 'Palaiseau', url: 'https://www.institutoptique.fr' },
-        { nom: 'ENSEA', ville: 'Cergy', url: 'https://www.ensea.fr' },
-      ],
-      siteInfos: [
-        { label: 'Site officiel Centrale', url: 'https://www.centralesupelec.fr/fr/admissions-en-1re-annee' },
-      ],
-    },
-    'Mines': {
-      description: 'La banque Mines-Ponts rassemble des grandes écoles d\'ingénieurs d\'excellence. Les épreuves écrites sont communes à toutes les écoles ; les oraux sont spécifiques à chaque établissement. La filière MP dispose d\'un large choix d\'épreuves en mathématiques, physique et chimie.',
-      ecrits: [
-        { matiere: 'Mathématiques 1', duree: '4h', coefficient: 3 },
-        { matiere: 'Mathématiques 2', duree: '4h', coefficient: 3 },
-        { matiere: 'Physique 1', duree: '4h', coefficient: 3 },
-        { matiere: 'Physique 2', duree: '4h', coefficient: 3 },
-        { matiere: 'Chimie', duree: '4h', coefficient: 2 },
-        { matiere: 'Informatique', duree: '4h', coefficient: 2 },
-        { matiere: 'Français-Philosophie', duree: '4h', coefficient: 2 },
-        { matiere: 'Langue vivante 1', duree: '3h', coefficient: 2 },
-      ],
-      oraux: [
-        { matiere: 'Mathématiques', format: 'Oral + préparation (30 min + 30 min)' },
-        { matiere: 'Physique', format: 'Oral + TP (variable)' },
-        { matiere: 'Langue vivante', format: 'Entretien (20–30 min)' },
-        { matiere: 'Entretien de motivation', format: 'Spécifique à chaque école' },
-      ],
-      ecoles: [
-        { nom: 'Mines Paris – PSL', ville: 'Paris', url: 'https://www.minesparis.psl.eu' },
-        { nom: 'École des Ponts ParisTech', ville: 'Marne-la-Vallée', url: 'https://www.ecoledesponts.fr' },
-        { nom: 'ISAE-SUPAERO', ville: 'Toulouse', url: 'https://www.isae-supaero.fr' },
-        { nom: 'ENSTA Paris', ville: 'Palaiseau', url: 'https://www.ensta-paris.fr' },
-        { nom: 'Télécom Paris', ville: 'Palaiseau', url: 'https://www.telecom-paris.fr' },
-        { nom: 'Mines Saint-Étienne', ville: 'Saint-Étienne', url: 'https://www.mines-stetienne.fr' },
-        { nom: 'Mines Nancy', ville: 'Nancy', url: 'https://mines-nancy.univ-lorraine.fr' },
-        { nom: 'ENSAE Paris', ville: 'Palaiseau', url: 'https://www.ensae.fr' },
-        { nom: 'Chimie ParisTech – PSL', ville: 'Paris', url: 'https://www.chimieparistech.psl.eu' },
-      ],
-      siteInfos: [
-        { label: 'Site officiel Mines-Ponts', url: 'https://www.concours-mines-ponts.fr' },
-      ],
-    },
-    'CCINP': {
-      description: 'La banque CCINP (ex-CCP) donne accès à un large réseau d\'écoles d\'ingénieurs reconnues : INSA, IMT, INP et bien d\'autres. C\'est la banque qui compte le plus grand nombre d\'établissements. Les épreuves sont communes et adaptées au niveau de la filière MP.',
-      ecrits: [
-        { matiere: 'Mathématiques 1', duree: '4h', coefficient: 3 },
-        { matiere: 'Mathématiques 2', duree: '4h', coefficient: 3 },
-        { matiere: 'Physique-Chimie 1', duree: '4h', coefficient: 3 },
-        { matiere: 'Physique-Chimie 2', duree: '4h', coefficient: 2 },
-        { matiere: 'Informatique', duree: '3h', coefficient: 2 },
-        { matiere: 'Français-Philosophie', duree: '4h', coefficient: 2 },
-        { matiere: 'Langue vivante', duree: '2h', coefficient: 1 },
-      ],
-      oraux: [
-        { matiere: 'Mathématiques', format: 'Oral (20–30 min)' },
-        { matiere: 'Physique-Chimie', format: 'Oral + TP' },
-        { matiere: 'Langue vivante', format: 'Entretien' },
-        { matiere: 'Entretien de motivation', format: 'Spécifique à chaque école' },
-      ],
-      ecoles: [
-        { nom: 'CPE Lyon', ville: 'Lyon', url: 'https://www.cpe.fr' },
-        { nom: 'Grenoble INP – Ensimag', ville: 'Grenoble', url: 'https://ensimag.grenoble-inp.fr' },
-        { nom: 'INSA Lyon', ville: 'Lyon', url: 'https://www.insa-lyon.fr' },
-        { nom: 'INSA Toulouse', ville: 'Toulouse', url: 'https://www.insa-toulouse.fr' },
-        { nom: 'IMT Atlantique', ville: 'Brest / Nantes', url: 'https://www.imt-atlantique.fr' },
-        { nom: 'IMT Mines Albi', ville: 'Albi', url: 'https://www.imt-mines-albi.fr' },
-        { nom: 'Bordeaux INP', ville: 'Bordeaux', url: 'https://www.bordeaux-inp.fr' },
-        { nom: 'ENSICAEN', ville: 'Caen', url: 'https://www.ensicaen.fr' },
-        { nom: 'Clermont Auvergne INP', ville: 'Clermont-Ferrand', url: 'https://clermont-inp.fr' },
-        { nom: 'ENSCM', ville: 'Montpellier', url: 'https://www.enscm.fr' },
-      ],
-      siteInfos: [
-        { label: 'Site officiel CCINP', url: 'https://www.ccinp.fr' },
-      ],
-    },
-  },
-
-  PC: {
-    'X-ENS-ESPCI': {
-      description: 'La filière PC a pleinement accès aux concours X, ENS et ESPCI. Les épreuves sont adaptées au programme PC, avec notamment une part importante accordée à la chimie. L\'ESPCI Paris, très orientée physique-chimie, est particulièrement adaptée aux étudiants de cette filière.',
-      ecrits: [
-        { matiere: 'Mathématiques 1', duree: '4h', coefficient: 4 },
-        { matiere: 'Mathématiques 2', duree: '4h', coefficient: 4 },
-        { matiere: 'Physique-Chimie 1', duree: '4h', coefficient: 3 },
-        { matiere: 'Physique-Chimie 2', duree: '4h', coefficient: 3 },
-        { matiere: 'Français-Philosophie', duree: '4h', coefficient: 2 },
-        { matiere: 'Langue vivante 1', duree: '3h', coefficient: 2 },
-      ],
-      oraux: [
-        { matiere: 'Mathématiques', format: 'Oral + préparation (30 min + 30 min)' },
-        { matiere: 'Physique-Chimie', format: 'Oral + TP (variable)' },
-        { matiere: 'Langue vivante', format: 'Entretien (20 min)' },
-        { matiere: 'Entretien de personnalité', format: 'Spécifique à chaque école' },
-      ],
-      ecoles: [
-        { nom: 'École Polytechnique (l\'X)', ville: 'Palaiseau', url: 'https://www.polytechnique.edu/admissions' },
-        { nom: 'ENS Paris (Ulm)', ville: 'Paris', url: 'https://www.ens.psl.eu/admission' },
-        { nom: 'ENS Lyon', ville: 'Lyon', url: 'https://www.ens-lyon.fr/admission' },
-        { nom: 'ENS Paris-Saclay', ville: 'Gif-sur-Yvette', url: 'https://ens-paris-saclay.fr/admission' },
-        { nom: 'ESPCI Paris', ville: 'Paris', url: 'https://www.espci.psl.eu/admission' },
-      ],
-      siteInfos: [
-        { label: 'Concours Polytechnique', url: 'https://www.polytechnique.edu/admissions' },
-        { label: 'Concours ENS', url: 'https://www.ens.psl.eu/admission' },
-        { label: 'Concours ESPCI', url: 'https://www.espci.psl.eu/admission' },
-      ],
-    },
-    'Centrale': {
-      description: 'La banque Centrale-Supélec en filière PC propose les mêmes grandes écoles qu\'en MP, avec des épreuves adaptées au programme PC — notamment une chimie renforcée et une physique orientée vers les applications.',
-      ecrits: [
-        { matiere: 'Mathématiques 1', duree: '4h', coefficient: 3 },
-        { matiere: 'Mathématiques 2', duree: '4h', coefficient: 3 },
-        { matiere: 'Physique-Chimie 1', duree: '4h', coefficient: 3 },
-        { matiere: 'Physique-Chimie 2', duree: '4h', coefficient: 3 },
-        { matiere: 'Sciences de l\'Ingénieur', duree: '4h', coefficient: 2, note: 'option SI' },
-        { matiere: 'Français-Philosophie', duree: '4h', coefficient: 2 },
-        { matiere: 'Langue vivante 1', duree: '2h30', coefficient: 2 },
-      ],
-      oraux: [
-        { matiere: 'Mathématiques', format: 'Oral (30 min)' },
-        { matiere: 'Physique-Chimie', format: 'Oral + TP (variable)' },
-        { matiere: 'Langue vivante', format: 'Entretien (20 min)' },
-        { matiere: 'Entretien de motivation', format: 'Spécifique à chaque école' },
-      ],
-      ecoles: [
-        { nom: 'CentraleSupélec', ville: 'Gif-sur-Yvette', url: 'https://www.centralesupelec.fr' },
-        { nom: 'Centrale Lyon', ville: 'Écully', url: 'https://www.ec-lyon.fr' },
-        { nom: 'Centrale Nantes', ville: 'Nantes', url: 'https://www.ec-nantes.fr' },
-        { nom: 'Centrale Lille', ville: 'Lille', url: 'https://centralelille.fr' },
-        { nom: 'Centrale Méditerranée', ville: 'Marseille', url: 'https://www.centrale-marseille.fr' },
-        { nom: 'Institut d\'Optique (SupOptique)', ville: 'Palaiseau', url: 'https://www.institutoptique.fr' },
-        { nom: 'ENSEA', ville: 'Cergy', url: 'https://www.ensea.fr' },
-      ],
-      siteInfos: [
-        { label: 'Site officiel Centrale', url: 'https://www.centralesupelec.fr/fr/admissions-en-1re-annee' },
-      ],
-    },
-    'Mines': {
-      description: 'La banque Mines-Ponts en filière PC met l\'accent sur la chimie, qui y prend un coefficient plus important qu\'en MP. Les mêmes grandes écoles sont accessibles, avec des épreuves spécifiques au programme PC.',
-      ecrits: [
-        { matiere: 'Mathématiques 1', duree: '4h', coefficient: 3 },
-        { matiere: 'Mathématiques 2', duree: '4h', coefficient: 3 },
-        { matiere: 'Physique 1', duree: '4h', coefficient: 3 },
-        { matiere: 'Physique 2', duree: '4h', coefficient: 2 },
-        { matiere: 'Chimie', duree: '4h', coefficient: 3 },
-        { matiere: 'Informatique', duree: '4h', coefficient: 2 },
-        { matiere: 'Français-Philosophie', duree: '4h', coefficient: 2 },
-        { matiere: 'Langue vivante 1', duree: '3h', coefficient: 2 },
-      ],
-      oraux: [
-        { matiere: 'Mathématiques', format: 'Oral + préparation (30 min + 30 min)' },
-        { matiere: 'Physique-Chimie', format: 'Oral + TP (variable)' },
-        { matiere: 'Langue vivante', format: 'Entretien (20–30 min)' },
-        { matiere: 'Entretien de motivation', format: 'Spécifique à chaque école' },
-      ],
-      ecoles: [
-        { nom: 'Mines Paris – PSL', ville: 'Paris', url: 'https://www.minesparis.psl.eu' },
-        { nom: 'École des Ponts ParisTech', ville: 'Marne-la-Vallée', url: 'https://www.ecoledesponts.fr' },
-        { nom: 'ISAE-SUPAERO', ville: 'Toulouse', url: 'https://www.isae-supaero.fr' },
-        { nom: 'ENSTA Paris', ville: 'Palaiseau', url: 'https://www.ensta-paris.fr' },
-        { nom: 'Télécom Paris', ville: 'Palaiseau', url: 'https://www.telecom-paris.fr' },
-        { nom: 'Mines Saint-Étienne', ville: 'Saint-Étienne', url: 'https://www.mines-stetienne.fr' },
-        { nom: 'Mines Nancy', ville: 'Nancy', url: 'https://mines-nancy.univ-lorraine.fr' },
-        { nom: 'ENSAE Paris', ville: 'Palaiseau', url: 'https://www.ensae.fr' },
-        { nom: 'Chimie ParisTech – PSL', ville: 'Paris', url: 'https://www.chimieparistech.psl.eu' },
-      ],
-      siteInfos: [
-        { label: 'Site officiel Mines-Ponts', url: 'https://www.concours-mines-ponts.fr' },
-      ],
-    },
-    'CCINP': {
-      description: 'La banque CCINP en filière PC donne accès au même vaste réseau d\'écoles qu\'en MP. Les épreuves sont adaptées au programme PC, avec une présence marquée de la chimie.',
-      ecrits: [
-        { matiere: 'Mathématiques 1', duree: '4h', coefficient: 3 },
-        { matiere: 'Mathématiques 2', duree: '4h', coefficient: 3 },
-        { matiere: 'Physique-Chimie 1', duree: '4h', coefficient: 3 },
-        { matiere: 'Physique-Chimie 2', duree: '4h', coefficient: 2 },
-        { matiere: 'Informatique', duree: '3h', coefficient: 2 },
-        { matiere: 'Français-Philosophie', duree: '4h', coefficient: 2 },
-        { matiere: 'Langue vivante', duree: '2h', coefficient: 1 },
-      ],
-      oraux: [
-        { matiere: 'Mathématiques', format: 'Oral (20–30 min)' },
-        { matiere: 'Physique-Chimie', format: 'Oral + TP' },
-        { matiere: 'Langue vivante', format: 'Entretien' },
-        { matiere: 'Entretien de motivation', format: 'Spécifique à chaque école' },
-      ],
-      ecoles: [
-        { nom: 'CPE Lyon', ville: 'Lyon', url: 'https://www.cpe.fr' },
-        { nom: 'Grenoble INP – Phelma', ville: 'Grenoble', url: 'https://phelma.grenoble-inp.fr' },
-        { nom: 'INSA Lyon', ville: 'Lyon', url: 'https://www.insa-lyon.fr' },
-        { nom: 'INSA Toulouse', ville: 'Toulouse', url: 'https://www.insa-toulouse.fr' },
-        { nom: 'IMT Atlantique', ville: 'Brest / Nantes', url: 'https://www.imt-atlantique.fr' },
-        { nom: 'IMT Mines Albi', ville: 'Albi', url: 'https://www.imt-mines-albi.fr' },
-        { nom: 'Bordeaux INP', ville: 'Bordeaux', url: 'https://www.bordeaux-inp.fr' },
-        { nom: 'ENSICAEN', ville: 'Caen', url: 'https://www.ensicaen.fr' },
-        { nom: 'ENSCM', ville: 'Montpellier', url: 'https://www.enscm.fr' },
-      ],
-      siteInfos: [
-        { label: 'Site officiel CCINP', url: 'https://www.ccinp.fr' },
-      ],
-    },
-  },
-
-  PSI: {
-    'X-ENS-ESPCI': {
-      description: 'En rédaction.',
-      ecrits: [
-        { matiere: 'En rédaction', duree: '—' },
-      ],
-      oraux: [
-        { matiere: 'En rédaction', format: '—' },
-      ],
-      ecoles: [
-        { nom: 'En rédaction', ville: '—', url: 'https://www.jeremy-luccioni.fr' },
-      ],
-      siteInfos: [
-        { label: 'Site officiel (bientôt disponible)', url: 'https://www.jeremy-luccioni.fr' },
-      ],
-    },
-    'Centrale': {
-      description: 'La banque Centrale-Supélec est tout à fait accessible en filière PSI. Les épreuves accordent une place centrale aux Sciences de l\'Ingénieur, qui remplacent les épreuves de mathématiques avancées de MP/PC. Les mêmes grandes écoles du réseau Centrale sont accessibles.',
-      ecrits: [
-        { matiere: 'Mathématiques 1', duree: '4h', coefficient: 3 },
-        { matiere: 'Mathématiques 2', duree: '4h', coefficient: 2 },
-        { matiere: 'Sciences de l\'Ingénieur 1', duree: '4h', coefficient: 4 },
-        { matiere: 'Sciences de l\'Ingénieur 2', duree: '4h', coefficient: 4 },
-        { matiere: 'Physique-Chimie', duree: '4h', coefficient: 2 },
-        { matiere: 'Français-Philosophie', duree: '4h', coefficient: 2 },
-        { matiere: 'Langue vivante 1', duree: '2h30', coefficient: 2 },
-      ],
-      oraux: [
-        { matiere: 'Mathématiques', format: 'Oral (30 min)' },
-        { matiere: 'Sciences de l\'Ingénieur', format: 'Oral + TP (variable)' },
-        { matiere: 'Physique-Chimie', format: 'Oral (20 min)' },
-        { matiere: 'Langue vivante', format: 'Entretien (20 min)' },
-        { matiere: 'Entretien de motivation', format: 'Spécifique à chaque école' },
-      ],
-      ecoles: [
-        { nom: 'CentraleSupélec', ville: 'Gif-sur-Yvette', url: 'https://www.centralesupelec.fr' },
-        { nom: 'Centrale Lyon', ville: 'Écully', url: 'https://www.ec-lyon.fr' },
-        { nom: 'Centrale Nantes', ville: 'Nantes', url: 'https://www.ec-nantes.fr' },
-        { nom: 'Centrale Lille', ville: 'Lille', url: 'https://centralelille.fr' },
-        { nom: 'Centrale Méditerranée', ville: 'Marseille', url: 'https://www.centrale-marseille.fr' },
-        { nom: 'Institut d\'Optique (SupOptique)', ville: 'Palaiseau', url: 'https://www.institutoptique.fr' },
-        { nom: 'ENSEA', ville: 'Cergy', url: 'https://www.ensea.fr' },
-      ],
-      siteInfos: [
-        { label: 'Site officiel Centrale', url: 'https://www.centralesupelec.fr/fr/admissions-en-1re-annee' },
-      ],
-    },
-    'Mines': {
-      description: 'La banque Mines-Ponts est accessible en filière PSI, principalement pour les écoles à fort profil ingénierie. Les Sciences de l\'Ingénieur remplacent certaines épreuves de mathématiques et permettent d\'accéder à des écoles comme ISAE-SUPAERO, ENSTA Paris ou les Mines.',
-      ecrits: [
-        { matiere: 'Mathématiques 1', duree: '4h', coefficient: 3 },
-        { matiere: 'Mathématiques 2', duree: '4h', coefficient: 2 },
-        { matiere: 'Sciences de l\'Ingénieur 1', duree: '4h', coefficient: 3 },
-        { matiere: 'Sciences de l\'Ingénieur 2', duree: '4h', coefficient: 3 },
-        { matiere: 'Physique', duree: '4h', coefficient: 2 },
-        { matiere: 'Informatique', duree: '4h', coefficient: 2 },
-        { matiere: 'Français-Philosophie', duree: '4h', coefficient: 2 },
-        { matiere: 'Langue vivante 1', duree: '3h', coefficient: 2 },
-      ],
-      oraux: [
-        { matiere: 'Mathématiques', format: 'Oral + préparation (30 min + 30 min)' },
-        { matiere: 'Sciences de l\'Ingénieur', format: 'Oral + TP (variable)' },
-        { matiere: 'Physique', format: 'Oral (20 min)' },
-        { matiere: 'Langue vivante', format: 'Entretien (20–30 min)' },
-        { matiere: 'Entretien de motivation', format: 'Spécifique à chaque école' },
-      ],
-      ecoles: [
-        { nom: 'ISAE-SUPAERO', ville: 'Toulouse', url: 'https://www.isae-supaero.fr' },
-        { nom: 'ENSTA Paris', ville: 'Palaiseau', url: 'https://www.ensta-paris.fr' },
-        { nom: 'Télécom Paris', ville: 'Palaiseau', url: 'https://www.telecom-paris.fr' },
-        { nom: 'Mines Saint-Étienne', ville: 'Saint-Étienne', url: 'https://www.mines-stetienne.fr' },
-        { nom: 'Mines Nancy', ville: 'Nancy', url: 'https://mines-nancy.univ-lorraine.fr' },
-      ],
-      siteInfos: [
-        { label: 'Site officiel Mines-Ponts', url: 'https://www.concours-mines-ponts.fr' },
-      ],
-    },
-    'CCINP': {
-      description: 'La banque CCINP est très bien adaptée à la filière PSI, avec des épreuves centrées sur les Sciences de l\'Ingénieur. Elle donne accès à un réseau très large d\'écoles, notamment les INSA et les INP qui valorisent particulièrement ce profil.',
-      ecrits: [
-        { matiere: 'Mathématiques 1', duree: '4h', coefficient: 3 },
-        { matiere: 'Mathématiques 2', duree: '4h', coefficient: 2 },
-        { matiere: 'Sciences de l\'Ingénieur 1', duree: '4h', coefficient: 4 },
-        { matiere: 'Sciences de l\'Ingénieur 2', duree: '4h', coefficient: 3 },
-        { matiere: 'Physique-Chimie', duree: '4h', coefficient: 2 },
-        { matiere: 'Informatique', duree: '3h', coefficient: 2 },
-        { matiere: 'Français-Philosophie', duree: '4h', coefficient: 2 },
-        { matiere: 'Langue vivante', duree: '2h', coefficient: 1 },
-      ],
-      oraux: [
-        { matiere: 'Mathématiques', format: 'Oral (20–30 min)' },
-        { matiere: 'Sciences de l\'Ingénieur', format: 'Oral + TP' },
-        { matiere: 'Physique-Chimie', format: 'Oral (20 min)' },
-        { matiere: 'Langue vivante', format: 'Entretien' },
-        { matiere: 'Entretien de motivation', format: 'Spécifique à chaque école' },
-      ],
-      ecoles: [
-        { nom: 'CPE Lyon', ville: 'Lyon', url: 'https://www.cpe.fr' },
-        { nom: 'INSA Lyon', ville: 'Lyon', url: 'https://www.insa-lyon.fr' },
-        { nom: 'INSA Toulouse', ville: 'Toulouse', url: 'https://www.insa-toulouse.fr' },
-        { nom: 'Grenoble INP – Génie industriel', ville: 'Grenoble', url: 'https://genie-industriel.grenoble-inp.fr' },
-        { nom: 'IMT Atlantique', ville: 'Brest / Nantes', url: 'https://www.imt-atlantique.fr' },
-        { nom: 'IMT Mines Albi', ville: 'Albi', url: 'https://www.imt-mines-albi.fr' },
-        { nom: 'Bordeaux INP', ville: 'Bordeaux', url: 'https://www.bordeaux-inp.fr' },
-        { nom: 'ENSICAEN', ville: 'Caen', url: 'https://www.ensicaen.fr' },
-      ],
-      siteInfos: [
-        { label: 'Site officiel CCINP', url: 'https://www.ccinp.fr' },
-      ],
-    },
-  },
-}
+import { FILIERES, BANQUES, MODALITES } from '@/data/modalites.js'
 
 // ── Navigation state ──────────────────────────────────────────────────────────
 
-const activeView      = ref('landing')
-const selectedFiliere = ref('')
-const selectedBanque  = ref('')
+const activeView         = ref('landing')
+const selectedFiliere    = ref('')
+const selectedBanque     = ref('')
+const selectedSousOption = ref('')
 
 function goLanding() {
-  activeView.value      = 'landing'
-  selectedFiliere.value = ''
-  selectedBanque.value  = ''
+  activeView.value         = 'landing'
+  selectedFiliere.value    = ''
+  selectedBanque.value     = ''
+  selectedSousOption.value = ''
 }
 
 function selectFiliere(id) {
-  selectedFiliere.value = id
-  selectedBanque.value  = ''
+  selectedFiliere.value    = id
+  selectedBanque.value     = ''
+  selectedSousOption.value = ''
+}
+
+function selectBanque(id) {
+  selectedBanque.value     = id
+  selectedSousOption.value = ''
 }
 
 function hasData(banqueId) {
   return !!MODALITES[selectedFiliere.value]?.[banqueId]
 }
 
-const currentBanque   = computed(() => BANQUES.find(b => b.id === selectedBanque.value))
-const currentModalite = computed(() =>
-  selectedFiliere.value && selectedBanque.value
-    ? MODALITES[selectedFiliere.value]?.[selectedBanque.value] ?? null
-    : null
-)
+const currentBanque = computed(() => BANQUES.find(b => b.id === selectedBanque.value))
+
+const hasSousOptions = computed(() => {
+  if (!selectedFiliere.value || !selectedBanque.value) return false
+  return !!MODALITES[selectedFiliere.value]?.[selectedBanque.value]?.sousOptions
+})
+
+const sousOptionsForBanque = computed(() => {
+  if (!hasSousOptions.value) return []
+  return MODALITES[selectedFiliere.value]?.[selectedBanque.value]?.sousOptions ?? []
+})
+
+const currentModalite = computed(() => {
+  if (!selectedFiliere.value || !selectedBanque.value) return null
+  const raw = MODALITES[selectedFiliere.value]?.[selectedBanque.value]
+  if (!raw) return null
+  if (raw.sousOptions) {
+    return selectedSousOption.value
+      ? raw.sousOptions.find(s => s.id === selectedSousOption.value) ?? null
+      : null
+  }
+  return raw
+})
 
 // ── Exercises state ───────────────────────────────────────────────────────────
 
@@ -696,9 +366,9 @@ const availableBanks = computed(() => {
 })
 
 const filtered = computed(() => docs.value.filter(d => {
-  if (activeType.value    && d.type !== activeType.value)                       return false
-  if (activeSubject.value && String(d.subject_id) !== activeSubject.value)      return false
-  if (activeBank.value    && d.concours_name !== activeBank.value)               return false
+  if (activeType.value    && d.type !== activeType.value)                  return false
+  if (activeSubject.value && String(d.subject_id) !== activeSubject.value) return false
+  if (activeBank.value    && d.concours_name !== activeBank.value)         return false
   return true
 }))
 
@@ -824,11 +494,27 @@ async function loadExercices() {
   padding: 2px 8px; border-radius: 4px; font-weight: 600;
 }
 
-/* Bannière en rédaction */
-.redaction-banner {
-  background: #fef9c3; border: 1px solid #fde047; border-radius: 10px;
-  padding: 12px 18px; font-size: .88rem; font-weight: 600; color: #854d0e;
-  margin-bottom: 20px;
+/* Sous-option buttons */
+.sous-option-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.so-btn {
+  background: white; border: 2px solid var(--border); border-radius: 10px;
+  padding: 12px 18px; cursor: pointer; transition: all .2s;
+  display: flex; align-items: center; gap: 10px; text-align: left;
+}
+.so-btn:hover  { border-color: var(--accent); }
+.so-btn.active { border-color: var(--accent); background: #eff6ff; }
+.so-tag {
+  font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
+  background: var(--accent); color: white;
+  padding: 2px 8px; border-radius: 4px; white-space: nowrap; flex-shrink: 0;
+}
+.so-label { font-size: .88rem; font-weight: 600; color: var(--text); }
+
+/* Note banner */
+.note-banner {
+  background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px;
+  padding: 12px 18px; font-size: .88rem; color: #1e40af;
+  margin-bottom: 20px; line-height: 1.5;
 }
 
 /* Detail card */
@@ -844,7 +530,6 @@ async function loadExercices() {
 .detail-filiere-tag {
   font-size: .9rem; font-weight: 600; color: var(--accent); margin-left: 6px;
 }
-.detail-desc  { color: var(--text-light); font-size: .93rem; line-height: 1.6; margin: 0; }
 .detail-close { flex-shrink: 0; padding: 6px 14px; }
 
 .detail-cols {
@@ -872,10 +557,17 @@ async function loadExercices() {
 
 /* Oraux list */
 .oral-list { display: flex; flex-direction: column; }
-.oral-row  { padding: 9px 0; border-bottom: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 2px; }
+.oral-row  {
+  padding: 9px 0; border-bottom: 1px solid #f1f5f9;
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+}
 .oral-row:last-child { border-bottom: none; }
-.oral-mat  { font-weight: 600; font-size: .88rem; color: var(--text); }
-.oral-fmt  { font-size: .8rem; color: var(--text-light); }
+.oral-mat   { font-weight: 600; font-size: .88rem; color: var(--text); flex: 1; }
+.oral-coeff {
+  font-size: .78rem; font-weight: 700; color: var(--accent);
+  background: #eff6ff; border-radius: 4px; padding: 2px 7px;
+  white-space: nowrap; flex-shrink: 0;
+}
 
 /* Écoles */
 .detail-ecoles { margin-bottom: 24px; }
@@ -959,6 +651,7 @@ async function loadExercices() {
   .detail-cols  { grid-template-columns: 1fr; }
   .filiere-row  { flex-direction: column; }
   .filiere-btn  { min-width: unset; }
+  .oral-row     { flex-direction: column; align-items: flex-start; gap: 4px; }
 }
 @media (max-width: 480px) {
   .banque-row { grid-template-columns: 1fr; }
