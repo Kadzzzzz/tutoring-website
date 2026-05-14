@@ -40,167 +40,168 @@ export const MODALITES = {
   // ═══════════════════════════════════════════════════════════════════════════
   MP: {
 
-    // ─── X – ENS – ESPCI ────────────────────────────────────────────────────
+    // ─── X – ENS ────────────────────────────────────────────────────────────
     'X-ENS-ESPCI': {
       sousOptions: [
 
-        // Polytechnique — Option Informatique
+        // ── Polytechnique (X) ────────────────────────────────────────────────
         {
-          id: 'X-info', label: 'Polytechnique – Option Informatique', tag: 'X',
-          ecrits: [
-            { matiere: 'Mathématiques A',  duree: '4h', coefficient: 8 },
-            { matiere: 'Mathématiques B',  duree: '4h', coefficient: 7 },
-            { matiere: 'Physique MP',      duree: '4h', coefficient: 6 },
-            { matiere: 'Informatique A',   duree: '4h', coefficient: 6 },
-            { matiere: 'Français',         duree: '4h', coefficient: 6 },
-            { matiere: 'Langue Vivante',   duree: '4h', coefficient: 6 },
-          ],
-          oraux: [
-            { matiere: 'Mathématiques — 1re interrogation', coefficient: 16 },
-            { matiere: 'Mathématiques — 2e interrogation',  coefficient: 16 },
-            { matiere: 'Physique',                          coefficient: 20 },
-            { matiere: 'Chimie MP',                         coefficient: 9  },
-            { matiere: 'Analyse de Documents Scientifiques (ADS)', coefficient: 15 },
-            { matiere: 'Français',                          coefficient: 8  },
-            { matiere: 'Langue Vivante obligatoire',        coefficient: 8  },
-            { matiere: 'Épreuves sportives',                coefficient: 5  },
+          id: 'X', label: 'Polytechnique (X)', tag: 'X',
+          options: [
+            {
+              id: 'X-si', label: 'Option SI',
+              ecrits: [
+                { matiere: 'Mathématiques A',         duree: '4h', coefficient: 8 },
+                { matiere: 'Mathématiques B',         duree: '4h', coefficient: 7 },
+                { matiere: 'Physique MP',             duree: '4h', coefficient: 6 },
+                { matiere: 'Physique & Sciences de l\'Ingénieur', duree: '4h', coefficient: 6 },
+                { matiere: 'Français',                duree: '4h', coefficient: 6 },
+                { matiere: 'Langue Vivante',          duree: '4h', coefficient: 6 },
+              ],
+              oraux: [
+                { matiere: 'Mathématiques — 1re interrogation',        coefficient: 16 },
+                { matiere: 'Mathématiques — 2e interrogation',         coefficient: 16 },
+                { matiere: 'Physique',                                 coefficient: 20 },
+                { matiere: 'Chimie MP',                                coefficient: 9  },
+                { matiere: 'Analyse de Documents Scientifiques (ADS)', coefficient: 15 },
+                { matiere: 'Français',                                 coefficient: 8  },
+                { matiere: 'Langue Vivante obligatoire',               coefficient: 8  },
+                { matiere: 'Épreuves sportives',                       coefficient: 5  },
+              ],
+            },
+            {
+              id: 'X-info', label: 'Option Informatique',
+              ecrits: [
+                { matiere: 'Mathématiques A',  duree: '4h', coefficient: 8 },
+                { matiere: 'Mathématiques B',  duree: '4h', coefficient: 7 },
+                { matiere: 'Physique MP',      duree: '4h', coefficient: 6 },
+                { matiere: 'Informatique A',   duree: '4h', coefficient: 6 },
+                { matiere: 'Français',         duree: '4h', coefficient: 6 },
+                { matiere: 'Langue Vivante',   duree: '4h', coefficient: 6 },
+              ],
+              oraux: [
+                { matiere: 'Mathématiques — 1re interrogation',        coefficient: 16 },
+                { matiere: 'Mathématiques — 2e interrogation',         coefficient: 16 },
+                { matiere: 'Physique',                                 coefficient: 20 },
+                { matiere: 'Chimie MP',                                coefficient: 9  },
+                { matiere: 'Analyse de Documents Scientifiques (ADS)', coefficient: 15 },
+                { matiere: 'Français',                                 coefficient: 8  },
+                { matiere: 'Langue Vivante obligatoire',               coefficient: 8  },
+                { matiere: 'Épreuves sportives',                       coefficient: 5  },
+              ],
+            },
           ],
           ecoles: [{ nom: 'École Polytechnique (l\'X)', ville: 'Palaiseau', url: 'https://www.polytechnique.edu/admission-cycle-ingenieur/calendrier-cpge' }],
           siteInfos: [{ label: 'Polytechnique — Admissions', url: 'https://www.polytechnique.edu/admission-cycle-ingenieur/calendrier-cpge' }],
         },
 
-        // Polytechnique — Option SI
+        // ── Écoles Normales Supérieures ──────────────────────────────────────
         {
-          id: 'X-si', label: 'Polytechnique – Option SI', tag: 'X',
-          ecrits: [
-            { matiere: 'Mathématiques A',         duree: '4h', coefficient: 8 },
-            { matiere: 'Mathématiques B',         duree: '4h', coefficient: 7 },
-            { matiere: 'Physique MP',             duree: '4h', coefficient: 6 },
-            { matiere: 'Physique & Sciences de l\'Ingénieur', duree: '4h', coefficient: 6 },
-            { matiere: 'Français',                duree: '4h', coefficient: 6 },
-            { matiere: 'Langue Vivante',          duree: '4h', coefficient: 6 },
+          id: 'ENS', label: 'Écoles Normales Supérieures', tag: 'ENS',
+          sousOptions: [
+            {
+              id: 'ENS-ulm', label: 'ENS Paris (Ulm)', tag: 'ENS',
+              options: [
+                {
+                  id: 'ENS-ulm-P', label: 'Option Physique',
+                  ecrits: [
+                    { matiere: 'Physique MP',     duree: '4h', coefficient: 6 },
+                    { matiere: 'Mathématiques C', duree: '4h', coefficient: 4 },
+                    { matiere: 'Mathématiques D', duree: '6h', coefficient: 6, note: 'Épreuve propre ENS Ulm (6h)' },
+                    { matiere: 'Français',        duree: '4h', coefficient: 8 },
+                    { matiere: 'Langue Vivante',  duree: '4h', coefficient: 3 },
+                  ],
+                  oraux: [
+                    { matiere: 'Langue Vivante (commune X-ULSR)', coefficient: 3  },
+                    { matiere: 'Mathématiques – commun ULSR',     coefficient: 15 },
+                    { matiere: 'Mathématiques – Ulm propre',      coefficient: 30 },
+                    { matiere: 'Physique – Ulm',                  coefficient: 25 },
+                  ],
+                },
+                {
+                  id: 'ENS-ulm-I', label: 'Option Informatique',
+                  ecrits: [
+                    { matiere: 'Physique MP',               duree: '4h', coefficient: 2 },
+                    { matiere: 'Informatique A',            duree: '4h', coefficient: 4 },
+                    { matiere: 'Mathématiques D',           duree: '6h', coefficient: 6, note: 'Épreuve propre ENS Ulm (6h)' },
+                    { matiere: 'Informatique Fondamentale', duree: '4h', coefficient: 4 },
+                    { matiere: 'Français',                  duree: '4h', coefficient: 8 },
+                    { matiere: 'Langue Vivante',            duree: '4h', coefficient: 3 },
+                  ],
+                  oraux: [
+                    { matiere: 'Langue Vivante (commune X-ULSR)', coefficient: 3  },
+                    { matiere: 'Mathématiques – commun ULSR',     coefficient: 10 },
+                    { matiere: 'Mathématiques – Ulm propre',      coefficient: 30 },
+                    { matiere: 'Physique – Ulm',                  coefficient: 4  },
+                    { matiere: 'Informatique Fondamentale',       coefficient: 15 },
+                    { matiere: 'TP Algorithmique',                coefficient: 15 },
+                  ],
+                },
+              ],
+              ecoles: [{ nom: 'ENS Paris (Ulm)', ville: 'Paris', url: 'https://www.ens.psl.eu/admission' }],
+              siteInfos: [{ label: 'ENS Ulm — Admissions', url: 'https://www.ens.psl.eu/admission' }],
+            },
+            {
+              id: 'ENS-lyon', label: 'ENS Lyon', tag: 'ENS',
+              ecrits: [
+                { matiere: 'Mathématiques A', duree: '4h', coefficient: 4 },
+                { matiere: 'Mathématiques C', duree: '4h', coefficient: 4 },
+                { matiere: 'Informatique B',  duree: '2h', coefficient: 3, note: 'Épreuve d\'admission (non comptée à l\'admissibilité)' },
+                { matiere: 'Français',        duree: '4h', coefficient: 2.5, note: 'Épreuve d\'admission' },
+                { matiere: 'Langue Vivante',  duree: '4h', coefficient: 2.5, note: 'Épreuve d\'admission' },
+              ],
+              oraux: [
+                { matiere: 'Langue Vivante (commune)',     coefficient: 1.5 },
+                { matiere: 'Mathématiques – commun ULSR', coefficient: 4   },
+                { matiere: 'Mathématiques – Lyon',        coefficient: 6   },
+                { matiere: 'Physique',                    coefficient: 6   },
+                { matiere: 'Informatique Fondamentale',   coefficient: 4   },
+                { matiere: 'TIPE',                        coefficient: 2   },
+              ],
+              ecoles: [{ nom: 'ENS Lyon', ville: 'Lyon', url: 'https://www.ens-lyon.fr/formation/admission/procedures-dadmission/concours-sciences-exactes-et-experimentales' }],
+              siteInfos: [{ label: 'ENS Lyon — Admissions', url: 'https://www.ens-lyon.fr/formation/admission/procedures-dadmission/concours-sciences-exactes-et-experimentales' }],
+            },
+            {
+              id: 'ENS-saclay', label: 'ENS Paris-Saclay', tag: 'ENS',
+              ecrits: [
+                { matiere: 'Mathématiques A', duree: '4h', coefficient: 5 },
+                { matiere: 'Physique MP',     duree: '4h', coefficient: 4 },
+                { matiere: 'Informatique B',  duree: '2h', coefficient: 2.5, note: 'Épreuve d\'admission (non comptée à l\'admissibilité)' },
+                { matiere: 'Français',        duree: '4h', coefficient: 3, note: 'Épreuve d\'admission' },
+                { matiere: 'Langue Vivante',  duree: '4h', coefficient: 2, note: 'Épreuve d\'admission' },
+              ],
+              oraux: [
+                { matiere: 'Langue Vivante (commune)',      coefficient: 2  },
+                { matiere: 'Mathématiques – commun ULSR',  coefficient: 8  },
+                { matiere: 'Mathématiques – Paris-Saclay', coefficient: 12 },
+                { matiere: 'Physique',                     coefficient: 6  },
+                { matiere: 'Informatique Fondamentale',    coefficient: 12 },
+                { matiere: 'TIPE',                         coefficient: 2  },
+              ],
+              ecoles: [{ nom: 'ENS Paris-Saclay', ville: 'Gif-sur-Yvette', url: 'https://ens-paris-saclay.fr/admission/sur-concours/concours-dadmission-en-1ere-annee' }],
+              siteInfos: [{ label: 'ENS Paris-Saclay — Admissions', url: 'https://ens-paris-saclay.fr/admission/sur-concours/concours-dadmission-en-1ere-annee' }],
+            },
+            {
+              id: 'ENS-rennes', label: 'ENS Rennes', tag: 'ENS',
+              ecrits: [
+                { matiere: 'Mathématiques A', duree: '4h', coefficient: 5 },
+                { matiere: 'Mathématiques C', duree: '4h', coefficient: 5 },
+                { matiere: 'Physique MP',     duree: '4h', coefficient: 4 },
+                { matiere: 'Informatique B',  duree: '2h', coefficient: 3, note: 'Épreuve d\'admission (non comptée à l\'admissibilité)' },
+                { matiere: 'Français',        duree: '4h', coefficient: 3, note: 'Épreuve d\'admission' },
+                { matiere: 'Langue Vivante',  duree: '4h', coefficient: 2, note: 'Épreuve d\'admission' },
+              ],
+              oraux: [
+                { matiere: 'Langue Vivante (commune)',     coefficient: 2  },
+                { matiere: 'Mathématiques – commun ULSR', coefficient: 8  },
+                { matiere: 'Mathématiques – Rennes',      coefficient: 12 },
+                { matiere: 'Informatique Fondamentale',   coefficient: 5  },
+                { matiere: 'TIPE',                        coefficient: 2  },
+              ],
+              ecoles: [{ nom: 'ENS Rennes', ville: 'Rennes', url: 'https://www.ens-rennes.fr/admission' }],
+              siteInfos: [{ label: 'ENS Rennes — Admissions', url: 'https://www.ens-rennes.fr/admission' }],
+            },
           ],
-          oraux: [
-            { matiere: 'Mathématiques — 1re interrogation', coefficient: 16 },
-            { matiere: 'Mathématiques — 2e interrogation',  coefficient: 16 },
-            { matiere: 'Physique',                          coefficient: 20 },
-            { matiere: 'Chimie MP',                         coefficient: 9  },
-            { matiere: 'Analyse de Documents Scientifiques (ADS)', coefficient: 15 },
-            { matiere: 'Français',                          coefficient: 8  },
-            { matiere: 'Langue Vivante obligatoire',        coefficient: 8  },
-            { matiere: 'Épreuves sportives',                coefficient: 5  },
-          ],
-          ecoles: [{ nom: 'École Polytechnique (l\'X)', ville: 'Palaiseau', url: 'https://www.polytechnique.edu/admission-cycle-ingenieur/calendrier-cpge' }],
-          siteInfos: [{ label: 'Polytechnique — Admissions', url: 'https://www.polytechnique.edu/admission-cycle-ingenieur/calendrier-cpge' }],
-        },
-
-        // ENS Ulm — option Physique
-        {
-          id: 'ENS-ulm-P', label: 'ENS Ulm – Physique', tag: 'ENS',
-          ecrits: [
-            { matiere: 'Physique MP',     duree: '4h', coefficient: 6 },
-            { matiere: 'Mathématiques C', duree: '4h', coefficient: 4 },
-            { matiere: 'Mathématiques D', duree: '6h', coefficient: 6, note: 'Épreuve propre ENS Ulm (6h)' },
-            { matiere: 'Français',        duree: '4h', coefficient: 8 },
-            { matiere: 'Langue Vivante',  duree: '4h', coefficient: 3 },
-          ],
-          oraux: [
-            { matiere: 'Langue Vivante (commune X-ULSR)',  coefficient: 3  },
-            { matiere: 'Mathématiques – commun ULSR',      coefficient: 15 },
-            { matiere: 'Mathématiques – Ulm propre',       coefficient: 30 },
-            { matiere: 'Physique – Ulm',                   coefficient: 25 },
-          ],
-          ecoles: [{ nom: 'ENS Paris (Ulm)', ville: 'Paris', url: 'https://www.ens.psl.eu/admission' }],
-          siteInfos: [{ label: 'ENS Ulm — Admissions', url: 'https://www.ens.psl.eu/admission' }],
-        },
-
-        // ENS Ulm — option Informatique
-        {
-          id: 'ENS-ulm-I', label: 'ENS Ulm – Informatique', tag: 'ENS',
-          ecrits: [
-            { matiere: 'Physique MP',               duree: '4h', coefficient: 2 },
-            { matiere: 'Informatique A',            duree: '4h', coefficient: 4 },
-            { matiere: 'Mathématiques D',           duree: '6h', coefficient: 6, note: 'Épreuve propre ENS Ulm (6h)' },
-            { matiere: 'Informatique Fondamentale', duree: '4h', coefficient: 4 },
-            { matiere: 'Français',                  duree: '4h', coefficient: 8 },
-            { matiere: 'Langue Vivante',            duree: '4h', coefficient: 3 },
-          ],
-          oraux: [
-            { matiere: 'Langue Vivante (commune X-ULSR)',  coefficient: 3  },
-            { matiere: 'Mathématiques – commun ULSR',      coefficient: 10 },
-            { matiere: 'Mathématiques – Ulm propre',       coefficient: 30 },
-            { matiere: 'Physique – Ulm',                   coefficient: 4  },
-            { matiere: 'Informatique Fondamentale',        coefficient: 15 },
-            { matiere: 'TP Algorithmique',                 coefficient: 15 },
-          ],
-          ecoles: [{ nom: 'ENS Paris (Ulm)', ville: 'Paris', url: 'https://www.ens.psl.eu/admission' }],
-          siteInfos: [{ label: 'ENS Ulm — Admissions', url: 'https://www.ens.psl.eu/admission' }],
-        },
-
-        // ENS Lyon
-        {
-          id: 'ENS-lyon', label: 'ENS Lyon', tag: 'ENS',
-          ecrits: [
-            { matiere: 'Mathématiques A', duree: '4h', coefficient: 4 },
-            { matiere: 'Mathématiques C', duree: '4h', coefficient: 4 },
-            { matiere: 'Informatique B',  duree: '2h', coefficient: 3, note: 'Épreuve d\'admission (non comptée à l\'admissibilité)' },
-            { matiere: 'Français',        duree: '4h', coefficient: 2.5, note: 'Épreuve d\'admission' },
-            { matiere: 'Langue Vivante',  duree: '4h', coefficient: 2.5, note: 'Épreuve d\'admission' },
-          ],
-          oraux: [
-            { matiere: 'Langue Vivante (commune)',       coefficient: 1.5 },
-            { matiere: 'Mathématiques – commun ULSR',   coefficient: 4   },
-            { matiere: 'Mathématiques – Lyon',          coefficient: 6   },
-            { matiere: 'Physique',                      coefficient: 6   },
-            { matiere: 'Informatique Fondamentale',     coefficient: 4   },
-            { matiere: 'TIPE',                          coefficient: 2   },
-          ],
-          ecoles: [{ nom: 'ENS Lyon', ville: 'Lyon', url: 'https://www.ens-lyon.fr/formation/admission/procedures-dadmission/concours-sciences-exactes-et-experimentales' }],
-          siteInfos: [{ label: 'ENS Lyon — Admissions', url: 'https://www.ens-lyon.fr/formation/admission/procedures-dadmission/concours-sciences-exactes-et-experimentales' }],
-        },
-
-        // ENS Paris-Saclay
-        {
-          id: 'ENS-saclay', label: 'ENS Paris-Saclay', tag: 'ENS',
-          ecrits: [
-            { matiere: 'Mathématiques A', duree: '4h', coefficient: 5 },
-            { matiere: 'Physique MP',     duree: '4h', coefficient: 4 },
-            { matiere: 'Informatique B',  duree: '2h', coefficient: 2.5, note: 'Épreuve d\'admission (non comptée à l\'admissibilité)' },
-            { matiere: 'Français',        duree: '4h', coefficient: 3, note: 'Épreuve d\'admission' },
-            { matiere: 'Langue Vivante',  duree: '4h', coefficient: 2, note: 'Épreuve d\'admission' },
-          ],
-          oraux: [
-            { matiere: 'Langue Vivante (commune)',           coefficient: 2  },
-            { matiere: 'Mathématiques – commun ULSR',       coefficient: 8  },
-            { matiere: 'Mathématiques – Paris-Saclay',      coefficient: 12 },
-            { matiere: 'Physique',                          coefficient: 6  },
-            { matiere: 'Informatique Fondamentale',         coefficient: 12 },
-            { matiere: 'TIPE',                              coefficient: 2  },
-          ],
-          ecoles: [{ nom: 'ENS Paris-Saclay', ville: 'Gif-sur-Yvette', url: 'https://ens-paris-saclay.fr/admission/sur-concours/concours-dadmission-en-1ere-annee' }],
-          siteInfos: [{ label: 'ENS Paris-Saclay — Admissions', url: 'https://ens-paris-saclay.fr/admission/sur-concours/concours-dadmission-en-1ere-annee' }],
-        },
-
-        // ENS Rennes
-        {
-          id: 'ENS-rennes', label: 'ENS Rennes', tag: 'ENS',
-          ecrits: [
-            { matiere: 'Mathématiques A', duree: '4h', coefficient: 5 },
-            { matiere: 'Mathématiques C', duree: '4h', coefficient: 5 },
-            { matiere: 'Physique MP',     duree: '4h', coefficient: 4 },
-            { matiere: 'Informatique B',  duree: '2h', coefficient: 3, note: 'Épreuve d\'admission (non comptée à l\'admissibilité)' },
-            { matiere: 'Français',        duree: '4h', coefficient: 3, note: 'Épreuve d\'admission' },
-            { matiere: 'Langue Vivante',  duree: '4h', coefficient: 2, note: 'Épreuve d\'admission' },
-          ],
-          oraux: [
-            { matiere: 'Langue Vivante (commune)',          coefficient: 2  },
-            { matiere: 'Mathématiques – commun ULSR',      coefficient: 8  },
-            { matiere: 'Mathématiques – Rennes',           coefficient: 12 },
-            { matiere: 'Informatique Fondamentale',        coefficient: 5  },
-            { matiere: 'TIPE',                             coefficient: 2  },
-          ],
-          ecoles: [{ nom: 'ENS Rennes', ville: 'Rennes', url: 'https://www.ens-rennes.fr/admission' }],
-          siteInfos: [{ label: 'ENS Rennes — Admissions', url: 'https://www.ens-rennes.fr/admission' }],
         },
       ],
     },
